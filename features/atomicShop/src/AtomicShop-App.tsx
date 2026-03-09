@@ -1,8 +1,12 @@
 import { RouterProvider } from "react-router"
 import { appRouter } from "./routes/AppRoute"
+import { Toaster } from "sonner"
 
 export const AtomicShopApp = () => {
     return (
-        <RouterProvider router={appRouter} />
+        <>
+            <Toaster richColors />
+            <RouterProvider router={appRouter} />
+        </>
     )
 }
