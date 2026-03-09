@@ -36,6 +36,7 @@ export const LoginPage = () => {
             toast.success('Sesión iniciada correctamente');
             setEmail('');
             setPassword('');
+            navigate("/atomicAdmin")
 
         } else {
             toast.error('Credenciales incorrectas');
@@ -88,7 +89,7 @@ export const LoginPage = () => {
                 <div className="text-right">
                     <button
                         onClick={handleForgotPassword}
-                        className="text-sm text-blue-600 hover:text-blue-700 transition"
+                        className="text-sm text-blue-600 cursor-pointer hover:text-blue-700  transition"
                     >
                         ¿Olvidó su contraseña?
                     </button>

@@ -36,8 +36,9 @@ export default function CreatePasswordPage() {
         toast.success('Contraseña actualizada correctamente');
         setNewPassword('');
         setConfirmPassword('');
-
         setLoading(false);
+
+        navigate('/admin/succeschangepassword')
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
