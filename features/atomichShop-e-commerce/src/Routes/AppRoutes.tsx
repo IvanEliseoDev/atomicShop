@@ -1,7 +1,12 @@
 import { LoginPage } from "@/modules/Login/Pages/LoginPage";
 import { createBrowserRouter } from "react-router";
-import { NotFoundPage } from "@/modules/404NotFound/page/404NotFoundPage"
+import { NotFoundPage } from "@/modules/404NotFound/page/404NotFoundPage";
+// Importamos los apartados que pueden acceder los usuarios
 import HomePage from "@/modules/Home/Pages/HomePage";
+import Products from "@/modules/Products/Pages/Products";
+import Favorites from "@/modules/Products/Pages/Favorites";
+import Cart from "@/modules/CarShop/Pages/Cart";
+import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
 
 export const appRouter = createBrowserRouter([
   {
@@ -10,44 +15,36 @@ export const appRouter = createBrowserRouter([
     children: [
       {
         index: true, // Esto hace que cuando se habra solo la ruta /login, se va a mostrar este componete por defecto
-        element: <LoginPage/>,
+        element: <LoginPage />,
       },
     ],
   },
 
   {
-    path: "/atomicShop",
-    element: <HomePage/>,
+    path: "/atomicShop/",
+    element: <AtomicShopLayout />,
     children: [
       {
         index: true,
-        element: <HomePage/>
+        element: <HomePage />,
       },
-      // {
-      //   path: "nosotros",
-      //   element: <Abouts/>
-      // },
-      // {
-      //   path: "contactanos",
-      //   element: <Contact/>
-      // },
-      // {
-      //   path: "productos",
-      //   element: <Products/>
-      // },
-      // {
-      //   path: "favoritos",
-      //   element: <Favorites/>
-      // },
-      // {
-      //   path: "carrito",
-      //   element: <Cart/>
-      // },
-    ]
+      {
+        path: "productos",
+        element: <Products />,
+      },
+      {
+        path: "favoritos",
+        element: <Favorites />,
+      },
+      {
+        path: "carrito",
+        element: <Cart />,
+      },
+    ],
   },
 
   {
     path: "*",
-    element: <NotFoundPage/>
-  }
+    element: <NotFoundPage />,
+  },
 ]);

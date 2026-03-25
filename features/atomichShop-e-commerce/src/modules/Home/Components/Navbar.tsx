@@ -14,8 +14,25 @@ const Navbar = () => {
   // Y para poder enseñarle al usuario cuantos productos lleva en el carrito
   const [cartCount] = useState(0);
 
+  // Funcion para scroll para las secciones de contactanos y nosotros en la pagina principal del proyecto
+  const handleScroll = (id: string) => {
+    // Si no estamos en la pagina principal, navegamos primero
+    if (window.location.pathname !== "/atomicShop") {
+      navigate("/atomicShop");
+      // Esperamos a que cargue la pagina antes de scrollear
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: "smooth" });
+      }, 100); // Tiempo de espera
+    } else {
+      // Si ya estamos en Home, scrolleamos directamente
+      const element = document.getElementById(id);
+      if (element) element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <header className="w-full shadow-sm">
+    <header className="w-full shadow-sm border-b">
       <div className="bg-white px-10 py-3, flex items-center justify-between gap-4">
         {/* Logo */}
         <div
@@ -32,25 +49,25 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
           <button
             onClick={() => navigate("/atomicShop")}
-            className="hover:text-blue-500 transition"
+            className="hover:text-blue-500 transition cursor-pointer"
           >
             Inicio
           </button>
           <button
-            onClick={() => navigate("/nosotros")}
-            className="hover:text-blue-500 transition"
+            onClick={() => handleScroll("nosotros")}
+            className="hover:text-blue-500 transition cursor-pointer"
           >
             Nosotros
           </button>
           <button
-            onClick={() => navigate("/contactanos")}
-            className="hover:text-blue-500 transition"
+            onClick={() => handleScroll("contacto")}
+            className="hover:text-blue-500 transition cursor-pointer"
           >
             Contáctanos
           </button>
           <button
-            onClick={() => navigate("/productos")}
-            className="hover:text-blue-500 transition"
+            onClick={() => navigate("/atomicShop/productos")}
+            className="hover:text-blue-500 transition cursor-pointer"
           >
             Productos
           </button>
@@ -72,43 +89,42 @@ const Navbar = () => {
 
         {/* Iconos de accion */}
         <div className="flex items-center justify-evenly px-2 p-0 gap-15 ">
-        {/* Favoritos */}
-        <button
-          onClick={() => navigate("/favoritos")}
-          className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
-        >
-          <Heart size={22} />
-          <span className="text-xs mt-0.5"> Favoritos</span>
-        </button>
+          {/* Favoritos */}
+          <button
+            onClick={() => navigate("/favoritos")}
+            className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
+          >
+            <Heart size={22} />
+            <span className="text-xs mt-0.5"> Favoritos</span>
+          </button>
 
-        {/* Carrito */}
-        <button
-          onClick={() => navigate("/carrito")}
-          className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition relative cursor-pointer"
-        >
-          <div className="relative">
-            <ShoppingCart size={22} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </div>
-          <span className="text-xs mt-0.5">Carrito</span>
-        </button>
+          {/* Carrito */}
+          <button
+            onClick={() => navigate("/carrito")}
+            className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition relative cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingCart size={22} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-xs mt-0.5">Carrito</span>
+          </button>
 
-        {/* Crear cuenta */}
-        <button
-          onClick={() => navigate("/login")}
-          className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
-        >
-          <User size={22} />
-          <span className="text-xs mt-0.5"> Crear cuenta</span>
-        </button>
+          {/* Crear cuenta */}
+          <button
+            onClick={() => navigate("/login")}
+            className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
+          >
+            <User size={22} />
+            <span className="text-xs mt-0.5"> Crear cuenta</span>
+          </button>
         </div>
-        
       </div>
-      <CategoriesBar/>
+      <CategoriesBar />
     </header>
   );
 };

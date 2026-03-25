@@ -32,7 +32,7 @@ function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-10 pb-4 mt-12">
+    <footer className="bg-gray-900 text-gray-300 pt-10 pb-4">
       <div className="max-w-5xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-700">
           {/* Columna 1 — Logo y slogan */}

@@ -1,9 +1,8 @@
 // Importamos componentes para la pagina
-import Navbar from "../Components/Navbar";
 import Carrousel from "../Components/Carrousel";
 import ProductSlider from "../Components/ProductSlider";
 import ProviderCarts from "../Components/ProviderCarts";
-import Footer from "../Components/Footer";
+
 // Importamos useState para el formulario de contactenos
 import { useState } from "react";
 // Para validar camopos
@@ -11,7 +10,6 @@ import { MapPin, Mail, Phone, Star } from "lucide-react";
 // No se para que sirbe 😁
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import ButtonWhatsapp from "../Components/ButtonWhatsapp";
 
 function HomePage() {
   // ---------------- Para el formulario de contactanos (inicio)
@@ -58,8 +56,8 @@ function HomePage() {
   return (
     <>
       {/* Navbar junto con el componente de la lista de categorias */}
-      <Navbar />
-      <main className="bg-gray-100 min-h-screen px-4">
+
+      <main className="flex-1 bg-gray-100 px-4">
         {/* Carrousel de imagenes (osea banneres) */}
         <Carrousel />
 
@@ -70,7 +68,7 @@ function HomePage() {
         <ProviderCarts />
 
         {/* Section (por que no es necesario hacerlo componente) */}
-        <section className="w-full max-w-5xl mx-auto my-8 px-4">
+        <section id="nosotros" className="w-full max-w-5xl mx-auto my-8 px-4">
           {/* Título */}
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
             ¿Quiénes somos?
@@ -109,9 +107,9 @@ function HomePage() {
         </section>
 
         {/* Sección Contáctenos — pégala dentro del <main> */}
-        <section className="w-full max-w-5xl mx-auto my-8 px-4">
+        <section id="contacto" className="w-full max-w-5xl mx-auto my-8 px-4">
           {/* Título */}
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 tracking-wide uppercase">
+          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 tracking-wide ">
             Contáctenos
           </h2>
 
@@ -229,8 +227,8 @@ function HomePage() {
           </div>
         </section>
       </main>
-      <Footer />
-      <ButtonWhatsapp />
+
+      
     </>
   );
 }
