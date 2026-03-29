@@ -91,7 +91,7 @@ const Navbar = () => {
         <div className="flex items-center justify-evenly px-2 p-0 gap-15 ">
           {/* Favoritos */}
           <button
-            onClick={() => navigate("/favoritos")}
+            onClick={() => navigate("/atomicShop/favoritos")}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <Heart size={22} />
