@@ -1,13 +1,18 @@
+// ruta: ../src/app.ts
+
 // En este archivo lo que haremos es configurar los enpoints y las rutas con las cuales el frontEnd se podra comunicar con estos
 import express from "express";
-// A qui importamos las rutas de los enpoints que querramos utilizar
-import productsRoutes from "./src/routes/product.js";
 // Importamos cors para que nuestro fronEnd pueda utilizar nuestro enpoints
 import cors from "cors";
-// Importamos bcrypt para encriptar contraseñas
-import bcrypt from "bcryptjs";
-// Importamos para generar tokens y todo lo de autenticacion 😈😈😈
-import jwt from "jsonwebtoken";
+
+// A qui importamos las rutas de los enpoints que querramos utilizar
+import productsRoutes from "./routes/products";
+
+// Esto es para utilizarlos despues en controllers y middlewares.
+// // Importamos bcrypt para encriptar contraseñas
+// import bcrypt from "bcryptjs";
+// // Importamos para generar tokens y todo lo de autenticacion 😈😈😈
+// import jwt from "jsonwebtoken";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -15,18 +20,18 @@ import jwt from "jsonwebtoken";
 // Una constante que va a ejecutar la libreria de express
 const app = express();
 
-// Con esto permitimos solicitudes a nuestros enpoints
+/**
+ * CONFIGURACION DE CORS PARA LOS ENPOINTS
+ */
+app.use(cors()); // Con esto hacemos que todos los enpoints que vengan del archivo app.js tengan cors incluido 😁
+
+// Con esto permitimos solicitudes JSON a nuestros enpoints
 app.use(express.json());
 
 /**
  * CONFIGURACION DE ENPOINTS
  */
 app.use("/api/products", productsRoutes);
-
-/**
- * CONFIGURACION DE CORS PARA LOS ENPOINTS
- */
-app.use(cors()); // Con esto hacemos que todos los enpoints que vengan del archivo app.js tengan cors incluido 😁
 
 // ESTO SE USUARAN DESPUES EN controllers y middlewares.
 // /**
