@@ -7,6 +7,7 @@ import cors from "cors";
 
 // A qui importamos las rutas de los enpoints que querramos utilizar
 import productsRoutes from "./routes/products";
+import providerRoutes from "./routes/providers"
 
 // Esto es para utilizarlos despues en controllers y middlewares.
 // // Importamos bcrypt para encriptar contraseñas
@@ -32,6 +33,7 @@ app.use(express.json());
  * CONFIGURACION DE ENPOINTS
  */
 app.use("/api/products", productsRoutes);
+app.use("/api/providers", providerRoutes)
 
 // ESTO SE USUARAN DESPUES EN controllers y middlewares.
 // /**
