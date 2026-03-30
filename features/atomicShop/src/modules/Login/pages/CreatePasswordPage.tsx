@@ -59,6 +59,10 @@ export default function CreatePasswordPage() {
 
             {/* Text */}
             <div className="text-center mb-8">
+                            {/* Logo - centered */}
+            <div className="flex justify-center mb-6">
+                <img src="../public/logoatomicshop.png" alt="logo atomicShop" className='object-contain w-30 h-28' tabIndex={1}/>
+            </div>
                 <p className="text-gray-800 text-lg leading-relaxed">
                     ¡Muchas gracias por tu paciencia! Ahora puedes crear tu contraseña.
                 </p>

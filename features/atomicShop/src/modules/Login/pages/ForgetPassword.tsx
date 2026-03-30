@@ -48,7 +48,7 @@ export const ForgotPasswordPage = () => {
             </div>
             {/* Logo - centered */}
             <div className="flex justify-center mb-6">
-                <img src="public/logoatomicshop.png" alt="logo atomicShop" />
+                <img src="../public/logoatomicshop.png" alt="logo atomicShop" className='object-contain w-42 h-30' tabIndex={1}/>
             </div>
 
             {/* Text */}
