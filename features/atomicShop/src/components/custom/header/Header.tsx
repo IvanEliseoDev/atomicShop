@@ -1,3 +1,5 @@
+import React from 'react';      
+import { useNavigate } from 'react-router';         // ← agrega esto
 import { Menu, ChevronDown } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -12,6 +14,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onMobileMenuClick }) => {
+    const navigate = useNavigate();
     return (
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             {/* Mobile menu button */}
@@ -34,8 +37,12 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuClick }) => {
                         </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem>Perfil</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Cerrar sesión</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/atomicAdmin/profile')}> {/* ← agrega onClick */}
+                            Perfil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                            Cerrar sesión
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

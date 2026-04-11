@@ -2,8 +2,6 @@
 import { motion } from 'framer-motion';
 import { Outlet } from 'react-router';
 
-
-
 export const AuthLayout = () => {
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">

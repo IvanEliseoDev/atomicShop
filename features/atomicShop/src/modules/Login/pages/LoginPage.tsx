@@ -49,10 +49,6 @@ export const LoginPage = () => {
         navigate('/admin/ForgetPassword')
     };
 
-    const handleRegister = () => {
-
-    };
-
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleLogin();
@@ -63,7 +59,7 @@ export const LoginPage = () => {
         <AuthCard>
             {/* Header with logo and divider */}
             <div className="flex items-center gap-4 mb-8">
-                <img src='public/logoatomicshop.png' alt="" className='object-contain w-30 h-16' />
+                <img src='../public/logoatomicshop.png' alt="" className='object-contain w-52 h-24' />
                 <div className="w-0.5 h-8 bg-gray-300" />
                 <div className="font-semibold text-gray-800 text-lg">
                     Inicio de sesión
@@ -106,16 +102,6 @@ export const LoginPage = () => {
                 >
                     {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                 </motion.button>
-            </div>
-
-            {/* Register link */}
-            <div className="text-center mt-6">
-                <button
-                    onClick={handleRegister}
-                    className="text-blue-600 hover:text-blue-700 transition"
-                >
-                    Registrarse
-                </button>
             </div>
         </AuthCard>
     );

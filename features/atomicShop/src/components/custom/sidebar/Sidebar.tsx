@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Home, ShoppingCart, Package, ShoppingBag, BarChart3, Users, UserCheck, Store, Truck } from 'lucide-react';
+import { ChevronLeft, Home, ShoppingCart, Package, ShoppingBag, BarChart3, Users, UserCheck, Truck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useNavigate, useLocation } from 'react-router';
 
 interface SidebarProps {
     onMobileClose?: () => void;
@@ -12,41 +13,40 @@ const menuItems = [
     {
         section: 'NAVEGACION',
         items: [
-            { label: 'Inicio', icon: Home, active: true },
-            { label: 'Ventas', icon: ShoppingCart, active: false },
-            { label: 'Pedidos', icon: Package, active: false },
-            { label: 'Compras', icon: ShoppingBag, active: false },
-            { label: 'Inventario', icon: BarChart3, active: false },
+            { label: 'Inicio',     icon: Home,         path: '/atomicAdmin' },
+            { label: 'Ventas',     icon: ShoppingCart, path: '/atomicAdmin/ventas' },
+            { label: 'Pedidos',    icon: Package,      path: '/atomicAdmin/pedidos' },
+            { label: 'Compras',    icon: ShoppingBag,  path: '/atomicAdmin/compras' },
+            { label: 'Inventario', icon: BarChart3,    path: '/atomicAdmin/inventario' },
         ],
     },
     {
         section: 'ADMIN PANEL',
         items: [
-            { label: 'Empleados', icon: Users, active: false },
-            { label: 'Clientes', icon: UserCheck, active: false },
-            { label: 'Proveedores', icon: Truck, active: false },
+            { label: 'Empleados',   icon: Users,      path: '/atomicAdmin/empleados' },
+            { label: 'Clientes',    icon: UserCheck,  path: '/atomicAdmin/clientes' },
+            { label: 'Proveedores', icon: Truck,      path: '/atomicAdmin/proveedores' },
         ],
     },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = false }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <>
-            {/* Desktop Sidebar */}
+            {/* ── Desktop Sidebar ───────────────────────────────────────────── */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="hidden md:flex flex-col bg-white border-r border-gray-200 h-screen overflow-y-auto"
-                style={{
-                    width: isCollapsed ? '80px' : '250px',
-                }}
+                style={{ width: isCollapsed ? '80px' : '250px' }}
             >
-                {/* Header with logo and collapse button */}
+                {/* Header con botón colapsar */}
                 <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -57,6 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                             size={20}
                             style={{
                                 transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.3s',
                             }}
                         />
                     </motion.button>
@@ -80,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                     </motion.div>
                 )}
 
-                {/* Navigation Menu */}
+                {/* Menú de navegación */}
                 <nav className="flex-1 px-3 py-6">
                     {menuItems.map((section, sectionIdx) => (
                         <div key={sectionIdx} className="mb-6">
@@ -92,20 +93,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                             <div className="space-y-2">
                                 {section.items.map((item, itemIdx) => {
                                     const Icon = item.icon;
+                                    const isActive = location.pathname === item.path;
                                     return (
                                         <motion.button
                                             key={itemIdx}
                                             whileHover={{ x: isCollapsed ? 0 : 4 }}
-                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition relative group ${item.active
-                                                ? 'bg-blue-50 text-blue-600'
-                                                : 'text-gray-600 hover:bg-gray-50'
-                                                }`}
+                                            onClick={() => navigate(item.path)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition relative group ${
+                                                isActive
+                                                    ? 'bg-blue-50 text-blue-600'
+                                                    : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
                                         >
                                             <Icon size={20} className="flex-shrink-0" />
                                             {!isCollapsed && (
                                                 <span className="text-sm font-medium">{item.label}</span>
                                             )}
-                                            {item.active && (
+                                            {isActive && (
                                                 <motion.div
                                                     layoutId="active-indicator"
                                                     className="absolute right-3 w-2 h-2 bg-blue-500 rounded-full"
@@ -120,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                 </nav>
             </motion.div>
 
-            {/* Mobile Sidebar (Sheet) */}
+            {/* ── Mobile Sidebar ────────────────────────────────────────────── */}
             {isMobileOpen && (
                 <motion.div
                     initial={{ x: -300, opacity: 0 }}
@@ -129,17 +133,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                     transition={{ duration: 0.3 }}
                     className="fixed inset-0 z-40 md:hidden"
                 >
-                    {/* Backdrop */}
-                    <div
-                        className="absolute inset-0 bg-black/50"
-                        onClick={onMobileClose}
-                    />
+                    {/* Fondo oscuro */}
+                    <div className="absolute inset-0 bg-black/50" onClick={onMobileClose} />
 
-                    {/* Sidebar */}
+                    {/* Panel */}
                     <div className="absolute left-0 top-0 h-full w-64 bg-white overflow-y-auto">
-                        {/* Header with logo */}
+                        {/* Header */}
                         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-                            {/*logo */}
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -161,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                             </div>
                         </div>
 
-                        {/* Navigation Menu */}
+                        {/* Menú */}
                         <nav className="px-3 py-6">
                             {menuItems.map((section, sectionIdx) => (
                                 <div key={sectionIdx} className="mb-6">
@@ -171,18 +171,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                                     <div className="space-y-2">
                                         {section.items.map((item, itemIdx) => {
                                             const Icon = item.icon;
+                                            const isActive = location.pathname === item.path;
                                             return (
                                                 <button
                                                     key={itemIdx}
-                                                    onClick={onMobileClose}
-                                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition relative ${item.active
-                                                        ? 'bg-blue-50 text-blue-600'
-                                                        : 'text-gray-600 hover:bg-gray-50'
-                                                        }`}
+                                                    onClick={() => { navigate(item.path); onMobileClose?.(); }}
+                                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition relative ${
+                                                        isActive
+                                                            ? 'bg-blue-50 text-blue-600'
+                                                            : 'text-gray-600 hover:bg-gray-50'
+                                                    }`}
                                                 >
                                                     <Icon size={20} className="flex-shrink-0" />
                                                     <span className="text-sm font-medium">{item.label}</span>
-                                                    {item.active && (
+                                                    {isActive && (
                                                         <div className="absolute right-3 w-2 h-2 bg-blue-500 rounded-full" />
                                                     )}
                                                 </button>
