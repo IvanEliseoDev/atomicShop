@@ -14,6 +14,8 @@ import { ForgotPasswordPage } from "@/modules/Login/pages/ForgetPassword"
 import { LoginPage } from "@/modules/Login/pages/LoginPage"
 import SuccessPage from "@/modules/Login/pages/SuccesPage"
 import { createBrowserRouter } from "react-router"
+import { EmployeePage } from "@/modules/employee/Pages/EmployeePage"
+import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
 
 
 export const appRouter = createBrowserRouter([
@@ -61,6 +63,14 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'inventario',
                 element: <ProductsPage/>
+            },
+            {
+                path: 'empleados',
+                element: <EmployeePage/>
+            },
+            {
+                path: 'empleados/nuevo',
+                element: <EmployeeForm/>
             }
         ]
     },
