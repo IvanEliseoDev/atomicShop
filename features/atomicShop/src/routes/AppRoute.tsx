@@ -17,6 +17,7 @@ import { createBrowserRouter } from "react-router"
 import { EmployeePage } from "@/modules/employee/Pages/EmployeePage"
 import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
 import { ProviderPage } from "@/modules/provider/providerPage"
+import { ProviderForm } from "@/modules/provider/pages/ProviderRegisterForm"
 
 
 export const appRouter = createBrowserRouter([
@@ -76,6 +77,10 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'proveedores',
                 element: <ProviderPage />
+            },
+            {
+                path: 'proveedores/nuevo',
+                element: <ProviderForm /> 
             }
         ]
     },
