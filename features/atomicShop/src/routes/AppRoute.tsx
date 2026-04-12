@@ -16,6 +16,7 @@ import SuccessPage from "@/modules/Login/pages/SuccesPage"
 import { createBrowserRouter } from "react-router"
 import { EmployeePage } from "@/modules/employee/Pages/EmployeePage"
 import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
+import { ProviderPage } from "@/modules/provider/providerPage"
 
 
 export const appRouter = createBrowserRouter([
@@ -71,6 +72,10 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'empleados/nuevo',
                 element: <EmployeeForm/>
+            },
+            {
+                path: 'proveedores',
+                element: <ProviderPage />
             }
         ]
     },
