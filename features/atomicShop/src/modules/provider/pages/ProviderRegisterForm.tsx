@@ -36,7 +36,7 @@ interface SupplierFormState {
   registroFiscal: string;
 }
 
-export const  ProviderForm =() => {
+export const ProviderForm =() => {
   const [formData, setFormData] = useState<SupplierFormState>({
     nombre: '',
     email: '',
