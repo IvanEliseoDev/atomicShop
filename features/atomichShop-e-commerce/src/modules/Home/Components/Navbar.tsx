@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 // Esto son como los iconos creo
 import { Heart, ShoppingCart, User, Search } from "lucide-react";
 import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
@@ -114,13 +114,13 @@ const Navbar = () => {
             <span className="text-xs mt-0.5">Carrito</span>
           </button>
 
-          {/* Crear cuenta */}
+          {/* Iniciar sesion */}
           <button
             onClick={() => navigate("/login")}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <User size={22} />
-            <span className="text-xs mt-0.5"> Crear cuenta</span>
+            <span className="text-xs mt-0.5"> Iniciar sesion</span>
           </button>
         </div>
       </div>
