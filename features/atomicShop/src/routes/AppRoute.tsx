@@ -19,6 +19,9 @@ import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
 import { ProviderPage } from "@/modules/provider/providerPage"
 import { ProviderForm } from "@/modules/provider/pages/ProviderRegisterForm"
 import { ClientPage } from "@/modules/clients/pages/ClientPage"
+import { SalePage } from "@/modules/sale/page/SalePage"
+import { ShoppingPage } from "@/modules/shopping/pages/ShoppingPage"
+import { OrderPage } from "@/modules/orders/pages/OrderPage"
 
 
 export const appRouter = createBrowserRouter([
@@ -86,6 +89,18 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'clientes',
                 element: <ClientPage />
+            },
+            {
+                path: "ventas",
+                element: <SalePage />
+            },
+            {
+                path:"compras",
+                element: <ShoppingPage />
+            },
+            {
+                path:"pedidos",
+                element: <OrderPage />
             }
         ]
     },

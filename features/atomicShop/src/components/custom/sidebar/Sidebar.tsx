@@ -34,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
     const [isCollapsed, setIsCollapsed] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    
 
     return (
         <>
@@ -42,11 +43,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className="hidden md:flex flex-col bg-white border-r border-gray-200 h-screen overflow-y-auto"
+                className="hidden md:flex flex-col bg-white border-r border-gray-200/15 h-screen overflow-y-auto"
                 style={{ width: isCollapsed ? '80px' : '250px' }}
             >
                 {/* Header con botón colapsar */}
-                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200/20">
+                    
+                    {
+                        (!isCollapsed) && (
+                            <div className='flex flex-row justify-center items-center'>
+                                <button onClick={() => navigate("/atomicAdmin")} className='cursor-pointer'>
+                                    <img src="/logoatomicshop_blanco.png" alt="logoAtomicShop" className='w-15 h-15 object-cover'/>
+                                </button>
+                                <p className='text-sm font-bold'>AtomicShop</p> 
+                            </div>
+                        )
+                    }
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
