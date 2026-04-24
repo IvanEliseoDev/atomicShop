@@ -28,14 +28,34 @@ export const LoginPage = () => {
 
     setLoading(true);
 
-    // Simulate API call
+    // Simulación de espera
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
+    // --- PASO 1: Buscar en los usuarios que se registro (localStorage) ---
+    const localUsers = JSON.parse(localStorage.getItem("usuarios_registrados") || "[]");
+    const userInLocal = localUsers.find((u: any) => u.email === email && u.password === password);
+
+    if (userInLocal) {
+      toast.success(`¡Bienvenido de nuevo, ${userInLocal.nombres}!`);
+
+      // GUARDAMOS LA SESIÓN AQUÍ
+      localStorage.setItem("usuario_sesion", JSON.stringify(userInLocal));
+
+      navigate("/atomicShop"); 
+      setLoading(false);
+      return;
+    }
+
+    // --- PASO 2: Si no está en local, usar los mocks originales 
     if (verifyCredentials(email, password)) {
-      toast.success("Sesión iniciada correctamente");
+      toast.success("Sesión iniciada correctamente (Usuario Mock)");
+
+      // GUARDAMOS UN USUARIO GENÉRICO PARA EL MOCK
+      localStorage.setItem("usuario_sesion", JSON.stringify({ nombres: "Usuario Prueba", email: email }));
+
       setEmail("");
       setPassword("");
-      navigate("/atomicAdmin");
+      navigate("/atomicShop");
     } else {
       toast.error("Credenciales incorrectas");
     }
@@ -44,7 +64,12 @@ export const LoginPage = () => {
   };
 
   const handleForgotPassword = () => {
-    navigate("/admin/ForgetPassword");
+    navigate("/recover-password");
+  };
+
+  // Para ir a la página de Registro
+  const handleRegisterNavigation = () => {
+    navigate("/register");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -56,10 +81,10 @@ export const LoginPage = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 relative">
 
-      <button 
-      onClick={() => navigate(-1)}
-      className="absolute cursor-pointer top-4 left-4 flex items-center gap-1 text-gray-600 hover:text-gray-800 transition text-sm font-medium">
-        <ChevronLeft size={18}/>
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute cursor-pointer top-4 left-4 flex items-center gap-1 text-gray-600 hover:text-gray-800 transition text-sm font-medium">
+        <ChevronLeft size={18} />
         Regresar
       </button>
       <AuthCard>
@@ -118,7 +143,7 @@ export const LoginPage = () => {
           {/* Create acount */}
           <div className="text-center">
             <button
-              onClick={handleForgotPassword}
+              onClick={handleRegisterNavigation}
               className="text-sm text-center text-blue-600 cursor-pointer hover:text-blue-700  transition"
             >
               Crear cuenta
