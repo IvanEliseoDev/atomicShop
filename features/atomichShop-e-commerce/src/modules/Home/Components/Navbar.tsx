@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 // Esto son como los iconos creo
-import { Heart, ShoppingCart, User, Search, LogOut } from "lucide-react";
+import { Heart, ShoppingCart, User, Search, LogOut, X } from "lucide-react";
 import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
 import CategoriesBar from "./CategoriesBar";
 import { toast } from "sonner"; // 
+import { useCart } from "@/lib/CartContext";
 
 
 const Navbar = () => {
+  const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
+    id: i + 1,
+    name: "Báscula para pesar cajas petri",
+    price: 80.0,
+    originalPrice: 99.0,
+    image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
+    onSale: true,
+  }));
+
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -316,7 +326,7 @@ const Navbar = () => {
 
                   <button
                     onClick={() => {
-                      navigate("/atomicShop/perfil"); 
+                      navigate("/atomicShop/perfil");
                       setIsMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"

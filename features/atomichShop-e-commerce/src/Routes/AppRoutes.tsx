@@ -5,8 +5,12 @@ import { NotFoundPage } from "@/modules/404NotFound/page/404NotFoundPage";
 import HomePage from "@/modules/Home/Pages/HomePage";
 import Products from "@/modules/Products/Pages/Products";
 import Favorites from "@/modules/Products/Pages/Favorites";
-import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras";
+
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
+import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras";
+import DatosEntrega from "@/modules/CarShop/Pages/DatosEntrega";
+import DatosPago from "@/modules/CarShop/Pages/DatosPago";
+import ProductDetail from "@/modules/Products/Pages/ProductDetail";
 import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
 import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
 import { ManageProfilePage } from "@/modules/Profile/Pages/ManageProfilePerfil";
@@ -20,10 +24,13 @@ export const appRouter = createBrowserRouter([
         index: true, // Esto hace que cuando se habra solo la ruta /login, se va a mostrar este componete por defecto
         element: <LoginPage />,
       },
+
+
     ],
+
+
   },
 
-  //RUTA DE REGISTRO 
   {
     path: "/register",
     element: <RegisterPage />,
@@ -33,7 +40,6 @@ export const appRouter = createBrowserRouter([
     path: "/recover-password",
     element: <RecoverPasswordPage />,
   },
-
   {
     path: "/atomicShop/",
     element: <AtomicShopLayout />,
