@@ -16,27 +16,40 @@ const Navbar = () => {
   // Y para poder enseñarle al usuario cuantos productos lleva en el carrito
   const [cartCount] = useState(0);
 
-  const [user, setUser] = useState<{ nombres: string } | null>(null);
-
-
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown
 
+  // Estado que acepta nombre, apellido y foto
+  const [user, setUser] = useState<{ nombres: string, apellidos?: string, profilePic?: string } | null>(null);
+
   useEffect(() => {
-    const session = localStorage.getItem("usuario_sesion");
-    if (session) {
-      setUser(JSON.parse(session));
-    }
+    const checkSession = () => {
+      const session = localStorage.getItem("usuario_sesion");
+      if (session) {
+        const data = JSON.parse(session);
+        setUser(data);
+      }
+    };
+
+    checkSession(); // Carga inicial
+
+    window.addEventListener("profileUpdate", checkSession);
+    window.addEventListener("storage", checkSession);
+
+    return () => {
+      window.removeEventListener("profileUpdate", checkSession);
+      window.removeEventListener("storage", checkSession);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("usuario_sesion");
     setUser(null);
     setIsMenuOpen(false);
-    
+
     // Mostramos el mensaje antes o después de navegar
     toast.info("Has cerrado sesión correctamente", {
       description: "¡Vuelve pronto a Atomic Shop!",
-      position: "bottom-right", 
+      position: "bottom-right",
     });
 
     navigate("/atomicShop");
@@ -145,16 +158,19 @@ const Navbar = () => {
           {/* Lógica de Sesión con Menú Desplegable */}
           {user ? (
             <div className="relative">
-              {/* Burbuja con Inicial */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 p-1 pr-3 rounded-full border border-blue-200 transition cursor-pointer"
               >
-                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
-                  {user.nombres.charAt(0).toUpperCase()}
+                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
+                  {user?.profilePic ? (
+                    <img src={user.profilePic} className="w-full h-full object-cover" />
+                  ) : (
+                    user?.nombres?.charAt(0).toUpperCase() || "U"
+                  )}
                 </div>
                 <span className="text-sm font-semibold text-blue-700 hidden lg:block">
-                  Mi cuenta
+                  {user?.nombres.split(" ")[0]}
                 </span>
               </button>
 

@@ -9,6 +9,7 @@ import Cart from "@/modules/CarShop/Pages/Cart";
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
 import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
 import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
+import { ManageProfilePage } from "@/modules/Profile/Pages/ManageProfilePerfil";
 
 export const appRouter = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ export const appRouter = createBrowserRouter([
         path: "carrito",
         element: <Cart />,
       },
+      {
+        path: "perfil",
+        element: <ManageProfilePage />,
+      }
     ],
   },
 

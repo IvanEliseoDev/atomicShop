@@ -12,7 +12,13 @@ export const RegisterPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        nombres: "", apellidos: "", dui: "", telefono: "", email: "", password: "", confirmPassword: ""
+        nombres: "", 
+        apellidos: "", 
+        dui: "", 
+        telefono: "", 
+        email: "", 
+        password: "", 
+        confirmPassword: ""
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
@@ -20,29 +26,30 @@ export const RegisterPage = () => {
     };
 
     const handleRegister = async () => {
-        const { email, password, confirmPassword, nombres } = formData;
+        const { email, password, confirmPassword } = formData;
 
+        // Validaciones básicas
         if (!email.trim() || !password.trim() || password !== confirmPassword) {
             toast.error("Revisa los datos y la contraseña");
             return;
         }
 
         setLoading(true);
+        // Simulación de carga
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // 1. Obtener los usuarios que ya existan (o una lista vacía)
+        // --- CORRECCIÓN AQUÍ ---
+        // 1. Usamos desestructuración para extraer 'confirmPassword' y agrupar el resto en 'userToSave'
+        const { confirmPassword: _, ...userToSave } = formData;
+
+        // 2. Obtenemos los usuarios previos
         const existingUsers = JSON.parse(localStorage.getItem("usuarios_registrados") || "[]");
 
-        // 2. Crear el nuevo usuario
-        const newUser = { email, password, nombres };
-
-        // 3. Guardarlo en la lista
-        existingUsers.push(newUser);
+        // 3. Guardamos el nuevo objeto que ya no tiene la confirmación
+        existingUsers.push(userToSave);
         localStorage.setItem("usuarios_registrados", JSON.stringify(existingUsers));
 
         toast.success("¡Registro guardado localmente!");
-
-        // 4. Regresar al login
         navigate("/login");
         setLoading(false);
     };
@@ -67,7 +74,6 @@ export const RegisterPage = () => {
                 </div>
 
                 <div className="flex flex-col gap-3">
-
                     <div className="grid grid-cols-2 gap-3">
                         <TextInput placeholder="Nombres" value={formData.nombres} onChange={(e) => handleChange(e, "nombres")} />
                         <TextInput placeholder="Apellidos" value={formData.apellidos} onChange={(e) => handleChange(e, "apellidos")} />
