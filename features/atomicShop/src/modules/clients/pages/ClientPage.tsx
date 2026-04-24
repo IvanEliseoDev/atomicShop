@@ -24,7 +24,7 @@ const MOCK_CLIENTS = [
     },
     {
         _id: 3,
-        name: "Camila Sofia Rodas Menjivar",
+        name: "Camila Granados Tovar Menjivar",
         numberPhone: "+503 7118-1201",
         email: "Rodas123@gmail.com",
         typeClient: "Comun",

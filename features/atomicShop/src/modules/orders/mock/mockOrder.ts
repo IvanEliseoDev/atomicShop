@@ -32,7 +32,7 @@ export const MOCK_ORDERS = [
     fecha: "01/02/2025",
     tipoEnvio: "Entrega en sucursal",
     tipoEntrega: "Entrega con firma",
-    montoEnvio: 0.00,
+    montoEnvio: 3.00,
     estado: "Entregado" // Color: Verde
   },
   {
@@ -41,7 +41,7 @@ export const MOCK_ORDERS = [
     fecha: "01/02/2025",
     tipoEnvio: "A domicilio",
     tipoEntrega: "Entrega con firma",
-    montoEnvio: 0.00,
+    montoEnvio: 1.00,
     estado: "En bodega" // Color: Naranja
   },
   {

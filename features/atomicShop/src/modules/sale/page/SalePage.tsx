@@ -5,8 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CustomPaginationPage } from "@/components/custom/pagination/CustomPaginationPage";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HeaderAdmin } from "@/components/custom/header/HeaderAdmin";
-import { MOCK_PROVIDERS } from "@/modules/provider/mock/mockProvider";
+
 import { MoreVertical, OctagonX, SlidersHorizontal } from "lucide-react";
+import { CustomNotRegister } from "@/components/custom/span/CustomNotRegister";
 
 export const SalePage = () => {
     const [searchQuery, setsearchQuery] = useState('')
@@ -46,6 +47,7 @@ export const SalePage = () => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     )
+
 
     return (
         <motion.main
@@ -140,7 +142,9 @@ export const SalePage = () => {
                                             key={`${currentPage}-${statusFilter}-${documentFilter}`}
                                         >
                                             {
-                                                (paginatedSales.length <= 0) && <span className="text-2xl font-bold"> <OctagonX />Sin Ventas Registadas</span>
+                                                (paginatedSales.length <= 0) && (
+                                                   <CustomNotRegister title="Ventas" />
+                                                )
                                             }
 
                                             {
