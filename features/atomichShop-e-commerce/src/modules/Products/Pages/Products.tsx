@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
 
 interface Product {
   id: number;
   name: string;
   price: number;
+  originalPrice: number;
   brand: string;
   image: string;
   onSale: boolean;
@@ -13,6 +15,7 @@ const MOCK_PRODUCTS: Product[] = Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
   name: "Báscula para pesar cajas petri",
   price: 80.0,
+  originalPrice: 80.0,
   brand: "Marca A",
   image: "https://placehold.co/220x160/e8f4fb/4a9bbe?text=Báscula",
   onSale: true,
@@ -27,12 +30,14 @@ const SORT_OPTIONS = [
 ];
 
 function Products() {
+  const { addItem } = useCart(); // ← hook del carrito
+
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(200);
   const [brand, setBrand] = useState<string>("Todas");
   const [sortBy, setSortBy] = useState<string>("relevance");
   const [quantities, setQuantities] = useState<Record<number, number>>(
-    Object.fromEntries(MOCK_PRODUCTS.map((p) => [p.id, 1])),
+    Object.fromEntries(MOCK_PRODUCTS.map((p) => [p.id, 1]))
   );
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
 
@@ -49,6 +54,20 @@ function Products() {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  };
+
+  // Agrega al carrito respetando la cantidad seleccionada
+  const handleAddToCart = (product: Product) => {
+    const qty = quantities[product.id] ?? 1;
+    for (let i = 0; i < qty; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image,
+      });
+    }
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter((p) => {
@@ -190,12 +209,12 @@ function Products() {
                     {product.name}
                   </p>
 
-                  {/* Quantity + Cart */}
+                  {/* Cantidad + Carrito */}
                   <div className="flex items-center gap-2 mt-4">
                     <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                       <button
                         onClick={() => handleQty(product.id, -1)}
-                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         −
                       </button>
@@ -204,13 +223,16 @@ function Products() {
                       </span>
                       <button
                         onClick={() => handleQty(product.id, 1)}
-                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         +
                       </button>
                     </div>
 
-                    <button className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white rounded-lg py-2 text-sm font-semibold shadow-sm">
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white rounded-lg py-2 text-sm font-semibold shadow-sm cursor-pointer"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="w-4 h-4"

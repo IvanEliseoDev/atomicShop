@@ -1,3 +1,4 @@
+import { useCart } from "../../../lib/CartContext";
 import React, { useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
@@ -53,6 +54,8 @@ function ProductSlider() {
     Object.fromEntries(mockProducts.map((p) => [p.id, 1])),
   );
 
+  const { addItem } = useCart();
+
   // Favoritos (solo visual por el momento)
   const [favorites, setFavorites] = useState<Record<number, boolean>>(
     Object.fromEntries(mockProducts.map((p) => [p.id, false])),
@@ -68,9 +71,16 @@ function ProductSlider() {
 
   // Para agregar un producto al carrito
   const handleAddToCart = (product: Product) => {
-    toast.success(
-      `"${product.name}" agregado al carrito (x${quantities[product.id]})`,
-    );
+    const qty = quantities[product.id] ?? 1;
+    for (let i = 0; i < qty; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice ?? product.price,
+        image: product.image,
+      });
+    }
   };
 
   // Funcionalidad para favoritos
@@ -87,88 +97,92 @@ function ProductSlider() {
 
       {/* Grid productos */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {mockProducts.map((product) => (
-        <motion.div
-        key={product.id}
-        whileHover={{y: -4}}
-        transition={{duration: 0.2}}
-        className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-col gap-3 relative">
-
-          {/* Badge oferta */}
-          {product.isOffer && (
-            <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full z-10">
-              Oferta
-            </span>
-          )}
-
-          {/* Corazon favorito */}
-          <button
-          onClick={() => toggleFavorite(product.id)}
-          className="absolute top-3 right-3 z-10 transition">
-            <Heart
-            size={20}
-            className={
-              favorites[product.id]
-              ? "fill-blue-500 text-blue-500"
-              : "text-gray-300 hover:text-blue-300"
-            }/>
-          </button>
-
-          {/* Imagen */}
-          <img
-          src={product.image}
-          alt={product.image}
-          className="w-full h-32 object-contain rounded-lg mt-4"
-           />
-
-           {/* Precio */}
-           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-gray-800 font-semibold text-base">
-            ${product.price.toFixed(2)}
-            </span>
-            {product.isOffer && product.originalPrice && (
-              <span className="text-gray-400 text-sm line-through">
-                ${product.originalPrice?.toFixed(2)}
+        {mockProducts.map((product) => (
+          <motion.div
+            key={product.id}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-col gap-3 relative"
+          >
+            {/* Badge oferta */}
+            {product.isOffer && (
+              <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full z-10">
+                Oferta
               </span>
             )}
-           </div>
 
-           {/* Nombre */}
-           <p className="text-gray-600 text-sm leading-snug mb-2">
-            {product.name}
-           </p>
-
-           {/* Cantidad + Carrito */}
-           <div className="flex items-center gap-4 mt-auto">
-          
-          {/* Selector de cantidad */}
-          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
+            {/* Corazon favorito */}
             <button
-            onClick={() => updateQuantity(product.id, -1)}
-            className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer">
-                -
+              onClick={() => toggleFavorite(product.id)}
+              className="absolute top-3 right-3 z-10 transition"
+            >
+              <Heart
+                size={20}
+                className={
+                  favorites[product.id]
+                    ? "fill-blue-500 text-blue-500"
+                    : "text-gray-300 hover:text-blue-300"
+                }
+              />
             </button>
-            <span className="px-2 py-1 text-gray-700 min-w-[4rem] text-center">
-            {quantities[product.id].toFixed(2)}
-            </span>
-            <button 
-            onClick={() => updateQuantity(product.id, 1)}
-            className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer">
-                +
-            </button>
-          </div>
 
-          {/* Boton carrito */}
-          <motion.button
-          whileHover={{scale: 1.05}}
-          whileTap={{scale: 0.95}}
-          onClick={() => handleAddToCart(product)}
-          className="bg-blue-500 hover:bg-blue-600 transition p-2 rounded-lg">
-            <ShoppingCart size={18} className="text-white cursor-pointer"/>
-          </motion.button>
-           </div>
-        </motion.div>
-      ))}
+            {/* Imagen */}
+            <img
+              src={product.image}
+              alt={product.image}
+              className="w-full h-32 object-contain rounded-lg mt-4"
+            />
+
+            {/* Precio */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-gray-800 font-semibold text-base">
+                ${product.price.toFixed(2)}
+              </span>
+              {product.isOffer && product.originalPrice && (
+                <span className="text-gray-400 text-sm line-through">
+                  ${product.originalPrice?.toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            {/* Nombre */}
+            <p className="text-gray-600 text-sm leading-snug mb-2">
+              {product.name}
+            </p>
+
+            {/* Cantidad + Carrito */}
+            <div className="flex items-center gap-4 mt-auto">
+              {/* Selector de cantidad */}
+              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
+                <button
+                  onClick={() => updateQuantity(product.id, -1)}
+                  className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="px-2 py-1 text-gray-700 min-w-[4rem] text-center">
+                  {quantities[product.id].toFixed(2)}
+                </span>
+                <button
+                  onClick={() => updateQuantity(product.id, 1)}
+                  className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Boton carrito */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleAddToCart(product)}
+                className="bg-blue-500 hover:bg-blue-600 transition p-2 rounded-lg"
+              >
+                <ShoppingCart size={18} className="text-white cursor-pointer" />
+              </motion.button>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
   );

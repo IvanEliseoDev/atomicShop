@@ -1,31 +1,22 @@
 import { useState } from "react";
-// Esto son como los iconos creo
 import { Heart, ShoppingCart, User, Search } from "lucide-react";
-import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
+import { useNavigate } from "react-router";
 import CategoriesBar from "./CategoriesBar";
+import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
 
 const Navbar = () => {
-  // Para poder mandar al usuario a diferentes interfases
   const navigate = useNavigate();
-
-  // Para poder utilizar useState
   const [searchQuery, setSearchQuery] = useState("");
+  const { toggleCart, totalItems } = useCart(); // ← usamos el contexto
 
-  // Y para poder enseñarle al usuario cuantos productos lleva en el carrito
-  const [cartCount] = useState(0);
-
-  // Funcion para scroll para las secciones de contactanos y nosotros en la pagina principal del proyecto
   const handleScroll = (id: string) => {
-    // Si no estamos en la pagina principal, navegamos primero
     if (window.location.pathname !== "/atomicShop") {
       navigate("/atomicShop");
-      // Esperamos a que cargue la pagina antes de scrollear
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) element.scrollIntoView({ behavior: "smooth" });
-      }, 100); // Tiempo de espera
+      }, 100);
     } else {
-      // Si ya estamos en Home, scrolleamos directamente
       const element = document.getElementById(id);
       if (element) element.scrollIntoView({ behavior: "smooth" });
     }
@@ -33,7 +24,7 @@ const Navbar = () => {
 
   return (
     <header className="w-full shadow-sm border-b">
-      <div className="bg-white px-10 py-3, flex items-center justify-between gap-4">
+      <div className="bg-white px-10 py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer shrink-0"
@@ -88,26 +79,26 @@ const Navbar = () => {
         </div>
 
         {/* Iconos de accion */}
-        <div className="flex items-center justify-evenly px-2 p-0 gap-15 ">
+        <div className="flex items-center justify-evenly px-2 p-0 gap-15">
           {/* Favoritos */}
           <button
             onClick={() => navigate("/atomicShop/favoritos")}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <Heart size={22} />
-            <span className="text-xs mt-0.5"> Favoritos</span>
+            <span className="text-xs mt-0.5">Favoritos</span>
           </button>
 
-          {/* Carrito */}
+          {/* Carrito — abre el sidebar */}
           <button
-            onClick={() => navigate("/carrito")}
+            onClick={toggleCart}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition relative cursor-pointer"
           >
             <div className="relative">
               <ShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {cartCount}
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalItems}
                 </span>
               )}
             </div>
@@ -120,7 +111,7 @@ const Navbar = () => {
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <User size={22} />
-            <span className="text-xs mt-0.5"> Iniciar sesion</span>
+            <span className="text-xs mt-0.5">Iniciar sesion</span>
           </button>
         </div>
       </div>
