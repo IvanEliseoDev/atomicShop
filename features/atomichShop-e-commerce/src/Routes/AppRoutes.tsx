@@ -7,9 +7,9 @@ import Products from "@/modules/Products/Pages/Products";
 import Favorites from "@/modules/Products/Pages/Favorites";
 import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras";
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
-import DatosEntrega from "@/modules/CarShop/Pages/DatosEntrega";
-import DatosPago from "@/modules/CarShop/Pages/DatosPago";
-import ProductDetail from "@/modules/Products/Pages/ProductDetail";
+import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
+import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
+import { ManageProfilePage } from "@/modules/Profile/Pages/ManageProfilePerfil";
 
 export const appRouter = createBrowserRouter([
   {
@@ -21,6 +21,17 @@ export const appRouter = createBrowserRouter([
         element: <LoginPage />,
       },
     ],
+  },
+
+  //RUTA DE REGISTRO 
+  {
+    path: "/register",
+    element: <RegisterPage />,
+  },
+  //RUTA DE RECUPERAR CONTRASEÑA
+  {
+    path: "/recover-password",
+    element: <RecoverPasswordPage />,
   },
 
   {
@@ -55,6 +66,10 @@ export const appRouter = createBrowserRouter([
         path: "productos/:id",
         element: <ProductDetail />,
       },
+      {
+        path: "perfil",
+        element: <ManageProfilePage />,
+      }
     ],
   },
 

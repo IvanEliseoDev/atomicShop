@@ -1,20 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { Heart, ShoppingCart, User, Search, X } from "lucide-react";
-import { useNavigate } from "react-router";
+import React, { useState, useEffect } from "react";
+// Esto son como los iconos creo
+import { Heart, ShoppingCart, User, Search, LogOut } from "lucide-react";
+import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
 import CategoriesBar from "./CategoriesBar";
-import { useCart } from "../../../lib/CartContext";
+import { toast } from "sonner"; // 
 
-// Productos mock fijos que siempre aparecen en el dropdown
-const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  name: "Báscula para pesar cajas petri",
-  price: 80.0,
-  originalPrice: 99.0,
-  image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
-  onSale: true,
-}));
-
-const TOTAL_RESULTS = 264;
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -46,6 +36,46 @@ const Navbar = () => {
     setShowDropdown(false);
   };
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown
+
+  // Estado que acepta nombre, apellido y foto
+  const [user, setUser] = useState<{ nombres: string, apellidos?: string, profilePic?: string } | null>(null);
+
+  useEffect(() => {
+    const checkSession = () => {
+      const session = localStorage.getItem("usuario_sesion");
+      if (session) {
+        const data = JSON.parse(session);
+        setUser(data);
+      }
+    };
+
+    checkSession(); // Carga inicial
+
+    window.addEventListener("profileUpdate", checkSession);
+    window.addEventListener("storage", checkSession);
+
+    return () => {
+      window.removeEventListener("profileUpdate", checkSession);
+      window.removeEventListener("storage", checkSession);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("usuario_sesion");
+    setUser(null);
+    setIsMenuOpen(false);
+
+    // Mostramos el mensaje antes o después de navegar
+    toast.info("Has cerrado sesión correctamente", {
+      description: "¡Vuelve pronto a Atomic Shop!",
+      position: "bottom-right",
+    });
+
+    navigate("/atomicShop");
+  };
+
+  // Funcion para scroll para las secciones de contactanos y nosotros en la pagina principal del proyecto
   const handleScroll = (id: string) => {
     if (window.location.pathname !== "/atomicShop") {
       navigate("/atomicShop");
@@ -257,13 +287,64 @@ const Navbar = () => {
             <span className="text-xs mt-0.5">Carrito</span>
           </button>
 
-          <button
-            onClick={() => navigate("/login")}
-            className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
-          >
-            <User size={22} />
-            <span className="text-xs mt-0.5">Iniciar sesion</span>
-          </button>
+          {/* Lógica de Sesión con Menú Desplegable */}
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 p-1 pr-3 rounded-full border border-blue-200 transition cursor-pointer"
+              >
+                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
+                  {user?.profilePic ? (
+                    <img src={user.profilePic} className="w-full h-full object-cover" />
+                  ) : (
+                    user?.nombres?.charAt(0).toUpperCase() || "U"
+                  )}
+                </div>
+                <span className="text-sm font-semibold text-blue-700 hidden lg:block">
+                  {user?.nombres.split(" ")[0]}
+                </span>
+              </button>
+
+              {/* Menú que aparece al dar clic */}
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
+                  <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 mb-1">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Sesión activa</p>
+                    <p className="text-sm font-bold text-gray-800 truncate">{user.nombres}</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      navigate("/atomicShop/perfil"); 
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"
+                  >
+                    <User size={18} />
+                    Ver mi perfil
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-3 border-t border-gray-50"
+                  >
+                    <LogOut size={18} />
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Si no hay nadie, tu botón original de Crear Cuenta */
+            <button
+              onClick={() => navigate("/login")}
+              className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
+            >
+              <User size={22} />
+              <span className="text-xs mt-0.5"> Crear cuenta</span>
+            </button>
+          )}
         </div>
       </div>
       <CategoriesBar />
