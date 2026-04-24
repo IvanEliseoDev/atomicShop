@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
+  Search,
+  Plus,
   SlidersHorizontal,
   MoreVertical,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   Card,
   CardContent,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -18,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MOCK_EMPLOYEES } from '../Mock/Employee.mock';
+import { HeaderEmployee } from '../Components/HeaderEmployee';
 import { useFilterEmployee } from '../hooks/useFilterEmployee';
 import { HeaderAdmin } from '@/components/custom/header/HeaderAdmin';
 import { CustomPaginationPage } from '@/components/custom/pagination/CustomPaginationPage';
@@ -128,6 +135,10 @@ export const EmployeePage = () => {
                       <SelectTrigger className="border-2 border-gray-300 w-full sm:w-40">
                         <SelectValue />
                       </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Salvadoreño">Nacionalidad: Salvadoreño</SelectItem>
+                        <SelectItem value="Peruano">Nacionalidad: Peruano</SelectItem>
+                      </SelectContent>
                     </Select>
                     <Select value={positionFilter} onValueChange={setPositionFilter}>
                       <SelectTrigger className="border-2 border-gray-300 w-full sm:w-40">
@@ -148,7 +159,9 @@ export const EmployeePage = () => {
                       <tr className="bg-blue-500 text-white">
                         <th className="text-left font-semibold px-4 py-3 rounded-tl-lg">Lista de empleado</th>
                         <th className="text-left font-semibold px-4 py-3">Correo electrónico</th>
+                        <th className="text-left font-semibold px-4 py-3">Nacionalidad</th>
                         <th className="text-center font-semibold px-4 py-3">Cargo</th>
+                        <th className="text-center font-semibold px-4 py-3">Documento de Identificación</th>
                         <th className="text-center font-semibold px-4 py-3">Numero Telefonico</th>
                         <th className="text-center font-semibold px-4 py-3">Fecha de Nacimiento</th>
                         <th className="text-center font-semibold px-4 py-3">Estado</th>
@@ -187,7 +200,9 @@ export const EmployeePage = () => {
                               {employee.email}
                             </a>
                           </td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{employee.nationality}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{employee.position}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{employee.document}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{employee.phone}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{employee.birthDate}</td>
                           <td className="px-6 py-4">

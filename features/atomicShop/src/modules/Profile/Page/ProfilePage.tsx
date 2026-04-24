@@ -4,36 +4,12 @@ import { Pencil, Phone, Mail, Building2, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import type { ProfileData } from '../interface/profile.interface';
+import { mockProfile } from '../mock/mockProfile';
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
-interface ProfileData {
-    nombres: string;
-    apellidos: string;
-    dui: string;
-    fechaNacimiento: string;
-    telefono: string;
-    correo: string;
-    afp: string;
-    isss: string;
-    direccion: string;
-    rol: string;
-    panel: string;
-}
 
 // ─── Datos mock (reemplaza con tu API cuando tengas el backend listo) ──────────
-const mockProfile: ProfileData = {
-    nombres: 'IVAN ELISEO',
-    apellidos: 'HERNANDEZ MAURICIO',
-    dui: '012345678-9',
-    fechaNacimiento: '11/11/2007',
-    telefono: '+503 7405 9926',
-    correo: 'ivancitoLab@gmail.com',
-    afp: 'Confia',
-    isss: '011214121',
-    direccion: 'Poligono T - Casa #12 - Mejicanos - San Salvador',
-    rol: 'ADMINISTRADOR',
-    panel: 'Panel Central',
-};
+
 
 // ─── Sub-componente: fila de dato ──────────────────────────────────────────────
 const DataField = ({ label, value }: { label: string; value: string }) => (

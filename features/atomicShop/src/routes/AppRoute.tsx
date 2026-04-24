@@ -14,6 +14,17 @@ import { ForgotPasswordPage } from "@/modules/Login/pages/ForgetPassword"
 import { LoginPage } from "@/modules/Login/pages/LoginPage"
 import SuccessPage from "@/modules/Login/pages/SuccesPage"
 import { createBrowserRouter } from "react-router"
+import { EmployeePage } from "@/modules/employee/Pages/EmployeePage"
+import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
+import { ProviderPage } from "@/modules/provider/providerPage"
+import { ProviderForm } from "@/modules/provider/pages/ProviderRegisterForm"
+import { ClientPage } from "@/modules/clients/pages/ClientPage"
+import { SalePage } from "@/modules/sale/page/SalePage"
+import { ShoppingPage } from "@/modules/shopping/pages/ShoppingPage"
+import { OrderPage } from "@/modules/orders/pages/OrderPage"
+import { CustomerRegistrationForm } from "@/modules/clients/pages/ClientForm"
+import { OrderRegisterForm } from "@/modules/orders/pages/OrderRegisterForm"
+import  { SalesRegisterForm } from "@/modules/sale/page/SalesRegisterForm"
 
 
 export const appRouter = createBrowserRouter([
@@ -61,6 +72,50 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'inventario',
                 element: <ProductsPage/>
+            },
+            {
+                path: 'empleados',
+                element: <EmployeePage/>
+            },
+            {
+                path: 'empleados/nuevo',
+                element: <EmployeeForm/>
+            },
+            {
+                path: 'proveedores',
+                element: <ProviderPage />
+            },
+            {
+                path: 'proveedores/nuevo',
+                element: <ProviderForm /> 
+            },
+            {
+                path: 'clientes',
+                element: <ClientPage />
+            },
+            {
+                path: 'clientes/nuevo',
+                element: <CustomerRegistrationForm />
+            },
+            {
+                path: "ventas",
+                element: <SalePage />
+            },
+            {
+                path:"ventas/nuevo",
+                element:<SalesRegisterForm/>
+            },
+            {
+                path:"compras",
+                element: <ShoppingPage />
+            },
+            {
+                path:"pedidos",
+                element: <OrderPage />
+            },
+            {
+                path:"pedidos/nuevo",
+                element: <OrderRegisterForm />
             }
         ]
     },
