@@ -1,5 +1,6 @@
 import { Facebook, Youtube, Instagram } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useState } from "react";
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -29,6 +30,9 @@ const socialLinks: SocialLink[] = [
 ];
 
 function Footer() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
   const navigate = useNavigate();
 
   return (
@@ -185,8 +189,17 @@ function Footer() {
 
         {/* Copyright */}
         <div className="pt-4 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} AtomicShop. Todos los derechos
-          reservados.
+          © {new Date().getFullYear()} AtomicShop.{" "}
+          <p
+          className="cursor-pointer text-gray-400 p-4 rounded-lg"
+            onClick={() => {
+              navigate("/atomicShop/terminos y condiciones");
+              setShowDropdown(false);
+              setSearchQuery("");
+            }}
+          >
+            Términos y condiciones
+          </p>
         </div>
       </div>
     </footer>
