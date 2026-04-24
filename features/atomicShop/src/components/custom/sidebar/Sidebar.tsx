@@ -11,7 +11,7 @@ interface SidebarProps {
 
 const menuItems = [
     {
-        section: 'NAVEGACION',
+        section: 'Iventario',
         items: [
             { label: 'Inicio',     icon: Home,         path: '/atomicAdmin' },
             { label: 'Ventas',     icon: ShoppingCart, path: '/atomicAdmin/ventas' },
@@ -21,7 +21,7 @@ const menuItems = [
         ],
     },
     {
-        section: 'ADMIN PANEL',
+        section: 'Usuarios',
         items: [
             { label: 'Empleados',   icon: Users,      path: '/atomicAdmin/empleados' },
             { label: 'Clientes',    icon: UserCheck,  path: '/atomicAdmin/clientes' },

@@ -1,9 +1,13 @@
 import React, { useState } from "react";
+import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
+// Agrega este import al inicio
+import { useNavigate } from "react-router";
 
 interface Product {
   id: number;
   name: string;
   price: number;
+  originalPrice: number;
   brand: string;
   image: string;
   onSale: boolean;
@@ -13,6 +17,7 @@ const MOCK_PRODUCTS: Product[] = Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
   name: "Báscula para pesar cajas petri",
   price: 80.0,
+  originalPrice: 80.0,
   brand: "Marca A",
   image: "https://placehold.co/220x160/e8f4fb/4a9bbe?text=Báscula",
   onSale: true,
@@ -27,6 +32,10 @@ const SORT_OPTIONS = [
 ];
 
 function Products() {
+  const { addItem } = useCart(); // ← hook del carrito
+  // Dentro del componente Products(), agrega:
+  const navigate = useNavigate();
+
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(200);
   const [brand, setBrand] = useState<string>("Todas");
@@ -51,6 +60,20 @@ function Products() {
     });
   };
 
+  // Agrega al carrito respetando la cantidad seleccionada
+  const handleAddToCart = (product: Product) => {
+    const qty = quantities[product.id] ?? 1;
+    for (let i = 0; i < qty; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image,
+      });
+    }
+  };
+
   const filteredProducts = MOCK_PRODUCTS.filter((p) => {
     const inPrice = p.price >= minPrice && p.price <= maxPrice;
     const inBrand = brand === "Todas" || p.brand === brand;
@@ -65,7 +88,7 @@ function Products() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Filter Bar */}
-      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
           {/* Price Range */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -140,7 +163,8 @@ function Products() {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 group"
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 group cursor-pointer"
+                onClick={() => navigate(`/atomicShop/productos/${product.id}`)}
               >
                 {/* Card Top */}
                 <div className="relative">
@@ -150,7 +174,10 @@ function Products() {
                     </span>
                   )}
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(product.id);
+                    }}
                     className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow hover:scale-110 transition-transform"
                     aria-label="Agregar a favoritos"
                   >
@@ -190,12 +217,15 @@ function Products() {
                     {product.name}
                   </p>
 
-                  {/* Quantity + Cart */}
+                  {/* Cantidad + Carrito */}
                   <div className="flex items-center gap-2 mt-4">
                     <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                       <button
-                        onClick={() => handleQty(product.id, -1)}
-                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQty(product.id, -1);
+                        }}
+                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         −
                       </button>
@@ -203,14 +233,23 @@ function Products() {
                         {quantities[product.id]}
                       </span>
                       <button
-                        onClick={() => handleQty(product.id, 1)}
-                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQty(product.id, 1);
+                        }}
+                        className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         +
                       </button>
                     </div>
 
-                    <button className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white rounded-lg py-2 text-sm font-semibold shadow-sm">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white rounded-lg py-2 text-sm font-semibold shadow-sm cursor-pointer"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="w-4 h-4"

@@ -5,8 +5,11 @@ import { NotFoundPage } from "@/modules/404NotFound/page/404NotFoundPage";
 import HomePage from "@/modules/Home/Pages/HomePage";
 import Products from "@/modules/Products/Pages/Products";
 import Favorites from "@/modules/Products/Pages/Favorites";
-import Cart from "@/modules/CarShop/Pages/Cart";
+import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras";
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
+import DatosEntrega from "@/modules/CarShop/Pages/DatosEntrega";
+import DatosPago from "@/modules/CarShop/Pages/DatosPago";
+import ProductDetail from "@/modules/Products/Pages/ProductDetail";
 
 export const appRouter = createBrowserRouter([
   {
@@ -38,7 +41,19 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: "carrito",
-        element: <Cart />,
+        element: <DetalleCarritoCompras />,
+      },
+      {
+        path: "carrito/datos-entrega",
+        element: <DatosEntrega />,
+      },
+      {
+        path: "carrito/datos-pago",
+        element: <DatosPago />,
+      },
+      {
+        path: "productos/:id",
+        element: <ProductDetail />,
       },
     ],
   },
