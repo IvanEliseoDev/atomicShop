@@ -36,7 +36,7 @@ const Navbar = () => {
     // Mostramos el mensaje antes o después de navegar
     toast.info("Has cerrado sesión correctamente", {
       description: "¡Vuelve pronto a Atomic Shop!",
-      position: "bottom-right", // Opcional: para que no estorbe arriba
+      position: "bottom-right", 
     });
 
     navigate("/atomicShop");
