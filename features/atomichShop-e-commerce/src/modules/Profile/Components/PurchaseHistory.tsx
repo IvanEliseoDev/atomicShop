@@ -37,7 +37,6 @@ export const PurchaseHistory = () => {
                 </tbody>
             </table>
 
-            {/* Paginación estilo imagen */}
             <div className="flex items-center justify-between mt-8 text-gray-400 text-sm">
                 <div className="flex items-center gap-2">
                     <span>Mostrar más</span>

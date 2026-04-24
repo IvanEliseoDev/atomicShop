@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Mail, MapPin, Phone, CreditCard, Pencil, Check, X, Camera } from "lucide-react";
-import { toast } from "sonner"; // Para avisar que se guardó
+import { toast } from "sonner"; 
 
 export const ProfileHeader = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -26,9 +26,9 @@ export const ProfileHeader = () => {
                 // Usamos los nombres exactos que vienen del formulario de registro
                 nombres: data.nombres || "",
                 apellidos: data.apellidos || "",
-                correo: data.email || data.correo || "", // El registro usa 'email'
+                correo: data.email || data.correo || "", 
                 telefono: data.telefono || "",
-                dni: data.dui || data.dni || "", // El registro usa 'dui'
+                dni: data.dui || data.dni || "", 
                 direccion: data.direccion || "Tu dirección aquí",
                 profilePic: data.profilePic || ""
             });
@@ -49,7 +49,7 @@ export const ProfileHeader = () => {
             (u.email === userData.correo || u.correo === userData.correo) ? { ...u, ...userData } : u
         );
         localStorage.setItem("usuarios_registrados", JSON.stringify(nuevosUsuarios));
-        
+
         // Lanzamos este evento para que el Navbar lo escuche y se refresque solo
         window.dispatchEvent(new Event("profileUpdate"));
 

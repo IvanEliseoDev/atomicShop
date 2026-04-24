@@ -184,7 +184,7 @@ const Navbar = () => {
 
                   <button
                     onClick={() => {
-                      navigate("/atomicShop/perfil"); // Ajusta a tu ruta real de perfil
+                      navigate("/atomicShop/perfil"); 
                       setIsMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"

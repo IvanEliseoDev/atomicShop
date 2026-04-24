@@ -28,7 +28,7 @@ export const RegisterPage = () => {
     const handleRegister = async () => {
         const { email, password, confirmPassword } = formData;
 
-        // Validaciones básicas
+        // Validaciones de datos y contraseña
         if (!email.trim() || !password.trim() || password !== confirmPassword) {
             toast.error("Revisa los datos y la contraseña");
             return;
@@ -38,14 +38,11 @@ export const RegisterPage = () => {
         // Simulación de carga
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // --- CORRECCIÓN AQUÍ ---
-        // 1. Usamos desestructuración para extraer 'confirmPassword' y agrupar el resto en 'userToSave'
+        
         const { confirmPassword: _, ...userToSave } = formData;
 
-        // 2. Obtenemos los usuarios previos
         const existingUsers = JSON.parse(localStorage.getItem("usuarios_registrados") || "[]");
 
-        // 3. Guardamos el nuevo objeto que ya no tiene la confirmación
         existingUsers.push(userToSave);
         localStorage.setItem("usuarios_registrados", JSON.stringify(existingUsers));
 

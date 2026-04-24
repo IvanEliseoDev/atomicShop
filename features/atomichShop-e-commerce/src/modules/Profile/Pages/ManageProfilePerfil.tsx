@@ -10,7 +10,6 @@ export const ManageProfilePage = () => {
 
       <main className="flex-grow py-8 px-4">
         <div className="max-w-5xl mx-auto">
-          {/* Título de la página coincidiendo con el diseño */}
           <h1 className="text-gray-800 text-lg font-medium mb-6 ml-2">
             Administrar perfil
           </h1>
