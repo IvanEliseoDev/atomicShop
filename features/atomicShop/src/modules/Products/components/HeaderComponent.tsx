@@ -20,7 +20,7 @@ export const HeaderComponent = ({mockProductos}:HeaderProps) => {
                     <p className="text-sm text-gray-500 mt-0.5">{mockProductos.length} productos registrados</p>
                 </div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-2 shadow-sm" >
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-3 cursor-pointer shadow-sm" >
                         <Plus size={16} />
                         Agregar
                     </Button>

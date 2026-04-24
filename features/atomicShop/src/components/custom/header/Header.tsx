@@ -16,7 +16,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMobileMenuClick }) => {
     const navigate = useNavigate();
     return (
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <header className="bg-white max-h-15 px-6 py-4 flex items-center justify-between">
             {/* Mobile menu button */}
             <button
                 onClick={onMobileMenuClick}

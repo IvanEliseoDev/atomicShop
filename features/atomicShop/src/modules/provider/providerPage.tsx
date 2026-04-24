@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { motion } from 'framer-motion'
 import { MoreVertical, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { MOCK_PROVIDERS } from './mock/mockProvider';
 
 const getStatusDotColor = (status: string) => {
     switch (status) {

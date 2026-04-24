@@ -5,7 +5,7 @@ import { NotFoundPage } from "@/modules/404NotFound/page/404NotFoundPage";
 import HomePage from "@/modules/Home/Pages/HomePage";
 import Products from "@/modules/Products/Pages/Products";
 import Favorites from "@/modules/Products/Pages/Favorites";
-import Cart from "@/modules/CarShop/Pages/Cart";
+import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras";
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
 import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
 import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
@@ -52,7 +52,19 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: "carrito",
-        element: <Cart />,
+        element: <DetalleCarritoCompras />,
+      },
+      {
+        path: "carrito/datos-entrega",
+        element: <DatosEntrega />,
+      },
+      {
+        path: "carrito/datos-pago",
+        element: <DatosPago />,
+      },
+      {
+        path: "productos/:id",
+        element: <ProductDetail />,
       },
       {
         path: "perfil",
