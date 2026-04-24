@@ -9,6 +9,7 @@ import DetalleCarritoCompras from "@/modules/CarShop/Pages/DetalleCarritoCompras
 import { AtomicShopLayout } from "@/modules/Home/Layouts/AtomicShopLayout";
 import DatosEntrega from "@/modules/CarShop/Pages/DatosEntrega";
 import DatosPago from "@/modules/CarShop/Pages/DatosPago";
+import ProductDetail from "@/modules/Products/Pages/ProductDetail";
 
 export const appRouter = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ export const appRouter = createBrowserRouter([
       {
         path: "carrito/datos-pago",
         element: <DatosPago />,
+      },
+      {
+        path: "productos/:id",
+        element: <ProductDetail />,
       },
     ],
   },

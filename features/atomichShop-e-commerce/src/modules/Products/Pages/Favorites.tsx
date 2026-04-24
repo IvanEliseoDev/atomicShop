@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
-
 interface FavoriteProduct {
   id: number;
   name: string;

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 // Para poder llenar los datos a las targetas de productos
 interface Product {
@@ -49,6 +50,7 @@ const mockProducts: Product[] = [
 ];
 
 function ProductSlider() {
+  const navigate = useNavigate();
   // Cantidad por producto
   const [quantities, setQuantities] = useState<Record<number, number>>(
     Object.fromEntries(mockProducts.map((p) => [p.id, 1])),
@@ -102,7 +104,8 @@ function ProductSlider() {
             key={product.id}
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-col gap-3 relative"
+            onClick={() => navigate(`/atomicShop/productos/${product.id}`)}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-col gap-3 relative cursor-pointer"
           >
             {/* Badge oferta */}
             {product.isOffer && (
@@ -113,7 +116,10 @@ function ProductSlider() {
 
             {/* Corazon favorito */}
             <button
-              onClick={() => toggleFavorite(product.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(product.id);
+              }}
               className="absolute top-3 right-3 z-10 transition"
             >
               <Heart
@@ -155,7 +161,10 @@ function ProductSlider() {
               {/* Selector de cantidad */}
               <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
                 <button
-                  onClick={() => updateQuantity(product.id, -1)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateQuantity(product.id, -1);
+                  }}
                   className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer"
                 >
                   -
@@ -164,7 +173,10 @@ function ProductSlider() {
                   {quantities[product.id].toFixed(2)}
                 </span>
                 <button
-                  onClick={() => updateQuantity(product.id, 1)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateQuantity(product.id, 1);
+                  }}
                   className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer"
                 >
                   +
@@ -175,7 +187,7 @@ function ProductSlider() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleAddToCart(product)}
+                onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }}
                 className="bg-blue-500 hover:bg-blue-600 transition p-2 rounded-lg"
               >
                 <ShoppingCart size={18} className="text-white cursor-pointer" />

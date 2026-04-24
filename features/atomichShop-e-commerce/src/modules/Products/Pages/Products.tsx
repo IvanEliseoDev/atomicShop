@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
+// Agrega este import al inicio
+import { useNavigate } from "react-router";
 
 interface Product {
   id: number;
@@ -31,13 +33,15 @@ const SORT_OPTIONS = [
 
 function Products() {
   const { addItem } = useCart(); // ← hook del carrito
+  // Dentro del componente Products(), agrega:
+  const navigate = useNavigate();
 
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(200);
   const [brand, setBrand] = useState<string>("Todas");
   const [sortBy, setSortBy] = useState<string>("relevance");
   const [quantities, setQuantities] = useState<Record<number, number>>(
-    Object.fromEntries(MOCK_PRODUCTS.map((p) => [p.id, 1]))
+    Object.fromEntries(MOCK_PRODUCTS.map((p) => [p.id, 1])),
   );
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
 
@@ -159,7 +163,8 @@ function Products() {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 group"
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 group cursor-pointer"
+                onClick={() => navigate(`/atomicShop/productos/${product.id}`)}
               >
                 {/* Card Top */}
                 <div className="relative">
@@ -169,7 +174,10 @@ function Products() {
                     </span>
                   )}
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(product.id);
+                    }}
                     className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow hover:scale-110 transition-transform"
                     aria-label="Agregar a favoritos"
                   >
@@ -213,7 +221,10 @@ function Products() {
                   <div className="flex items-center gap-2 mt-4">
                     <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                       <button
-                        onClick={() => handleQty(product.id, -1)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQty(product.id, -1);
+                        }}
                         className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         −
@@ -222,7 +233,10 @@ function Products() {
                         {quantities[product.id]}
                       </span>
                       <button
-                        onClick={() => handleQty(product.id, 1)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQty(product.id, 1);
+                        }}
                         className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg leading-none cursor-pointer"
                       >
                         +
@@ -230,7 +244,10 @@ function Products() {
                     </div>
 
                     <button
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
                       className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white rounded-lg py-2 text-sm font-semibold shadow-sm cursor-pointer"
                     >
                       <svg
