@@ -19,6 +19,11 @@ import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
 import { ProviderPage } from "@/modules/provider/providerPage"
 import { ProviderForm } from "@/modules/provider/pages/ProviderRegisterForm"
 import { ClientPage } from "@/modules/clients/pages/ClientPage"
+import FirstUseAdmin from "@/modules/FirstUseAdmin/pages/FirstUSe"
+import { ForgotPasswordAdminPage } from "@/modules/ForgotPasswordAdmin/pages/ForgotPasswordAdmin";
+import { SendEmailAdmin } from "@/modules/SendEmailAdmin/pages/SendEmailAdmin";
+import { ResetPasswordAdmin } from "@/modules/ResetPassword/pages/ResetPaswordAdmin";
+import { SuccessResetAdmin } from "@/modules/SuccesResetAdmin/pages/SuccesResetAdmin";
 
 
 export const appRouter = createBrowserRouter([
@@ -33,17 +38,37 @@ export const appRouter = createBrowserRouter([
                 element: <LoginPage />
             },
             {
-                path: "ForgetPassword", // Si termina en /ForgetPassword, muestra recuperación de clave
-                element: <ForgotPasswordPage />
+              path: "ForgetPasswordAdmin",   
+            element: <ForgotPasswordAdminPage />  // Si termina en /ForgetPassword, muestra recuperación de clave
             },
             {
                 path: "createpassword", // si termina en /createpassword, muestra la creacion de contraseña - proximamente se validara con un store que el codigo de verificacion si se haya enviado
                 element: <CreatePasswordPage />
             },
             {
+                path: "FirstUseAdmin",
+                element: <FirstUseAdmin />
+            },
+            {
                 path: "succeschangepassword",
                 element: <SuccessPage />
-            }
+            },
+            {
+            path: "ForgetPasswordAdmin",
+            element: <ForgotPasswordPage />
+            },
+            {
+            path: "SendEmailAdmin",
+            element: <SendEmailAdmin />
+        },
+        {
+        path: "ResetPasswordAdmin",
+        element: <ResetPasswordAdmin />
+        },
+        {
+         path: "SuccessResetAdmin",
+         element: <SuccessResetAdmin />
+        },
         ]
     },
     {   
