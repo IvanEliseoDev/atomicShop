@@ -1,4 +1,3 @@
-
 import { HeaderAdmin } from '@/components/custom/header/HeaderAdmin';
 import { CustomPaginationPage } from '@/components/custom/pagination/CustomPaginationPage';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,7 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { motion } from 'framer-motion'
 import { MoreVertical, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
-import { MOCK_PROVIDERS } from './mock/mockProvider';
+import { useNavigate } from 'react-router';
+import { containerVariants } from '@/utils/variants/containerVariants';
+import { itemVariants } from '@/utils/variants/itemVariants';
 
 const getStatusDotColor = (status: string) => {
     switch (status) {
@@ -66,26 +67,9 @@ export const ProviderPage = () => {
     const [statusFilter, setStatusFilter] = useState('Activo')
     const [nationalityFilter, setNationalityFilter] = useState('Salvadoreño')
     const [performanceArea, setPerformanceArea] = useState('Ventas')
+    const navigate = useNavigate()
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.4, ease: 'easeOut' },
-        },
-    };
+    
 
     const filteredProviders = MOCK_PROVIDERS.filter((provider) => 
         provider.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -108,7 +92,7 @@ export const ProviderPage = () => {
 
                 <motion.div variants={{ itemVariants }} className="space-y-6">
                     {/* Header & Search */}
-                    <HeaderAdmin title='Proveedores' amount={MOCK_PROVIDERS.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} />
+                    <HeaderAdmin title='Proveedores' amount={MOCK_PROVIDERS.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} onAddClick={() => navigate('/atomicAdmin/proveedores/nuevo')} />
 
                     {/*Main Content */}
                     <motion.div

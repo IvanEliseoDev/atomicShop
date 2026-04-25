@@ -12,7 +12,8 @@ interface PageHeaderProps {
     labelAdd?: string;       // Por si quieres que diga algo distinto a "Agregar"
 }
 
-export const HeaderAdmin = ({ title, amount, searchQuery, setSearchQuery }: PageHeaderProps) => {
+export const HeaderAdmin = ({ title, amount, searchQuery, setSearchQuery, onAddClick}: PageHeaderProps) => {
+    
     return (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -32,7 +33,8 @@ export const HeaderAdmin = ({ title, amount, searchQuery, setSearchQuery }: Page
                     />
                 </div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 w-full sm:w-auto">
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 w-full sm:w-auto"
+                    onClick={onAddClick}>
                         <Plus className="w-5 h-5" />
                         Agregar
                     </Button>

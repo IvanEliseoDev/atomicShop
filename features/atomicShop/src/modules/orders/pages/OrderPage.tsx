@@ -9,6 +9,7 @@ import { MoreVertical, OctagonX, SlidersHorizontal } from "lucide-react";
 import { containerVariants } from "@/utils/variants/containerVariants";
 import { itemVariants } from "@/utils/variants/itemVariants";
 import { CustomNotRegister } from "@/components/custom/span/CustomNotRegister";
+import { useNavigate } from "react-router";
 
 
 export const OrderPage = () => {
@@ -19,6 +20,7 @@ export const OrderPage = () => {
     const [statusFilter, setStatusFilter] = useState('Todos')
     const [typeDeliveryFilter, setTypeDeliveryFilter] = useState('Todos')
     const [typeShippingFilter, settypeShippingFilter] = useState('Todos')
+    const navigate = useNavigate()
 
     const orderFiltered = MOCK_ORDERS.filter((order) => {
         const clientes = order.cliente.trim().toLowerCase().includes(searchQuery.trim().toLowerCase())
@@ -47,7 +49,7 @@ export const OrderPage = () => {
 
                 <motion.div variants={{ itemVariants }} className="space-y-6">
                     {/* Header & Search */}
-                    <HeaderAdmin title='Pedidos' amount={MOCK_ORDERS.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} />
+                    <HeaderAdmin title='Pedidos' amount={MOCK_ORDERS.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery}onAddClick={() => navigate("/atomicAdmin/pedidos/nuevo")} />
 
                     {/*Main Content */}
                     <motion.div

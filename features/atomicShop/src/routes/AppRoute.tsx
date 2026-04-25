@@ -25,13 +25,14 @@ import { OrderPage } from "@/modules/orders/pages/OrderPage"
 import { CustomerRegistrationForm } from "@/modules/clients/pages/ClientForm"
 import { OrderRegisterForm } from "@/modules/orders/pages/OrderRegisterForm"
 import  { SalesRegisterForm } from "@/modules/sale/page/SalesRegisterForm"
+import { ProductRegisterForm } from "@/modules/Products/Page/CreateProductPage"
 
 
 export const appRouter = createBrowserRouter([
     {
         //todas las rutas que tengan el /admin/ mostraran el layout que es donde esta el fondo el cual es el mismo para todas las paginas
         //asi solo hereda el children que es el que mostrar pero siempre estando en el layout
-        path: "/admin/",
+        path: "/",
         element: <AuthLayout />,
         children: [
             {
@@ -72,6 +73,10 @@ export const appRouter = createBrowserRouter([
             {
                 path: 'inventario',
                 element: <ProductsPage/>
+            },
+            {
+                path: 'inventario/nuevo',
+                element: <ProductRegisterForm/>
             },
             {
                 path: 'empleados',

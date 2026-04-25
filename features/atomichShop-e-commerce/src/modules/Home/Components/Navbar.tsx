@@ -102,6 +102,8 @@ const Navbar = () => {
   // Solo mostramos 3 productos en el dropdown
   const previewProducts = SEARCH_MOCK_PRODUCTS.slice(0, 3);
 
+  const TOTAL_RESULTS = 264;
+
   return (
     <header className="w-full shadow-sm border-b">
       <div className="bg-white px-10 py-3 flex items-center justify-between gap-4">

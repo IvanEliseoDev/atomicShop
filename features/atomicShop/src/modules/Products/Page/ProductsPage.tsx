@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { mockProductos } from '../mock/product.mock';
 import { estadoConfig } from '../mock/stateConfig.mock';
+import { useNavigate } from 'react-router';
 
 // ─── Iniciales para el avatar del producto ────────────────────────────────────
 const getInitials = (nombre: string) =>
@@ -18,6 +19,7 @@ export const ProductsPage = () => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [filtroEstado, setFiltroEstado] = useState<string>('Todos');
     const [filtroCategoria, setFiltroCategoria] = useState<string>('Todas');
+    const navigate = useNavigate()
 
     // Categorías únicas para el filtro
     const categorias = ['Todas', ...Array.from(new Set(mockProductos.map(p => p.categoria)))];
@@ -70,7 +72,7 @@ export const ProductsPage = () => {
                     <p className="text-sm text-gray-500 mt-0.5">{mockProductos.length} productos registrados</p>
                 </div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-2 shadow-sm" >
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold gap-2 shadow-sm" onClick={() => navigate('/atomicAdmin/inventario/nuevo')} >
                         <Plus size={16} />
                         Agregar
                     </Button>

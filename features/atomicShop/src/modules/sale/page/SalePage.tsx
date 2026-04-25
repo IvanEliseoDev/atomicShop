@@ -8,6 +8,7 @@ import { HeaderAdmin } from "@/components/custom/header/HeaderAdmin";
 
 import { MoreVertical, OctagonX, SlidersHorizontal } from "lucide-react";
 import { CustomNotRegister } from "@/components/custom/span/CustomNotRegister";
+import { useNavigate } from "react-router";
 
 export const SalePage = () => {
     const [searchQuery, setsearchQuery] = useState('')
@@ -17,6 +18,7 @@ export const SalePage = () => {
     const [statusFilter, setStatusFilter] = useState('Ninguno')
     const [documentFilter, setDocumentFIlter] = useState('Comercial')
     const [dateFilter, setDateFilter] = useState('Default')
+    const navigate = useNavigate()
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -60,7 +62,7 @@ export const SalePage = () => {
 
                 <motion.div variants={{ itemVariants }} className="space-y-6">
                     {/* Header & Search */}
-                    <HeaderAdmin title='Ventas' amount={MOCK_SALES.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} />
+                    <HeaderAdmin title='Ventas' amount={MOCK_SALES.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} onAddClick={() => navigate("/atomicAdmin/ventas/nuevo")} />
 
                     {/*Main Content */}
                     <motion.div

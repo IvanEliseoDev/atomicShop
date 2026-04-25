@@ -28,6 +28,7 @@ import { HeaderEmployee } from '../Components/HeaderEmployee';
 import { useFilterEmployee } from '../hooks/useFilterEmployee';
 import { HeaderAdmin } from '@/components/custom/header/HeaderAdmin';
 import { CustomPaginationPage } from '@/components/custom/pagination/CustomPaginationPage';
+import { useNavigate } from 'react-router';
 
 const getStatusDotColor = (status: string) => {
   switch (status) {
@@ -57,6 +58,7 @@ export const EmployeePage = () => {
     emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     emp.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const navigate = useNavigate()
 
   const paginatedEmployees = filteredEmployees.slice(
     (currentPage - 1) * itemsPerPage,
@@ -96,7 +98,7 @@ export const EmployeePage = () => {
 
         <motion.div variants={{ itemVariants }} className="space-y-6">
           {/* Header & Search */}
-          <HeaderAdmin title='Empleados' amount={MOCK_EMPLOYEES.length} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <HeaderAdmin title='Empleados' amount={MOCK_EMPLOYEES.length} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onAddClick={() => navigate("/atomicAdmin/empleados/nuevo")} />
           
           <motion.div
             initial={{ opacity: 0, y: 16 }}

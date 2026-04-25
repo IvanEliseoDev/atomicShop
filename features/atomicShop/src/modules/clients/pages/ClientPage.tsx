@@ -4,6 +4,7 @@ import { MoreVertical, Search, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { CustomPaginationPage } from '../../../components/custom/pagination/CustomPaginationPage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router";
 
 const MOCK_CLIENTS = [
     {
@@ -72,6 +73,7 @@ export const ClientPage = () => {
     const totalPages = Math.ceil(MOCK_CLIENTS.length / itemsPerPage);
     const [statusFilter, setStatusFilter] = useState('Comun')
     const [typeClientFilter, settypeClientFilter] = useState('Natural')
+    const navigate = useNavigate()
 
     const filteredClients = MOCK_CLIENTS.filter((client, index) =>
         client.status.toLowerCase().includes(querySearch.toLowerCase()) ||
@@ -98,7 +100,7 @@ export const ClientPage = () => {
                 <motion.div variants={{ itemVariants }} className="space-y-6">
 
                     {/*Custom Header */}
-                    <HeaderAdmin title="Clientes" amount={MOCK_CLIENTS.length} searchQuery={querySearch} setSearchQuery={setquerySearch} />
+                    <HeaderAdmin title="Clientes" amount={MOCK_CLIENTS.length} searchQuery={querySearch} setSearchQuery={setquerySearch} onAddClick={() => navigate('/atomicAdmin/clientes/nuevo')} />
 
                     {/*Filters */}
                     <div className="flex flex-col md:flex-row md:items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
