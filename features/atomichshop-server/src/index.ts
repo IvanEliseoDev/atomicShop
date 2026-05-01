@@ -1,6 +1,4 @@
-// ruta: ../src/index.ts
 
-// En este archivo lo que haremos es configurar como el archivo de arranque de nuestra API, para que esta pueda funcionar y utilizarse
 import app from "./app";
 import "./database";
 import { config } from "./config";
