@@ -12,9 +12,7 @@ const customerSchema = new Schema<ICustomer>(
             isRequired: true
         },
         password:{
-            type:String,
-            isRequired: true
-
+            type:String || null,
         },
         telephone:{
             type:String

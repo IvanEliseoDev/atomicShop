@@ -7,6 +7,8 @@ import cors from "cors";
 // A qui importamos las rutas de los enpoints que querramos utilizar
 import productsRoutes from "./routes/products";
 import providerRoutes from "./routes/providers"
+import { customerRouter } from "./routes/customer";
+import { seedRouter } from "./routes/seed";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -24,6 +26,8 @@ app.use(express.json());
 /**
  * CONFIGURACION DE ENPOINTS
  */
+app.use("/api/seed", seedRouter)
 app.use("/api/products", productsRoutes);
 app.use("/api/providers", providerRoutes)
+app.use("/api/customers", customerRouter)
 export default app;
