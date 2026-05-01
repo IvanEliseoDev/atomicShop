@@ -14,6 +14,7 @@ import ProductDetail from "@/modules/Products/Pages/ProductDetail";
 import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
 import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
 import { ManageProfilePage } from "@/modules/Profile/Pages/ManageProfilePerfil";
+import TerminosCondiciones from "@/modules/Terms/Pages/TerminosCondiciones";
 
 export const appRouter = createBrowserRouter([
   {
@@ -24,11 +25,7 @@ export const appRouter = createBrowserRouter([
         index: true, // Esto hace que cuando se habra solo la ruta /login, se va a mostrar este componete por defecto
         element: <LoginPage />,
       },
-
-
     ],
-
-
   },
 
   {
@@ -75,7 +72,11 @@ export const appRouter = createBrowserRouter([
       {
         path: "perfil",
         element: <ManageProfilePage />,
-      }
+      },
+      {
+        path: "terminos y condiciones",
+        element: <TerminosCondiciones />,
+      },
     ],
   },
 
