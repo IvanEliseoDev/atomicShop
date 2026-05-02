@@ -3,7 +3,7 @@ import type { CustomerEntity } from "../entity/customer.entity";
 
 export const addCustomer = async(paylaod:CustomerEntity) => {
     try{
-        const {data} = await AtomicShop_API.post('/customers')
+        const {data} = await AtomicShop_API.post('/customers', paylaod)
         return data
     }catch(error) {
         console.log(error)

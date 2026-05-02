@@ -4,7 +4,7 @@ import { Toaster } from "sonner"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 //Definimos un nuevo cliente para que pueda utilizarlo nuestro QueryProvider de tanstack
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient()
 
 export const AtomicShopApp = () => {
     return (

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,24 +15,59 @@ import { itemVariants } from '@/utils/variants/itemVariants';
 import { containerVariants } from '@/utils/variants/containerVariants';
 import { Controller, useForm } from 'react-hook-form'
 import { fieldVariants } from '@/utils/variants/fieldVariants';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registrationSchema } from '../schemas/registrationSchema';
+import { formatPhoneNumber } from '@/utils/format/numberPhone.format';
+import { formatDUI } from '@/utils/format/dui.format';
+import { toast } from 'sonner';
+import { formatNIT } from '@/utils/format/nit.format';
+import { customerActivities } from '@/mocks/customerActivity';
+import { useAddCustomer } from '../hooks/useAddCustomer';
 
 export const CustomerRegistrationForm = () => {
-
-  const { register, handleSubmit, formState: errors, control, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, control, watch } = useForm({
+    resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: "",
       numberPhone: "",
       mail: "",
       direction: "",
-      typeClient: "", 
+      typeClient: "",
       dui: "",
       nit: "",
       typeGiro: "",
       whitCreditFiscal: false
-    
     }
   })
+  const { mutate, isPending } = useAddCustomer();
+  const onSubmit = (data: any) => {
+    console.log("Data recivida y que se enviara: ", data)
+    // MAPEAMOS los datos del formulario a tu CustomerEntity
+    const customerPayload = {
+      name: data.name,
+      mail: data.mail,
+      password: null, // Según tu entity
+      telephone: data.numberPhone, // Mapeo de nombre
+      direction: data.direction,
+      typeCustomer: data.typeClient, // Mapeo de nombre
+      dui: data.dui || "",
+      nit: data.nit || "",
+      typeGiro: data.typeGiro || "",
+      state: "active", // Valor por defecto
+      isVerified: false,
+      loginAttemps: 0,
+      timeOut: new Date().toISOString()
+    };
+
+    // Ejecutamos la mutación
+    mutate(customerPayload);
+  };
   console.log(errors)
+  const onError = (errors: any) => {
+    // Muestra un mensaje general o el primero que encuentre
+    toast.error("Por favor, revisa los campos marcados en rojo.");
+    console.log("Errores detallados:", errors);
+  };
   const isCreditFiscal = watch('whitCreditFiscal', false)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -56,8 +90,8 @@ export const CustomerRegistrationForm = () => {
         {/* Main Card */}
         <motion.form
           onSubmit={handleSubmit(
-            (data) => console.log("Éxito:", data),
-            (err) => console.log("Errores de validación:", err)
+            onSubmit,
+            onError
           )}
           variants={containerVariants}
           initial="hidden"
@@ -81,7 +115,10 @@ export const CustomerRegistrationForm = () => {
                 id="name"
                 type="text"
                 placeholder="Ingrese el nombre del cliente"
-                className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                  ? 'border-red-300 focus:border-red-400'
+                  : 'border-gray-300 focus:border-blue-500'
+                  }`}
               />
             </motion.div>
 
@@ -90,6 +127,7 @@ export const CustomerRegistrationForm = () => {
               variants={{ itemVariants }}
               className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
             >
+
               <div>
                 <Label
                   htmlFor="numberPhone"
@@ -99,12 +137,24 @@ export const CustomerRegistrationForm = () => {
                 </Label>
                 <Input
                   id="numberPhone"
-                  {...register("numberPhone", { required: true })}
-                  type="tel"
-                  placeholder="+503 XXXX XXXX"
-                  className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                  {...register("numberPhone", {
+                    required: "El número es obligatorio",
+                    onChange: (e) => {
+                      const formattedValue = formatPhoneNumber(e.target.value);
+                      e.target.value = formattedValue; // Actualiza el valor visual y en el estado
+                    }
+                  })}
+                  type="text"
+                  maxLength={9}
+                  placeholder=" XXXX XXXX"
+                  className={`w-full border-2  focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                    ? 'border-red-300 focus:border-red-400'
+                    : 'border-gray-300 focus:border-blue-500'
+                    }`}
                 />
               </div>
+
+
               <div>
                 <Label
                   htmlFor="mail"
@@ -117,7 +167,9 @@ export const CustomerRegistrationForm = () => {
                   {...register("mail", { required: true })}
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                  className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                    ? 'border-red-300 focus:border-red-400'
+                    : 'border-gray-300 focus:border-blue-500'}`}
                 />
               </div>
             </motion.div>
@@ -132,7 +184,10 @@ export const CustomerRegistrationForm = () => {
                 {...register("direction", { required: true })}
                 type="text"
                 placeholder="Ingrese la dirección del cliente"
-                className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                className={`w-full border-2  focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                  ? 'border-red-300 focus:border-red-400'
+                  : 'border-gray-300 focus:border-blue-500'
+                  }`}
               />
             </motion.div>
 
@@ -147,7 +202,10 @@ export const CustomerRegistrationForm = () => {
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4">
+                    <SelectTrigger className={`w-full border-2  focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                      ? 'border-red-300 focus:border-red-400'
+                      : 'border-gray-300 focus:border-blue-500'
+                      }`}>
                       <SelectValue placeholder="Seleccionar tipo de cliente" />
                     </SelectTrigger>
                     <SelectContent>
@@ -198,10 +256,18 @@ export const CustomerRegistrationForm = () => {
                       </Label>
                       <Input
                         id="dui"
-                        {...register("dui", { required: true })}
+                        {...register("dui", {
+                          required: true, onChange: (e) => {
+                            const formatedDui = formatDUI(e.target.value);
+                            e.target.value = formatedDui; // Actualiza el valor visual y en el estado
+                          }
+                        })}
                         type="text"
                         placeholder="Ingrese el DUI"
-                        className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                        className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                          ? 'border-red-300 focus:border-red-400'
+                          : 'border-gray-300 focus:border-blue-500'
+                          }`}
                       />
                     </motion.div>
                     <motion.div variants={{ itemVariants }}>
@@ -210,10 +276,16 @@ export const CustomerRegistrationForm = () => {
                       </Label>
                       <Input
                         id="nit"
-                        {...register("nit", { required: true })}
+                        {...register("nit", { required: true  , onChange: (e) => {
+                            const formatedNit = formatNIT(e.target.value);
+                            e.target.value = formatedNit; // Actualiza el valor visual y en el estado
+                        }})}
                         type="text"
                         placeholder="Ingrese el NIT"
-                        className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4"
+                        className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                          ? 'border-red-300 focus:border-red-400'
+                          : 'border-gray-300 focus:border-blue-500'
+                          }`}
                       />
                     </motion.div>
                   </div>
@@ -228,15 +300,16 @@ export const CustomerRegistrationForm = () => {
                       rules={{ required: true }}
                       render={(({ field }) => (
                         <Select onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger className="w-full border-2 border-gray-300 focus:border-blue-500 focus:outline-none transition-colors rounded-md py-2 px-4">
+                          <SelectTrigger className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
+                            ? 'border-red-300 focus:border-red-400'
+                            : 'border-gray-300 focus:border-blue-500'
+                            }`}>
                             <SelectValue placeholder="Seleccionar tipo de giro" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="comercio">Comercio</SelectItem>
-                            <SelectItem value="servicios">Servicios</SelectItem>
-                            <SelectItem value="manufactura">Manufactura</SelectItem>
-                            <SelectItem value="importacion">Importación</SelectItem>
-                            <SelectItem value="exportacion">Exportación</SelectItem>
+                            {customerActivities.map((activity) =>  (
+                              <SelectItem value={activity.giro}>{activity.giro}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ))}
@@ -256,9 +329,10 @@ export const CustomerRegistrationForm = () => {
           >
             <Button
               type="submit"
+              disabled={isPending}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
             >
-              Registrar
+              {isPending ? "Registrando..." : "Registrar"}
             </Button>
           </motion.div>
         </motion.form>

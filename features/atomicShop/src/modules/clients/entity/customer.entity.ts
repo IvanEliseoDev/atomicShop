@@ -5,7 +5,10 @@ export interface CustomerEntity {
     password: string | null,
     telephone: string,
     direction: string
+    typeCustomer: string
     dui: string
+    nit: string
+    typeGiro: string
     state: string
     isVerified: boolean
     loginAttemps: number
