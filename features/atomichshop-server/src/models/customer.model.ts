@@ -23,8 +23,11 @@ const customerSchema = new Schema<ICustomer>(
         dui: {
             type:String
         },
+        nit: {
+            type:String
+        },
         state:{
-            type: Boolean
+            type: String
         },
         loginAttemps: {
             type: Number

@@ -8,7 +8,8 @@ export interface ICustomer extends Document {
     telephone: string,
     direction: string
     dui: string
-    state: boolean
+    nit: string,
+    state: 'frecuente' | 'comun' | 'restringido'
     isVerified: boolean
     loginAttemps: number
     timeOut: string

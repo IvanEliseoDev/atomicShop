@@ -8,7 +8,8 @@ const customer = {
     telephone: "7405-9926",
     direction: "Apopa - SanSalvador - El Salvador",
     dui: "12345678-9",
-    state: true,
+    nit:"102101221-1",
+    state: "frecuente",
     isVerified: false,
     loginAttemps: 0,
     timeOut: "00-00-00"

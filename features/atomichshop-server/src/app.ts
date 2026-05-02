@@ -18,8 +18,11 @@ const app = express();
 /**
  * CONFIGURACION DE CORS PARA LOS ENPOINTS
  */
-app.use(cors()); // Con esto hacemos que todos los enpoints que vengan del archivo app.js tengan cors incluido
-
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    //Permitir el envío de cookies y credenciales
+    credentials: true
+}))
 // Con esto permitimos solicitudes JSON a nuestros enpoints
 app.use(express.json());
 
