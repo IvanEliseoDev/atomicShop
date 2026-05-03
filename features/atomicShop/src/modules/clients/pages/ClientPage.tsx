@@ -1,43 +1,17 @@
 import { HeaderAdmin } from "@/components/custom/header/HeaderAdmin";
 import { motion } from "framer-motion"
-import { MoreVertical, Search, SlidersHorizontal } from "lucide-react";
+import { Eye, Lock, MoreVertical, Pencil, SlidersHorizontal, Trash2, Unlock } from "lucide-react";
 import { useState } from "react";
 import { CustomPaginationPage } from '../../../components/custom/pagination/CustomPaginationPage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useNavigate } from "react-router";
-import type { CustomerData } from "../responses/getCustomerResponse";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useGetAllCustomers } from "../hooks/useGetAllCustomers";
 import { containerVariants } from "@/utils/variants/containerVariants";
 import { itemVariants } from "@/utils/variants/itemVariants";
 import { CustomNotRegister } from "@/components/custom/span/CustomNotRegister";
-
-const MOCK_CLIENTS = [
-    {
-        _id: 1,
-        name: "Ivan Eliseo Hernandez Mauricio",
-        numberPhone: "+503 7118-1201",
-        email: "20212192@gmail.com",
-        typeClient: "Normal",
-        status: "Comun"
-    },
-    {
-        _id: 2,
-        name: "Oscar Abel Joyar Lopez",
-        numberPhone: "+503 7118-1201",
-        email: "20212192@gmail.com",
-        typeClient: "Mayorista",
-        status: "Restringido"
-    },
-    {
-        _id: 3,
-        name: "Camila Granados Tovar Menjivar",
-        numberPhone: "+503 7118-1201",
-        email: "Rodas123@gmail.com",
-        typeClient: "Comun",
-        status: "Frecuente"
-    }
-]
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { useDeleteCustomer } from "../hooks/useDeleteCustomer";
 
 const getStatusDotColor = (status: string) => {
     switch (status) {
@@ -60,12 +34,15 @@ export const ClientPage = () => {
     const [statusFilter, setStatusFilter] = useState('comun')
     const [typeClientFilter, settypeClientFilter] = useState('Natural')
     const navigate = useNavigate()
+    const location  = useLocation()
 
     // 1. Llamada correcta al hook en el nivel superior
     const { data, isLoading, isError } = useGetAllCustomers();
+    const { mutate: deleteCustomerMutation } = useDeleteCustomer();
 
     // 2. Extraer los datos de la respuesta (ajusta según tu interfaz CustomerResponse)
     const customers = data?.data || [];
+    
 
     const totalPages = Math.ceil(customers.length / itemsPerPage);
 
@@ -84,6 +61,16 @@ export const ClientPage = () => {
         nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
 
+    const handleDelete = (id: string) => {
+        if (!id) return toast.error("Error al intentar eliminar el cliente, no se envió ningún ID");
+
+        // Opcional: Añadir confirmación nativa o un modal
+        const confirmed = window.confirm("¿Estás seguro de que deseas eliminar este cliente?");
+
+        if (confirmed) {
+            deleteCustomerMutation(id);
+        }
+    };
     // Manejo de estados de carga
     if (isLoading) return <div>Cargando clientes...</div>;
     if (isError) return <div>Error al cargar datos.</div>;
@@ -182,7 +169,7 @@ export const ClientPage = () => {
 
                                         <td className="px-6 py-4 text-sm text-center text-gray-700">{client.telephone}</td>
                                         <td className="px-6 py-4 text-sm text-center text-gray-700">{client.mail}</td>
-                                        <td className="px-6 py-4 text-sm text-center text-gray-700">{client.direction}</td>
+                                        <td className="px-6 py-4 text-sm text-center text-gray-700">{client.typeCustomer}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <div
@@ -192,10 +179,61 @@ export const ClientPage = () => {
                                                 <span className="text-sm text-gray-700 font-medium">{client.state}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                                                <MoreVertical className="w-5 h-5 text-gray-500" />
-                                            </button>
+                                        <td className="px-6 py-4 text-center">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none">
+                                                        <MoreVertical className="w-5 h-5 text-gray-500" />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+
+                                                <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+
+                                                    <DropdownMenuItem onClick={() => {
+                                                        navigate(`${location.pathname}/nuevo?action=view&_id=${client._id}`)
+                                                    }}>
+                                                        <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                                                        <span>Ver detalles</span>
+                                                    </DropdownMenuItem>
+
+                                                    <DropdownMenuItem onClick={() =>  navigate(`${location.pathname}/nuevo?action=update&_id=${client._id}`)}>
+                                                        <Pencil className="mr-2 h-4 w-4 text-amber-500" />
+                                                        <span>Editar</span>
+                                                    </DropdownMenuItem>
+
+                                                    <DropdownMenuSeparator />
+
+                                                    {/* Lógica Condicional de Restricción */}
+                                                    {client.state.toLowerCase() === "restringido" ? (
+                                                        <DropdownMenuItem
+                                                            className="text-green-600 focus:text-green-700"
+                                                            onClick={() => console.log("Quitar restricción", client._id)}
+                                                        >
+                                                            <Unlock className="mr-2 h-4 w-4" />
+                                                            <span>Habilitar</span>
+                                                        </DropdownMenuItem>
+                                                    ) : (
+                                                        <DropdownMenuItem
+                                                            className="text-orange-600 focus:text-orange-700"
+                                                            onClick={() => console.log('restirngido')}
+                                                        >
+                                                            <Lock className="mr-2 h-4 w-4" />
+                                                            <span>Restringir</span>
+                                                        </DropdownMenuItem>
+                                                    )}
+
+                                                    <DropdownMenuSeparator />
+
+                                                    <DropdownMenuItem
+                                                        className="text-red-600 focus:text-red-700"
+                                                        onClick={() => handleDelete(client._id)}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        <span>Eliminar</span>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </td>
                                     </motion.tr>
                                 ))}

@@ -7,8 +7,10 @@ export interface ICustomer extends Document {
     password: string
     telephone: string,
     direction: string
+    typeCustomer: string
     dui: string
     nit: string,
+    typeActivity: string
     state: 'frecuente' | 'comun' | 'restringido'
     isVerified: boolean
     loginAttemps: number

@@ -8,5 +8,6 @@ customerRouter.route("/")
 .post(customerController.insertCustomer)
 
 customerRouter.route("/:id")
+.get(customerController.getCustomerByID)
 .put(customerController.updateCustomer)
 .delete(customerController.deleteCustomer)

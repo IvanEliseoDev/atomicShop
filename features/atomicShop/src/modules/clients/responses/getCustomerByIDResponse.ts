@@ -1,10 +1,10 @@
-export interface CustomerResponse {
+export interface CustomerByIDResponse {
     status:  string;
     message: string;
-    data:    CustomerData[];
+    data:    Data;
 }
 
-export interface CustomerData {
+export interface Data {
     _id:          string;
     name:         string;
     mail:         string;

@@ -1,8 +1,3 @@
-// ruta: ../src/controller/productsController.ts
-
-// Importo el esquema de la coleccion que voy a ocupar
-
-// Esto es
 import { Request, Response } from "express";
 import { modelProducts } from "../models/products";
 
@@ -12,7 +7,6 @@ export const productsController = {
   insertManyProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const products = req.body;
-
       if (!Array.isArray(products) || products.length === 0) {
         res.status(400).json({
           message: "Se requiere un array con al menos un elemento",

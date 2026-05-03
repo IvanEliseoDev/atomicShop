@@ -20,11 +20,17 @@ const customerSchema = new Schema<ICustomer>(
         direction:{
             type:String
         },
+        typeCustomer:{
+            type: String
+        },
         dui: {
             type:String
         },
         nit: {
             type:String
+        },
+        typeActivity:{
+            type: String
         },
         state:{
             type: String

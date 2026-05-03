@@ -23,9 +23,13 @@ import { toast } from 'sonner';
 import { formatNIT } from '@/utils/format/nit.format';
 import { customerActivities } from '@/mocks/customerActivity';
 import { useAddCustomer } from '../hooks/useAddCustomer';
+import { useSearchParams } from 'react-router';
+import { useGetCustomerByID } from '../hooks/useGetCustomerByID';
+import { useEffect } from 'react';
 
 export const CustomerRegistrationForm = () => {
-  const { register, handleSubmit, formState: { errors }, control, watch } = useForm({
+  const [searchParams] = useSearchParams()
+  const { register, handleSubmit, formState: { errors }, control, watch, reset } = useForm({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       name: "",
@@ -39,21 +43,24 @@ export const CustomerRegistrationForm = () => {
       whitCreditFiscal: false
     }
   })
+  const isCreditFiscal = watch('whitCreditFiscal', false)
+  const action = searchParams.get('action')
+  const _id = searchParams.get("_id")
+  const { data: customerData } = useGetCustomerByID(_id || "");
   const { mutate, isPending } = useAddCustomer();
   const onSubmit = (data: any) => {
     console.log("Data recivida y que se enviara: ", data)
-    // MAPEAMOS los datos del formulario a tu CustomerEntity
     const customerPayload = {
       name: data.name,
       mail: data.mail,
-      password: null, // Según tu entity
-      telephone: data.numberPhone, // Mapeo de nombre
+      password: null,
+      telephone: data.numberPhone,
       direction: data.direction,
-      typeCustomer: data.typeClient, // Mapeo de nombre
+      typeCustomer: data.typeClient,
       dui: data.dui || "",
       nit: data.nit || "",
       typeGiro: data.typeGiro || "",
-      state: "active", // Valor por defecto
+      state: "comun", // Valor por defecto
       isVerified: false,
       loginAttemps: 0,
       timeOut: new Date().toISOString()
@@ -68,7 +75,25 @@ export const CustomerRegistrationForm = () => {
     toast.error("Por favor, revisa los campos marcados en rojo.");
     console.log("Errores detallados:", errors);
   };
-  const isCreditFiscal = watch('whitCreditFiscal', false)
+
+  useEffect(() => {
+    if (customerData && customerData.data) {
+      const client = customerData.data; // Accedemos al objeto interno
+      reset({
+        name: client.name || "",
+        numberPhone: client.telephone || "",
+        mail: client.mail || "",
+        direction: client.direction || "",
+        typeClient: client.typeCustomer || "",
+        dui: client.dui || "",
+        nit: client.nit || "",
+        typeGiro: client.typeGiro || "",
+        // Mapea aquí si el cliente tiene crédito fiscal según tu lógica de base de datos
+        whitCreditFiscal: !!(client.dui || client.nit),
+      });
+    }
+  }, [customerData, reset]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8 px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -84,7 +109,7 @@ export const CustomerRegistrationForm = () => {
           initial="hidden"
           animate="visible"
         >
-          Registro de cliente
+          {action === "update" ?  "Actualizar cliente" : "Registro de cliente" }
         </motion.h1>
 
         {/* Main Card */}
@@ -114,6 +139,7 @@ export const CustomerRegistrationForm = () => {
                 {...register("name", { required: true })}
                 id="name"
                 type="text"
+                disabled={action === 'view'}
                 placeholder="Ingrese el nombre del cliente"
                 className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
                   ? 'border-red-300 focus:border-red-400'
@@ -137,6 +163,7 @@ export const CustomerRegistrationForm = () => {
                 </Label>
                 <Input
                   id="numberPhone"
+                  disabled={action === 'view'}
                   {...register("numberPhone", {
                     required: "El número es obligatorio",
                     onChange: (e) => {
@@ -164,6 +191,7 @@ export const CustomerRegistrationForm = () => {
                 </Label>
                 <Input
                   id="mail"
+                  disabled={action === 'view'}
                   {...register("mail", { required: true })}
                   type="email"
                   placeholder="correo@ejemplo.com"
@@ -181,6 +209,7 @@ export const CustomerRegistrationForm = () => {
               </Label>
               <Input
                 id="direction"
+                disabled={action === 'view'}
                 {...register("direction", { required: true })}
                 type="text"
                 placeholder="Ingrese la dirección del cliente"
@@ -198,10 +227,11 @@ export const CustomerRegistrationForm = () => {
               </Label>
               <Controller
                 name="typeClient"
+               
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}  disabled={action === 'view'}>
                     <SelectTrigger className={`w-full border-2  focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
                       ? 'border-red-300 focus:border-red-400'
                       : 'border-gray-300 focus:border-blue-500'
@@ -225,9 +255,11 @@ export const CustomerRegistrationForm = () => {
               <Controller
                 name="whitCreditFiscal"
                 control={control}
+                disabled={action === 'view'}
                 render={({ field }) => (
                   <Switch
                     checked={field.value}
+                    disabled={action === 'view'}
                     onCheckedChange={field.onChange}
                     className="data-[state=checked]:bg-blue-500"
                   />
@@ -256,6 +288,7 @@ export const CustomerRegistrationForm = () => {
                       </Label>
                       <Input
                         id="dui"
+                        disabled={action === 'view'}
                         {...register("dui", {
                           required: true, onChange: (e) => {
                             const formatedDui = formatDUI(e.target.value);
@@ -276,10 +309,13 @@ export const CustomerRegistrationForm = () => {
                       </Label>
                       <Input
                         id="nit"
-                        {...register("nit", { required: true  , onChange: (e) => {
+                        disabled={action === 'view'}
+                        {...register("nit", {
+                          required: true, onChange: (e) => {
                             const formatedNit = formatNIT(e.target.value);
                             e.target.value = formatedNit; // Actualiza el valor visual y en el estado
-                        }})}
+                          }
+                        })}
                         type="text"
                         placeholder="Ingrese el NIT"
                         className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
@@ -297,9 +333,10 @@ export const CustomerRegistrationForm = () => {
                     <Controller
                       name='typeGiro'
                       control={control}
+                      
                       rules={{ required: true }}
                       render={(({ field }) => (
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={action === 'view'}>
                           <SelectTrigger className={`w-full border-2 focus:outline-none transition-colors rounded-md py-2 px-4 ${errors.name
                             ? 'border-red-300 focus:border-red-400'
                             : 'border-gray-300 focus:border-blue-500'
@@ -307,7 +344,7 @@ export const CustomerRegistrationForm = () => {
                             <SelectValue placeholder="Seleccionar tipo de giro" />
                           </SelectTrigger>
                           <SelectContent>
-                            {customerActivities.map((activity) =>  (
+                            {customerActivities.map((activity) => (
                               <SelectItem value={activity.giro}>{activity.giro}</SelectItem>
                             ))}
                           </SelectContent>
@@ -329,10 +366,13 @@ export const CustomerRegistrationForm = () => {
           >
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || action === "view"}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
             >
-              {isPending ? "Registrando..." : "Registrar"}
+              {action === "update"
+                ? (isPending ? "Actualizando..." : "Actualizar")
+                : (isPending ? "Registrando..." : "Registrar")
+              }
             </Button>
           </motion.div>
         </motion.form>
