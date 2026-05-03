@@ -26,6 +26,7 @@ import { useAddCustomer } from '../hooks/useAddCustomer';
 import { useSearchParams } from 'react-router';
 import { useGetCustomerByID } from '../hooks/useGetCustomerByID';
 import { useEffect } from 'react';
+import { useUpdateCustomer } from '../hooks/useUpdateCustomer';
 
 export const CustomerRegistrationForm = () => {
   const [searchParams] = useSearchParams()
@@ -47,7 +48,8 @@ export const CustomerRegistrationForm = () => {
   const action = searchParams.get('action')
   const _id = searchParams.get("_id")
   const { data: customerData } = useGetCustomerByID(_id || "");
-  const { mutate, isPending } = useAddCustomer();
+  const { mutate:mutateAddCustomer, isPending } = useAddCustomer();
+  const { mutate:mutateUpdtadeCustomer} = useUpdateCustomer()
   const onSubmit = (data: any) => {
     console.log("Data recivida y que se enviara: ", data)
     const customerPayload = {
@@ -67,7 +69,13 @@ export const CustomerRegistrationForm = () => {
     };
 
     // Ejecutamos la mutación
-    mutate(customerPayload);
+    if(action === "update" && _id){
+      console.log("si se actualziara")
+      mutateUpdtadeCustomer({ id: _id, payload: customerPayload });
+    }else{
+      mutateAddCustomer(customerPayload);
+    }
+    
   };
   console.log(errors)
   const onError = (errors: any) => {
