@@ -11,6 +11,11 @@ export const config = {
     PORT: process.env.PORT || "4000", // ✅ Puerto del servidor con valor por defecto
   },
   jwt: {
-    SECRET: getEnvVar("JWT_SECRET"), // ✅ Ya tienes jwt, mejor centralizarlo aqui
+    secret: getEnvVar("JWT_SECRET"), // ✅ Ya tienes jwt, mejor centralizarlo aqui
   },
+  email:{
+        user: process.env.USER_EMAIL,
+        password: process.env.USER_PASSWORD
+  }
+   
 };

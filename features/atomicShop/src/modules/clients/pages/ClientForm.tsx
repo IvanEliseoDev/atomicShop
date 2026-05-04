@@ -77,7 +77,7 @@ export const CustomerRegistrationForm = () => {
     }
     
   };
-  console.log(errors)
+
   const onError = (errors: any) => {
     // Muestra un mensaje general o el primero que encuentre
     toast.error("Por favor, revisa los campos marcados en rojo.");

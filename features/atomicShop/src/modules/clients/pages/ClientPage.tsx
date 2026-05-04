@@ -4,7 +4,7 @@ import { Eye, Lock, MoreVertical, Pencil, SlidersHorizontal, Trash2, Unlock } fr
 import { useState } from "react";
 import { CustomPaginationPage } from '../../../components/custom/pagination/CustomPaginationPage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useGetAllCustomers } from "../hooks/useGetAllCustomers";
 import { containerVariants } from "@/utils/variants/containerVariants";
 import { itemVariants } from "@/utils/variants/itemVariants";
@@ -12,7 +12,6 @@ import { CustomNotRegister } from "@/components/custom/span/CustomNotRegister";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useDeleteCustomer } from "../hooks/useDeleteCustomer";
-
 const getStatusDotColor = (status: string) => {
     switch (status) {
         case 'frecuente':
@@ -25,8 +24,6 @@ const getStatusDotColor = (status: string) => {
             return '#57A4E1';
     }
 };
-
-
 export const ClientPage = () => {
     const [querySearch, setquerySearch] = useState('')
     const [currentPage, setCurrentPage] = useState(1);
