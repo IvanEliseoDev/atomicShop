@@ -3,12 +3,11 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import nodemailer from "nodemailer"
-import { employeeModel } from "../models/employee.model";
-import { customerModel } from "../models/customer.model";
-import { generateRandomPassword } from "../utils/generatedRandomPassword";
-import { config } from "../config";
-import { MyTokenPayload } from "../interface/employee.interface";
-
+import { employeeModel } from '../../models/employee.model';
+import { generateRandomPassword } from "../../utils/generatedRandomPassword";
+import { config } from "../../config";
+import { MyTokenPayload } from "../../interface/employee.interface";
+import { HTMLVerifyEmail } from "../../views/email/VerificationCodeEmail";
 
 export const employeeController = {
     getEmployees: async (req: Request, res: Response) => {
@@ -42,7 +41,7 @@ export const employeeController = {
         try {
             const employeeRequest = req.body
             if (!employeeRequest) return res.status(404).json({ status: 400, message: "Bad Request - request is null " })
-            const existEmployee = await customerModel.findOne({ email: employeeRequest.email })
+            const existEmployee = await employeeModel.findOne({ email: employeeRequest.email })
             if (existEmployee) return res.status(409).json({ status: 409, message: "Employee has alredy exist", data: null })
             const genericPassword = generateRandomPassword()
             const passwordHashed = await bcrypt.hash(genericPassword, 10);
@@ -53,7 +52,7 @@ export const employeeController = {
                 isVerified: false,
                 loginAttemps: 0
             });
-            const { email } = employeeRequest
+            const { name, email } = employeeRequest
             const verificationCode = crypto.randomBytes(3).toString("hex")
             const tokenCode = jwt.sign(
                 { email, verificationCode },
@@ -66,17 +65,21 @@ export const employeeController = {
                 auth: {
                     user: config.email.user,
                     pass: config.email.password
+                },
+                tls: {
+                    rejectUnauthorized: false
                 }
             })
             const mailOptions = {
                 from: config.email.user,
                 to: email,
-                subject: "verificacion de tu cuenta",
-                text: "Hola! " + employeeRequest.name + " Para verificar tu cuenta, utiliza este codigo " + verificationCode + " Expira en 15 Minutos"
+                subject: "Correo de verificacion",
+                body: "Use this code to verify account",
+                html: HTMLVerifyEmail(verificationCode, name),
             }
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.log(error)
+                    console.log(error, info)
                     return res.status(400).json({ status: 400, message: "Error sending email, please verify that the email address exists and is valid", data: null })
                 }
             })
@@ -90,7 +93,6 @@ export const employeeController = {
     },
     verifyCode: async (req: Request, res: Response) => {
         try {
-
             const { verificationCodeRequest } = req.body
             const token = req.cookies.VerificationToken
             const decoded = jwt.verify(token, config.jwt.secret) as MyTokenPayload;
@@ -105,7 +107,18 @@ export const employeeController = {
             res.clearCookie("VerificationToken")
             res.json({ message: "Email verified successfuly" })
         } catch (error) {
-
+            console.log(error)
+            return res.status(500).json({ message: "Internal Server Error - Check Server Logs" })
+        }
+    },
+    deleteEmployee: async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params
+            if (!id) return res.status(400).json({ status: 400, message: "Bad Request - Id is null" })
+            const result = await employeeModel.findByIdAndDelete(id)
+            if (!result) return res.status(409).json({ status: 409, message: "Can't delete employee - conflict check server logs" })
+            return res.status(204).json({ status: 204, message: "employee delete success", data: true })
+        } catch (error) {
             console.log(error)
             return res.status(500).json({ message: "Internal Server Error - Check Server Logs" })
         }

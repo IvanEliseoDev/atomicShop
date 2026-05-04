@@ -9,11 +9,14 @@ import productsRoutes from "./routes/products";
 import providerRoutes from "./routes/providers"
 import { customerRouter } from "./routes/customer";
 import { seedRouter } from "./routes/seed";
+import { employeeRouter } from "./routes/employee";
+import cookieParser from "cookie-parser";
 
 /**
  * CONFIGURACION DE ARRANQUE
  */
 // Una constante que va a ejecutar la libreria de express
+
 const app = express();
 /**
  * CONFIGURACION DE CORS PARA LOS ENPOINTS
@@ -25,6 +28,7 @@ app.use(cors({
 }))
 // Con esto permitimos solicitudes JSON a nuestros enpoints
 app.use(express.json());
+app.use(cookieParser());
 
 /**
  * CONFIGURACION DE ENPOINTS
@@ -33,4 +37,5 @@ app.use("/api/seed", seedRouter)
 app.use("/api/products", productsRoutes);
 app.use("/api/providers", providerRoutes)
 app.use("/api/customers", customerRouter)
+app.use("/api/employees", employeeRouter)
 export default app;

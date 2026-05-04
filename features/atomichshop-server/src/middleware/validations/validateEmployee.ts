@@ -43,7 +43,7 @@ export const validateEmployee = [
         .notEmpty().withMessage('El correo es obligatorio')
         .isEmail().withMessage('Debe ser un correo electrónico válido')
         .custom((value) => {
-            if (!value.endsWith('@gmail.com')) {
+            if (!value.endsWith('@gmail.com') && !value.endsWith('@ricaldone.edu.sv') ) {
                 throw new Error('Solo se permiten correos de @gmail.com');
             }
             return true;

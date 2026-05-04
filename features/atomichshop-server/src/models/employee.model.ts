@@ -51,7 +51,7 @@ export const employeeSchema = new Schema({
         default: undefined
     },
     isGenericPassword: {
-        tyep: String,
+        type: String,
         default: true
     },
     isVerified: {
@@ -69,7 +69,10 @@ export const employeeSchema = new Schema({
 {
     timestamps: true,
     toJSON: { getters: true },
-    toObject: { getters: true }
+    toObject: { getters: true },
+    tls: {
+        rejectUnauthorized: false // <--- ESTO SOLUCIONA EL ERROR DE CERTIFICADO
+    }
 })
 
 export const employeeModel = model("Employees", employeeSchema)
