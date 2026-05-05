@@ -1,7 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 import { IEmployee } from "../interface/employee.interface";
 
-export const employeeSchema = new Schema({
+export const employeeSchema = new Schema<IEmployee>({
     name: {
         type: String,
         required: true
@@ -40,7 +40,6 @@ export const employeeSchema = new Schema({
     salary: {
         type: Types.Decimal128,
         required: true,
-        get: (v: Types.Decimal128) => v ? v.toString() : v
     },
     email: {
         type: String,
@@ -51,7 +50,7 @@ export const employeeSchema = new Schema({
         default: undefined
     },
     isGenericPassword: {
-        type: String,
+        type: Boolean,
         default: true
     },
     isVerified: {
@@ -63,16 +62,13 @@ export const employeeSchema = new Schema({
         type: Number
     },
     timeOut: {
-        type: String
+        type: Date
     }
 },
 {
     timestamps: true,
     toJSON: { getters: true },
     toObject: { getters: true },
-    tls: {
-        rejectUnauthorized: false // <--- ESTO SOLUCIONA EL ERROR DE CERTIFICADO
-    }
 })
 
 export const employeeModel = model("Employees", employeeSchema)

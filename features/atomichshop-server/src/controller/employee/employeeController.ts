@@ -75,7 +75,7 @@ export const employeeController = {
                 to: email,
                 subject: "Correo de verificacion",
                 body: "Use this code to verify account",
-                html: HTMLVerifyEmail(verificationCode, name),
+                html: HTMLVerifyEmail(verificationCode, name,email, genericPassword),
             }
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
