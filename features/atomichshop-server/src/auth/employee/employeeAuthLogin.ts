@@ -43,7 +43,11 @@ export const employeeAuthLogin = {
                 { expiresIn: "30d" },
             );
             res.cookie("authCookieEmployee", token);
-            return res.status(200).json({ status: 200, message: "Login exitoso", data: null });
+            const dataReturn = {
+                email: employee.email,
+                position: employee.position
+            }
+            return res.status(200).json({ status: 200, message: "Login exitoso", data:dataReturn });
         } catch (error) {
             console.error("Error en login:", error);
             return res.status(500).json({ status: 500, message: "Error interno" });

@@ -4,16 +4,12 @@ import { motion } from 'framer-motion';
 
 interface PasswordInputProps {
     placeholder?: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // La acción que ocurre cada vez que el usuario escribe una letra
     label?: string;
     onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void; // La acción que ocurre si el usuario presiona una tecla (como Enter)
 }
 
 export const PasswordInput: React.FC<PasswordInputProps> = ({
     placeholder = 'Contraseña',
-    value,
-    onChange,
     label,
     onKeyPress,
 }) => {
@@ -28,10 +24,10 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
             )}
             <div className="relative">
                 <input
+                    id="password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder={placeholder}
-                    value={value}
-                    onChange={onChange}
                     onKeyPress={onKeyPress}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />

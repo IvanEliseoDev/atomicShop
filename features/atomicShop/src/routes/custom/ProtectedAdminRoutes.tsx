@@ -1,7 +1,17 @@
+import type { PropsWithChildren } from "react";
+import { useAuthStore } from '../../auth/store/auth.store';
+import { Navigate } from "react-router";
 
-//Cuando se tenga la authenticacion este sera el componente que protegera las rutas para que solo pueda verlas el administrador
-export const ProtectedAdminRoutes = () => {
-    return (
-        <div>ProtectedAdminRoutes</div>
-    )
+export const AuthenticatedRoute = ({children}:PropsWithChildren) => {
+    const {authStatus} = useAuthStore()
+    if(authStatus === 'checking') return null
+    if(authStatus === 'not-authenticated') return <Navigate to='/login' />
+    return children
 }
+export const NotAuthenticatedRoute = ({children}:PropsWithChildren) => {
+    const {authStatus} = useAuthStore()
+    if(authStatus === 'checking') return null
+    if(authStatus === 'authenticated') return <Navigate to='/atomicAdmin/' />
+    return children
+}
+

@@ -8,6 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuthStore } from '@/auth/store/auth.store';
 
 interface HeaderProps {
     onMobileMenuClick?: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMobileMenuClick }) => {
     const navigate = useNavigate();
+    const {logOut} = useAuthStore()
     return (
         <header className="bg-white max-h-15 px-6 py-4 flex items-center justify-between">
             {/* Mobile menu button */}
@@ -40,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuClick }) => {
                         <DropdownMenuItem onClick={() => navigate('/atomicAdmin/profile')}> {/* ← agrega onClick */}
                             Perfil
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-red-600" onClick={logOut}>
                             Cerrar sesión
                         </DropdownMenuItem>
                     </DropdownMenuContent>
