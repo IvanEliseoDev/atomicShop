@@ -15,6 +15,7 @@ import { employeeRouter } from "./routes/employee";
 import productsEcomerceRoutes from "./routes/product/e-commerce/products";
 import providersEcommerceRoutes from "./routes/provider/e-commerce/supplier"
 import bannersEcommerceRotes from "./routes/banner/e-commerce/banner"
+import cartsEcommerceRoutes from "./routes/carts/carts"
 
 // API
 import { seedRouter } from "./routes/seed";
@@ -57,5 +58,6 @@ app.use("/admin/employees", employeeRouter);
 app.use("/e-commerce/products", productsEcomerceRoutes);
 app.use("/e-commerce/banners", bannersEcommerceRotes)
 app.use("/e-commerce/providers", providersEcommerceRoutes)
+app.use("/e-commerce/carts", cartsEcommerceRoutes)
 
 export default app;
