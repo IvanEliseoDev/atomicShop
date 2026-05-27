@@ -5,12 +5,20 @@ import express from "express";
 import cors from "cors";
 
 // A qui importamos las rutas de los enpoints que querramos utilizar
-import productsRoutes from "./routes/products";
+
+// ADMINISTRACION
+import productsRoutes from "./routes/product/products";
 import providerRoutes from "./routes/providers"
 import { customerRouter } from "./routes/customer";
-import { seedRouter } from "./routes/seed";
 import { employeeRouter } from "./routes/employee";
+
+// E-COMMERCE
+import productsEcomerceRoutes from "./routes/product/productsEcommerce"
+
+// API
+import { seedRouter } from "./routes/seed";
 import cookieParser from "cookie-parser";
+
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -33,9 +41,17 @@ app.use(cookieParser());
 /**
  * CONFIGURACION DE ENPOINTS
  */
+
+// API
 app.use("/api/seed", seedRouter)
+
+// ADMINISTRACION
 app.use("/api/products", productsRoutes);
 app.use("/api/providers", providerRoutes)
 app.use("/api/customers", customerRouter)
 app.use("/api/employees", employeeRouter)
+
+// E-COMMERCE
+app.use("/ecommerce/products", productsEcomerceRoutes)
+
 export default app;
