@@ -14,7 +14,7 @@ import { employeeRouter } from "./routes/employee";
 // E-COMMERCE
 import productsEcomerceRoutes from "./routes/product/e-commerce/products";
 import providersEcommerceRoutes from "./routes/provider/e-commerce/supplier"
-// import bannersEcommerceRotes from "./routes/banner/e-commerce/banner"
+import bannersEcommerceRotes from "./routes/banner/e-commerce/banner"
 
 // API
 import { seedRouter } from "./routes/seed";
@@ -55,7 +55,7 @@ app.use("/admin/employees", employeeRouter);
 
 // E-COMMERCE
 app.use("/e-commerce/products", productsEcomerceRoutes);
-// app.use("/e-commerce/banners", bannersEcommerceRotes)
+app.use("/e-commerce/banners", bannersEcommerceRotes)
 app.use("/e-commerce/providers", providersEcommerceRoutes)
 
 export default app;
