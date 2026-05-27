@@ -1,7 +1,7 @@
 // ruta: ../src/controller/providersController.ts
 
 // Importo el esquema de la coleccion que voy a ocupar
-import providersModel from "../../models/providers";
+import providersModel from "../models/providers.js";
 
 // Esto es
 import { Request, Response } from "express";
