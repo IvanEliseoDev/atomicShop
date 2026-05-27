@@ -32,6 +32,7 @@ export const appRouter = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+  //RUTA DE RECUPERAR CONTRASEÑA
   {
     path: "/recover-password",
     element: <RecoverPasswordPage />,
