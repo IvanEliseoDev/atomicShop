@@ -48,4 +48,4 @@ const customerSchema = new Schema<ICustomer>(
     }
 )
 
-export const customerModel = model<ICustomer>("Customer", customerSchema)
+export const customerModel = model<ICustomer>("Customers", customerSchema)

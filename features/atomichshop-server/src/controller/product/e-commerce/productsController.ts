@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { modelProducts } from "../../models/products";
+import { modelProducts } from "../../../models/product";
 
 export const productsEcommerceController = {
   // Obtener productos para carrusel en la pagina de inicio (Limite de 10)
@@ -9,7 +9,9 @@ export const productsEcommerceController = {
       res.status(200).json(products);
     } catch (error) {
       const err = error as Error;
-      res.status(500).json({ message: "Error al obtener carrusel", error: err.message });
+      res
+        .status(500)
+        .json({ message: "Error al obtener carrusel", error: err.message });
     }
   },
 
@@ -18,19 +20,20 @@ export const productsEcommerceController = {
     try {
       const { q } = req.query;
       const searchRegex = new RegExp(String(q), "i"); // "i" para que no importe mayusculas/minusculas
-      
-      const products = await modelProducts.find({
-        state: true,
-        $or: [
-          { name: searchRegex },
-          { description: searchRegex }
-        ]
-      }).limit(20);
+
+      const products = await modelProducts
+        .find({
+          state: true,
+          $or: [{ name: searchRegex }, { description: searchRegex }],
+        })
+        .limit(20);
 
       res.status(200).json(products);
     } catch (error) {
       const err = error as Error;
-      res.status(500).json({ message: "Error en la busqueda", error: err.message });
+      res
+        .status(500)
+        .json({ message: "Error en la busqueda", error: err.message });
     }
   },
 
@@ -58,14 +61,17 @@ export const productsEcommerceController = {
       else if (sort === "price_desc") sortOptions.price = -1;
       else sortOptions.createdAt = -1; // Mas recientes como relevancia por defecto
 
-      const products = await modelProducts.find(query)
+      const products = await modelProducts
+        .find(query)
         .populate("brandId") // Para mostrar nombre de marca en lugar de solo ID
         .sort(sortOptions);
 
       res.status(200).json(products);
     } catch (error) {
       const err = error as Error;
-      res.status(500).json({ message: "Error al filtrar productos", error: err.message });
+      res
+        .status(500)
+        .json({ message: "Error al filtrar productos", error: err.message });
     }
   },
 
@@ -73,8 +79,10 @@ export const productsEcommerceController = {
   getProductById: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const product = await modelProducts.findById(id).populate("brandId categoryId");
-      
+      const product = await modelProducts
+        .findById(id)
+        .populate("brandId categoryId");
+
       if (!product) {
         res.status(404).json({ message: "Producto no encontrado" });
         return;
@@ -83,7 +91,9 @@ export const productsEcommerceController = {
       res.status(200).json(product);
     } catch (error) {
       const err = error as Error;
-      res.status(500).json({ message: "Error al obtener detalle", error: err.message });
+      res
+        .status(500)
+        .json({ message: "Error al obtener detalle", error: err.message });
     }
   },
 
@@ -91,16 +101,20 @@ export const productsEcommerceController = {
   getSimilarProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { categoryId, currentId } = req.query;
-      const products = await modelProducts.find({
-        categoryId,
-        _id: { $ne: currentId }, // Excluir el producto que ya se esta viendo
-        state: true
-      }).limit(4);
+      const products = await modelProducts
+        .find({
+          categoryId,
+          _id: { $ne: currentId }, // Excluir el producto que ya se esta viendo
+          state: true,
+        })
+        .limit(4);
 
       res.status(200).json(products);
     } catch (error) {
       const err = error as Error;
-      res.status(500).json({ message: "Error al obtener similares", error: err.message });
+      res
+        .status(500)
+        .json({ message: "Error al obtener similares", error: err.message });
     }
-  }
+  },
 };
