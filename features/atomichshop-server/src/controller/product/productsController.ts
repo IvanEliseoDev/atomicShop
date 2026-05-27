@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { modelProducts } from "../../models/products";
+import { modelProducts } from "../../models/product";
 
 // Creo un array de products y alparecer no se pueda hacer como hantes, si no que en el array que creamos, adentro se ponen los metodos
 export const productsController = {
