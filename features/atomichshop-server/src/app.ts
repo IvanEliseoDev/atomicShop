@@ -5,9 +5,24 @@ import express from "express";
 import cors from "cors";
 
 // A qui importamos las rutas de los enpoints que querramos utilizar
-import productsRoutes from "./routes/products";
-import providerRoutes from "./routes/providers"
-import { customerRouter } from "./routes/customer";
+
+// ADMINISTRACION
+import productsRoutes from "./routes/product/products";
+import providerRoutes from "./routes/provider/provider";
+import { customerRouter } from "./routes/customer/customer";
+import { employeeRouter } from "./routes/employee";
+
+// E-COMMERCE
+import productsEcomerceRoutes from "./routes/product/e-commerce/products";
+import providersEcommerceRoutes from "./routes/provider/e-commerce/supplier"
+import bannersEcommerceRotes from "./routes/banner/e-commerce/banner"
+import cartsEcommerceRoutes from "./routes/carts/carts"
+import loginEcommerceRoutes from "./routes/login/e-commerce/login"
+import logoutEcommerceRoutes from "./routes/logout/e-commerce/logout"
+import registerCustommerEcommerceRoutes from "./routes/customer/e-commerce/registerCustomerController"
+import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerce/recoveryPassword"
+
+// API
 import { seedRouter } from "./routes/seed";
 import { employeeRouter } from "./routes/employee";
 import cookieParser from "cookie-parser";
@@ -33,9 +48,24 @@ app.use(cookieParser());
 /**
  * CONFIGURACION DE ENPOINTS
  */
-app.use("/api/seed", seedRouter)
-app.use("/api/products", productsRoutes);
-app.use("/api/providers", providerRoutes)
-app.use("/api/customers", customerRouter)
-app.use("/api/employees", employeeRouter)
+
+// API
+app.use("/api/seed", seedRouter);
+
+// ADMINISTRACION
+app.use("/admin/products", productsRoutes);
+app.use("/admin/provider", providerRoutes);
+app.use("/admin/customers", customerRouter);
+app.use("/admin/employees", employeeRouter);
+
+// E-COMMERCE
+app.use("/e-commerce/products", productsEcomerceRoutes);
+app.use("/e-commerce/banners", bannersEcommerceRotes)
+app.use("/e-commerce/providers", providersEcommerceRoutes)
+app.use("/e-commerce/carts", cartsEcommerceRoutes)
+app.use("/e-commerce/login", loginEcommerceRoutes)
+app.use("/e-commerce/logout", logoutEcommerceRoutes)
+app.use("/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
+app.use("/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
+
 export default app;
