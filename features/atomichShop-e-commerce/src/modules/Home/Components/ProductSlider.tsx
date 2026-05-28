@@ -1,9 +1,10 @@
 import { useCart } from "../../../lib/CartContext";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import { ecommerceService } from "../../../services/ecommerceService";
 
 // Para poder llenar los datos a las targetas de productos
 interface Product {
@@ -15,53 +16,70 @@ interface Product {
   image: string;
 }
 
-// Array de objetos de productos, a si van a venir del backend
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    name: "Báscula para pesar cajas petri",
-    price: 80.0,
-    isOffer: true,
-    originalPrice: 110.0,
-    image: "https://analiticasal.com/wp-content/uploads/2025/07/1-1.png",
-  },
-  {
-    id: 2,
-    name: "Báscula para microbios",
-    price: 80.0,
-    isOffer: false,
-    image: "https://analiticasal.com/wp-content/uploads/2025/02/ContrAA1.jpg",
-  },
-  {
-    id: 3,
-    name: "Báscula normal científica",
-    price: 80.0,
-    originalPrice: 90.6,
-    isOffer: true,
-    image: "https://analiticasal.com/wp-content/uploads/2025/02/ContrAA1.jpg",
-  },
-  {
-    id: 4,
-    name: "Báscula para agua",
-    price: 120.99,
-    isOffer: false,
-    image: "https://placehold.co/200x150/dbeafe/93c5fd?text=img",
-  },
-];
+// // Array de objetos de productos, a si van a venir del backend
+// const mockProducts: Product[] = [
+//   {
+//     id: 1,
+//     name: "Báscula para pesar cajas petri",
+//     price: 80.0,
+//     isOffer: true,
+//     originalPrice: 110.0,
+//     image: "https://analiticasal.com/wp-content/uploads/2025/07/1-1.png",
+//   },
+//   {
+//     id: 2,
+//     name: "Báscula para microbios",
+//     price: 80.0,
+//     isOffer: false,
+//     image: "https://analiticasal.com/wp-content/uploads/2025/02/ContrAA1.jpg",
+//   },
+//   {
+//     id: 3,
+//     name: "Báscula normal científica",
+//     price: 80.0,
+//     originalPrice: 90.6,
+//     isOffer: true,
+//     image: "https://analiticasal.com/wp-content/uploads/2025/02/ContrAA1.jpg",
+//   },
+//   {
+//     id: 4,
+//     name: "Báscula para agua",
+//     price: 120.99,
+//     isOffer: false,
+//     image: "https://placehold.co/200x150/dbeafe/93c5fd?text=img",
+//   },
+// ];
 
 function ProductSlider() {
   const navigate = useNavigate();
-  // Cantidad por producto
-  const [quantities, setQuantities] = useState<Record<number, number>>(
-    Object.fromEntries(mockProducts.map((p) => [p.id, 1])),
-  );
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    ecommerceService.getHomeProducts().then((data) => {
+      const mapped = data.map((p: any) => ({
+        id: p._id,
+        name: p.name,
+        price: p.price,
+        originalPrice: p.discount
+          ? p.price / (1 - p.discount / 100)
+          : undefined,
+        isOffer: !!p.discount,
+        image: p.images?.[0] ?? "",
+      }));
+      setProducts(mapped);
+    });
+  }, []);
+
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const { addItem } = useCart();
 
-  // Favoritos (solo visual por el momento)
-  const [favorites, setFavorites] = useState<Record<number, boolean>>(
-    Object.fromEntries(mockProducts.map((p) => [p.id, false])),
-  );
+  // Sincronizar quantities cuando lleguen los productos
+  useEffect(() => {
+    setQuantities(Object.fromEntries(products.map((p) => [p.id, 1])));
+  }, [products]);
+
+  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
 
   // Actualizar la data de los productos
   const updateQuantity = (id: number, delta: number) => {
@@ -99,7 +117,7 @@ function ProductSlider() {
 
       {/* Grid productos */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {mockProducts.map((product) => (
+        {products.map((product) => (
           <motion.div
             key={product.id}
             whileHover={{ y: -4 }}
@@ -170,7 +188,7 @@ function ProductSlider() {
                   -
                 </button>
                 <span className="px-2 py-1 text-gray-700 min-w-[4rem] text-center">
-                  {quantities[product.id].toFixed(2)}
+                  {(quantities[product.id] ?? 1).toFixed(2)}
                 </span>
                 <button
                   onClick={(e) => {
@@ -187,7 +205,10 @@ function ProductSlider() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart(product);
+                }}
                 className="bg-blue-500 hover:bg-blue-600 transition p-2 rounded-lg"
               >
                 <ShoppingCart size={18} className="text-white cursor-pointer" />

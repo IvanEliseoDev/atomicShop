@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import { ecommerceService } from "../services/ecommerceService";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 export interface CartItem {
@@ -39,19 +40,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const toggleCart = () => setIsOpen((prev) => !prev);
 
   const addItem = (product: Omit<CartItem, "quantity">) => {
+    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
+    ecommerceService.addToCart(clientId, String(product.id), 1);
+
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setIsOpen(true); // Abre el sidebar al agregar
+    setIsOpen(true);
   };
 
   const removeItem = (id: number) => {
+    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
+    ecommerceService.removeFromCart(clientId, String(id));
+
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
@@ -60,9 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(id);
       return;
     }
-    setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
-    );
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
   };
 
   const clearCart = () => setItems([]);
@@ -74,7 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       i.originalPrice > i.price
         ? acc + (i.originalPrice - i.price) * i.quantity
         : acc,
-    0
+    0,
   );
 
   return (

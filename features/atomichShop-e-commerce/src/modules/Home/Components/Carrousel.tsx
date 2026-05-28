@@ -2,40 +2,50 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ecommerceService } from "../../../services/ecommerceService";
 
 // Array de imagenes
-const slides = [
-  {
-    id: 1,
-    image: "https://www.shutterstock.com/image-photo/scientist-beakers-water-chemistry-science-260nw-2475262401.jpg",
-    title: "Excelencia",
-    subtitle: "Te ofrecemos los mejores productos de laboratorio del país",
-  },
-  {
-    id: 2,
-    image: "https://www.shutterstock.com/image-photo/panorama-background-health-care-researchers-260nw-1974611666.jpg",
-    title: "Calidad Garantizada",
-    subtitle: "Instrumentos certificados por los mejores fabricantes del mundo",
-  },
-  {
-    id: 3,
-    image: "https://www.shutterstock.com/image-photo/flask-test-tune-science-research-600nw-2524509389.jpg",
-    title: "Soporte Técnico",
-    subtitle: "Nuestro equipo está disponible para ayudarte en todo momento",
-  },
-];
+// const slides = [
+//   {
+//     id: 1,
+//     image: "https://www.shutterstock.com/image-photo/scientist-beakers-water-chemistry-science-260nw-2475262401.jpg",
+//     title: "Excelencia",
+//     subtitle: "Te ofrecemos los mejores productos de laboratorio del país",
+//   },
+//   {
+//     id: 2,
+//     image: "https://www.shutterstock.com/image-photo/panorama-background-health-care-researchers-260nw-1974611666.jpg",
+//     title: "Calidad Garantizada",
+//     subtitle: "Instrumentos certificados por los mejores fabricantes del mundo",
+//   },
+//   {
+//     id: 3,
+//     image: "https://www.shutterstock.com/image-photo/flask-test-tune-science-research-600nw-2524509389.jpg",
+//     title: "Soporte Técnico",
+//     subtitle: "Nuestro equipo está disponible para ayudarte en todo momento",
+//   },
+// ];
+
 function Carrousel() {
+  const [slides, setSlides] = useState<
+    { id: string; image: string; title: string; subtitle: string }[]
+  >([]);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = derecha, -1 = izquierda
 
-  // Avance automatico cada 5s
   useEffect(() => {
-    const timer = setInterval(() => {
-      setDirection(1);
-      setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    ecommerceService.getBanners().then((data) => {
+      const mapped = data.map((b: any) => ({
+        id: b._id,
+        image: b.image,
+        title: b.title,
+        subtitle: b.subtitle ?? "",
+      }));
+      setSlides(mapped);
+    });
   }, []);
+
+  if (slides.length === 0) return null;
 
   // Para avanzar entre banners
   function goNext() {
@@ -92,7 +102,7 @@ function Carrousel() {
         onClick={goPrev}
         className="absolute left-3 top-1/2 -trasnlate-y-1/2 bg-white/80 hover:bg-white shadow rounded-full p-2 transition z-10"
       >
-        <ChevronLeft size={22} className="text-gray-700 cursor-pointer"/>
+        <ChevronLeft size={22} className="text-gray-700 cursor-pointer" />
       </button>
 
       {/* Flecha derecha */}
@@ -100,7 +110,7 @@ function Carrousel() {
         onClick={goNext}
         className="absolute right-3 top-1/2 -trasnlate-y-1/2 bg-white/80 hover:bg-white shadow rounded-full p-2 transition z-10"
       >
-        <ChevronRight size={22} className="text-gray-700 cursor-pointer"/>
+        <ChevronRight size={22} className="text-gray-700 cursor-pointer" />
       </button>
 
       {/* Indicadores (dots) */}
