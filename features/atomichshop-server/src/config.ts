@@ -1,30 +1,25 @@
-// ruta: ../src/config.ts
-
-// En este archivo lo que hacemos es que nuestra API pueda utilizar las varibales que estan en el .env
 import dotenv from "dotenv";
+import { getEnvVar } from "./utils/getEnvVar";
 
-// Ejecutamos la libreria de dotenv
 dotenv.config();
 
-// Con esta funcion validamos que las variables de entorno existan antes de arrancar la API
-// Si no existen, la API no arranca y avisa exactamente cual variable falta
-const getEnvVar = (key: string): string => {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`❌ Variable de entorno faltante: ${key}`);
-  }
-  return value;
-};
-
-// Con esto podemos mandar a llamar al .env y utilizar las variables que esten dentro de este
 export const config = {
   db: {
     URI: getEnvVar("DB_URI"),
   },
   server: {
-    PORT: process.env.PORT || "4000", // ✅ Puerto del servidor con valor por defecto
+    PORT: process.env.PORT || "4000",
   },
   jwt: {
-    SECRET: getEnvVar("JWT_SECRET"), // ✅ Ya tienes jwt, mejor centralizarlo aqui
+    secret: getEnvVar("JWT_SECRET"),
   },
+  email:{
+        user: process.env.USER_EMAIL,
+        password: process.env.USER_PASSWORD
+  },
+  cloudinary: {
+    cloudinary_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloudinary_key: process.env.CLOUDINARY_API_KEY,
+    cloudinary_secret: process.env.CLOUDINARY_API_SECRET
+  }
 };

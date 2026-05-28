@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, Home, ShoppingCart, Package, ShoppingBag, BarChart3, Users, UserCheck, Truck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate, useLocation } from 'react-router';
+import { useAuthStore } from '@/auth/store/auth.store';
 
 interface SidebarProps {
     onMobileClose?: () => void;
@@ -30,12 +31,20 @@ const menuItems = [
     },
 ];
 
+
+
 export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = false }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const {isAdmin} = useAuthStore()
     const navigate = useNavigate();
     const location = useLocation();
     
-
+    const filteredMenu = menuItems.filter(section => {
+        if (section.section === 'Usuarios') {
+            return isAdmin; 
+        }
+        return true; // Las demás secciones se muestran siempre
+    });
     return (
         <>
             {/* ── Desktop Sidebar ───────────────────────────────────────────── */}
@@ -95,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onMobileClose, isMobileOpen = 
 
                 {/* Menú de navegación */}
                 <nav className="flex-1 px-3 py-6">
-                    {menuItems.map((section, sectionIdx) => (
+                    {filteredMenu.map((section, sectionIdx) => (
                         <div key={sectionIdx} className="mb-6">
                             {!isCollapsed && (
                                 <div className="text-xs font-semibold text-gray-500 uppercase mb-3 px-2">

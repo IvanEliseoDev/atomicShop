@@ -1,18 +1,12 @@
-// ruta: ../src/controller/productsController.ts
-
-// Importo el esquema de la coleccion que voy a ocupar
-import productsModel from "../models/products.js";
-
-// Esto es
 import { Request, Response } from "express";
+import { modelProducts } from "../models/products";
 
 // Creo un array de products y alparecer no se pueda hacer como hantes, si no que en el array que creamos, adentro se ponen los metodos
-const productsController = {
+export const productsController = {
   // INSERT MASIVO
   insertManyProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const products = req.body;
-
       if (!Array.isArray(products) || products.length === 0) {
         res.status(400).json({
           message: "Se requiere un array con al menos un elemento",
@@ -20,7 +14,7 @@ const productsController = {
         return;
       }
 
-      const result = await productsModel.insertMany(products);
+      const result = await modelProducts.insertMany(products);
       res.status(201).json({
         message: `${result.length} productos creados exitosamente`,
         data: result,
@@ -37,7 +31,7 @@ const productsController = {
   // GET ALL
   getProducts: async (req: Request, res: Response): Promise<void> => {
     try {
-      const products = await productsModel.find();
+      const products = await modelProducts.find();
       res.status(200).json(products);
     } catch (error) {
       const err = error as Error;
@@ -50,7 +44,7 @@ const productsController = {
   // INSERT ONE
   insertProducts: async (req: Request, res: Response): Promise<void> => {
     try {
-      const product = new productsModel(req.body);
+      const product = new modelProducts(req.body);
       const result = await product.save();
       res
         .status(201)
@@ -67,7 +61,7 @@ const productsController = {
   updateProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await productsModel.findByIdAndUpdate(id, req.body, {
+      const result = await modelProducts.findByIdAndUpdate(id, req.body, {
         new: true,
       });
       res.status(200).json({ message: "Producto actualizado", data: result });
@@ -83,7 +77,7 @@ const productsController = {
   deleteProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      await productsModel.findByIdAndDelete(id);
+      await modelProducts.findByIdAndDelete(id);
       res.status(200).json({ message: "Producto eliminado exitosamente" });
     } catch (error) {
       const err = error as Error;
@@ -93,5 +87,3 @@ const productsController = {
     }
   },
 };
-
-export default productsController;
