@@ -6,6 +6,7 @@ interface AuthUser {
   id: string;
   name: string;
   mail: string;
+  profilePic?: string;
 }
 
 interface AuthContextType {

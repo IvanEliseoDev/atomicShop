@@ -237,10 +237,12 @@ const Navbar = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           addItem({
-                            id: product.id,
+                            id: product._id,
                             name: product.name,
                             price: product.price,
-                            originalPrice: product.originalPrice,
+                            originalPrice: product.discount
+                              ? product.price / (1 - product.discount / 100)
+                              : product.price, // Calculado igual que en ProductSlider
                             image: product.images?.[0] ?? "",
                           });
                         }}

@@ -48,7 +48,7 @@ export const ecommerceService = {
     direction: string;
     dui: string;
   }) =>
-    fetch(`${BASE_URL}/registerCustommer`, {
+    fetch(`${BASE_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -60,7 +60,7 @@ export const ecommerceService = {
     }).then((r) => r.json()),
 
   verifyRegisterCode: (verificationCodeRequest: string) =>
-    fetch(`${BASE_URL}/registerCustommer/verifyCodeEmail`, {
+    fetch(`${BASE_URL}/register/verifyCodeEmail`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -70,7 +70,7 @@ export const ecommerceService = {
   // Recuperar contraseña
   // ----------------
   requestRecoveryCode: (mail: string) =>
-    fetch(`${BASE_URL}/recoveryPasswordEcommerce/requestCode`, {
+    fetch(`${BASE_URL}/recoveryPassword/requestCode`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -78,7 +78,7 @@ export const ecommerceService = {
     }).then((r) => r.json()),
 
   verifyRecoveryCode: (codeRequest: string) =>
-    fetch(`${BASE_URL}/recoveryPasswordEcommerce/verifyCode`, {
+    fetch(`${BASE_URL}/recoveryPassword/verifyCode`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -86,7 +86,7 @@ export const ecommerceService = {
     }).then((r) => r.json()),
 
   newPassword: (newPassword: string, confirmNewPassword: string) =>
-    fetch(`${BASE_URL}/recoveryPasswordEcommerce/newPassword`, {
+    fetch(`${BASE_URL}/recoveryPassword/newPassword`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -108,4 +108,7 @@ export const ecommerceService = {
 
   searchProducts: (q: string) =>
   fetch(`${BASE_URL}/products/search?q=${encodeURIComponent(q)}`).then(r => r.json()),
+
+  getCategories: () =>
+  fetch(`${BASE_URL}/categories`).then((r) => r.json()),
 };
