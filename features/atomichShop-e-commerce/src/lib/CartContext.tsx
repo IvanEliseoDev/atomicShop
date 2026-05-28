@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import { ecommerceService } from "../services/ecommerceService";
+import { useAuth } from "./AuthContext";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────
 export interface CartItem {
@@ -34,13 +35,14 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
   const toggleCart = () => setIsOpen((prev) => !prev);
 
   const addItem = (product: Omit<CartItem, "quantity">) => {
-    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
+    const clientId = user?.id ?? "guest";
     ecommerceService.addToCart(clientId, String(product.id), 1);
 
     setItems((prev) => {
@@ -56,7 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = (id: number) => {
-    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
+    const clientId = user?.id ?? "guest";
     ecommerceService.removeFromCart(clientId, String(id));
 
     setItems((prev) => prev.filter((i) => i.id !== id));
