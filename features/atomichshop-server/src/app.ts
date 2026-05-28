@@ -1,3 +1,4 @@
+
 // En este archivo lo que haremos es configurar los enpoints y las rutas con las cuales el frontEnd se podra comunicar con estos
 import express from "express";
 // Importamos cors para que nuestro fronEnd pueda utilizar nuestro enpoints
@@ -23,6 +24,7 @@ import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerc
 
 // API
 import { seedRouter } from "./routes/seed";
+import { employeeRouter } from "./routes/employee";
 import cookieParser from "cookie-parser";
 
 /**
@@ -34,13 +36,11 @@ const app = express();
 /**
  * CONFIGURACION DE CORS PARA LOS ENPOINTS
  */
-app.use(
-  cors({
+app.use(cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
     //Permitir el envío de cookies y credenciales
-    credentials: true,
-  }),
-);
+    credentials: true
+}))
 // Con esto permitimos solicitudes JSON a nuestros enpoints
 app.use(express.json());
 app.use(cookieParser());

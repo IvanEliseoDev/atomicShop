@@ -1,5 +1,5 @@
 import { Request } from "express"
-import { customerModel } from "../../models/customer"
+import { customerModel } from "../../models/customer.model"
 
 const customer = {
     name: "Ivan Eliseo Hernandez",
