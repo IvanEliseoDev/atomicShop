@@ -5,47 +5,50 @@ const customerSchema = new Schema<ICustomer>(
     {
         name: {
             type: String,
-            isRequired: true,
+            required: true,       // "isRequired" no existe en Mongoose, el correcto es "required"
         },
-        mail:{
+        mail: {
             type: String,
-            isRequired: true
+            required: true,
         },
-        password:{
-            type:String || null,
+        password: {
+            type: String,         // String || null no es valido en Mongoose, String solo es suficiente
+            default: null,
         },
-        telephone:{
-            type:String
+        telephone: {
+            type: String,
         },
-        direction:{
-            type:String
+        direction: {
+            type: String,
         },
-        typeCustomer:{
-            type: String
+        typeCustomer: {
+            type: String,
         },
         dui: {
-            type:String
+            type: String,
         },
         nit: {
-            type:String
+            type: String,
         },
-        typeActivity:{
-            type: String
+        typeActivity: {
+            type: String,
         },
-        state:{
-            type: String
+        state: {
+            type: String,
         },
         loginAttemps: {
-            type: Number
+            type: Number,
+            default: 0,
         },
-        timeOut:{
-            type: String
-        }
+        timeOut: {
+            type: Date,           
+            default: null,
+        },
     },
     {
         timestamps: true,
         strict: false,
     }
-)
+);
 
-export const customerModel = model<ICustomer>("Customers", customerSchema)
+export const customerModel = model<ICustomer>("Customers", customerSchema);
