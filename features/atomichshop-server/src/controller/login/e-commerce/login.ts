@@ -59,4 +59,23 @@ export const loginEcommerceController = {
       return res.status(500).json({ status: "500", message: "Internal Server Error - Check Server Logs" });
     }
   },
+  me: async (req: Request, res: Response): Promise<any> => {
+    try {
+      const token = req.cookies.authCookie;
+      if (!token) {
+        return res.status(401).json({ status: "401", message: "No session" });
+      }
+
+      const decoded: any = jsonwebtoken.verify(token, config.jwt.secret);
+      const user = await customerModel.findById(decoded.id).select("_id name mail");
+
+      if (!user) {
+        return res.status(404).json({ status: "404", message: "User not found" });
+      }
+
+      return res.status(200).json({ status: "200", user: { id: user._id, name: user.name, mail: user.mail } });
+    } catch (error) {
+      return res.status(401).json({ status: "401", message: "Invalid session" });
+    }
+  },
 };
