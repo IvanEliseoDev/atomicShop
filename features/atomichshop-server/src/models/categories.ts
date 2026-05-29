@@ -1,20 +1,13 @@
-import { model, Schema, Types } from "mongoose";
-import { ICategorie } from "../interface/categories.interface";
+import { Schema, model, Document } from "mongoose";
 
-export const categorieSchema = new Schema<ICategorie>(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    state: {
-      type: Boolean,
-    },
-  },
-  {
-    timestamps: true,
-    strict: false,
-  },
-);
+export interface ICategory extends Document {
+  name: string;
+  state: boolean;
+}
 
-export const categorieModel = model("Categories", categorieSchema);
+const categorySchema = new Schema<ICategory>({
+  name: { type: String, required: true },
+  state: { type: Boolean, default: true }
+}, { timestamps: true });
+
+export const modelCategories = model<ICategory>("Categories", categorySchema);
