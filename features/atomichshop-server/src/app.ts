@@ -21,6 +21,7 @@ import logoutEcommerceRoutes from "./routes/logout/e-commerce/logout"
 import registerCustommerEcommerceRoutes from "./routes/customer/e-commerce/registerCustomerController"
 import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerce/recoveryPassword"
 import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories"
+import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
 
 // API
 import { seedRouter } from "./routes/seed";
@@ -69,5 +70,6 @@ app.use("/e-commerce/logout", logoutEcommerceRoutes)
 app.use("/e-commerce/register", registerCustommerEcommerceRoutes)
 app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
 app.use("/e-commerce/categories", categoriesEcommerceRoutes)
+app.use("/e-commerce/brands", brandsEcommerceRoutes)
 
 export default app;
