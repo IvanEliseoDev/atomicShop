@@ -1,10 +1,10 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { ecommerceService } from "../services/ecommerceService";
+import { useAuth } from "./AuthContext";
 
-// ── Tipos ──────────────────────────────────────────────────────────────────
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   originalPrice: number;
@@ -19,55 +19,89 @@ interface CartContextType {
   closeCart: () => void;
   toggleCart: () => void;
   addItem: (product: Omit<CartItem, "quantity">) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
   discount: number;
 }
 
-// ── Contexto ───────────────────────────────────────────────────────────────
 const CartContext = createContext<CartContextType | null>(null);
 
-// ── Provider ───────────────────────────────────────────────────────────────
+// Convierte la respuesta del backend al formato local
+function mapCartFromBackend(cart: any): CartItem[] {
+  if (!cart?.products) return [];
+  return cart.products.map((p: any) => {
+    const product = p.idProduct;
+    const price = product?.price ?? 0;
+    const discount = product?.discount ?? 0;
+    const originalPrice = discount ? price / (1 - discount / 100) : price;
+    return {
+      id: product?._id ?? p.idProduct,
+      name: product?.name ?? "",
+      price,
+      originalPrice,
+      image: product?.images?.[0] ?? "",
+      quantity: p.amount,
+    };
+  });
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
   const toggleCart = () => setIsOpen((prev) => !prev);
 
-  const addItem = (product: Omit<CartItem, "quantity">) => {
-    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
-    ecommerceService.addToCart(clientId, String(product.id), 1);
-
-    setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i,
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
+  // Cargar el carrito del backend cuando el usuario inicia sesion
+  useEffect(() => {
+    if (!user?.id) {
+      setItems([]);
+      return;
+    }
+    ecommerceService.getCart(user.id).then((cart) => {
+      setItems(mapCartFromBackend(cart));
     });
+  }, [user?.id]);
+
+  const addItem = async (product: Omit<CartItem, "quantity">) => {
+    if (!user?.id) {
+      setIsOpen(true);
+      return;
+    }
+
+    const updatedCart = await ecommerceService.addToCart(user.id, String(product.id), 1);
+    setItems(mapCartFromBackend(updatedCart));
     setIsOpen(true);
   };
 
-  const removeItem = (id: number) => {
-    const clientId = "EL_ID_DEL_USUARIO_LOGUEADO";
-    ecommerceService.removeFromCart(clientId, String(id));
+  const removeItem = async (id: string) => {
+    if (!user?.id) return;
 
+    await ecommerceService.removeFromCart(user.id, id);
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number) => {
     if (quantity < 1) {
       removeItem(id);
       return;
     }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
+
+    if (!user?.id) return;
+
+    // Calcula el delta respecto a la cantidad actual
+    const current = items.find((i) => i.id === id);
+    const delta = quantity - (current?.quantity ?? 0);
+
+    if (delta !== 0) {
+      const updatedCart = await ecommerceService.addToCart(user.id, id, delta);
+      setItems(mapCartFromBackend(updatedCart));
+    }
   };
 
   const clearCart = () => setItems([]);
@@ -104,7 +138,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ── Hook ───────────────────────────────────────────────────────────────────
 export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart debe usarse dentro de <CartProvider>");
