@@ -12,7 +12,7 @@ const customer = {
     state: "frecuente",
     isVerified: false,
     loginAttemps: 0,
-    timeOut: "00-00-00"
+    timeOut: new Date()
 }
 
 export const customerSeed = async () => {
