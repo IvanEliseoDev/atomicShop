@@ -24,6 +24,7 @@ import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerc
 // API
 import { seedRouter } from "./routes/seed";
 import cookieParser from "cookie-parser";
+import { categoryRouter } from "./routes/categories/categories";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -50,22 +51,23 @@ app.use(cookieParser());
  */
 
 // API
-app.use("/api/seed", seedRouter);
+app.use("/api/v1/seed", seedRouter);
 
 // ADMINISTRACION
-app.use("/admin/products", productsRoutes);
-app.use("/admin/provider", providerRoutes);
-app.use("/admin/customers", customerRouter);
-app.use("/admin/employees", employeeRouter);
+app.use("/api/v1/admin/products", productsRoutes);
+app.use("/api/v1/admin/provider", providerRoutes);
+app.use("/api/v1/admin/customers", customerRouter);
+app.use("/api/v1/admin/employees", employeeRouter);
+app.use("/api/v1/admin/category", categoryRouter);
 
 // E-COMMERCE
-app.use("/e-commerce/products", productsEcomerceRoutes);
-app.use("/e-commerce/banners", bannersEcommerceRotes)
-app.use("/e-commerce/providers", providersEcommerceRoutes)
-app.use("/e-commerce/carts", cartsEcommerceRoutes)
-app.use("/e-commerce/login", loginEcommerceRoutes)
-app.use("/e-commerce/logout", logoutEcommerceRoutes)
-app.use("/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
-app.use("/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
+app.use("/api/v1/e-commerce/products", productsEcomerceRoutes);
+app.use("/api/v1/e-commerce/banners", bannersEcommerceRotes)
+app.use("/api/v1/e-commerce/providers", providersEcommerceRoutes)
+app.use("/api/v1/e-commerce/carts", cartsEcommerceRoutes)
+app.use("/api/v1/e-commerce/login", loginEcommerceRoutes)
+app.use("/api/v1/e-commerce/logout", logoutEcommerceRoutes)
+app.use("/api/v1/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
+app.use("/api/v1/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
 
 export default app;
