@@ -20,6 +20,9 @@ import loginEcommerceRoutes from "./routes/login/e-commerce/login"
 import logoutEcommerceRoutes from "./routes/logout/e-commerce/logout"
 import registerCustommerEcommerceRoutes from "./routes/customer/e-commerce/registerCustomerController"
 import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerce/recoveryPassword"
+import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories"
+import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
+import contactRoutes from "./routes/contactRoutes";
 
 // API
 import { seedRouter } from "./routes/seed";
@@ -61,6 +64,7 @@ app.use("/api/v1/admin/employees", employeeRouter);
 app.use("/api/v1/admin/category", categoryRouter);
 
 // E-COMMERCE
+<<<<<<< HEAD
 app.use("/api/v1/e-commerce/products", productsEcomerceRoutes);
 app.use("/api/v1/e-commerce/banners", bannersEcommerceRotes)
 app.use("/api/v1/e-commerce/providers", providersEcommerceRoutes)
@@ -69,5 +73,18 @@ app.use("/api/v1/e-commerce/login", loginEcommerceRoutes)
 app.use("/api/v1/e-commerce/logout", logoutEcommerceRoutes)
 app.use("/api/v1/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
 app.use("/api/v1/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
+=======
+app.use("/e-commerce/products", productsEcomerceRoutes);
+app.use("/e-commerce/banners", bannersEcommerceRotes)
+app.use("/e-commerce/providers", providersEcommerceRoutes)
+app.use("/e-commerce/carts", cartsEcommerceRoutes)
+app.use("/e-commerce/login", loginEcommerceRoutes)
+app.use("/e-commerce/logout", logoutEcommerceRoutes)
+app.use("/e-commerce/register", registerCustommerEcommerceRoutes)
+app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
+app.use("/e-commerce/categories", categoriesEcommerceRoutes)
+app.use("/e-commerce/brands", brandsEcommerceRoutes)
+app.use("/api", contactRoutes);
+>>>>>>> 0351b7839c65bbc933b671bec715376221e0c661
 
 export default app;

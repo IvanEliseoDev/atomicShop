@@ -5,6 +5,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { customerModel } from '../../../models/customer';
 import { config } from '../../../config';
+import { HTMLRecoveryEmail } from '../../../utils/HTMLRecoveryEmail';
 
 export const recoveryPasswordEcommerceController = {
     requestCode: async (req: Request, res: Response): Promise<any> => {
@@ -16,7 +17,7 @@ export const recoveryPasswordEcommerceController = {
                 return res.status(404).json({ status: '404', message: 'User not found' });
             }
 
-            const code = crypto.randomBytes(3).toString('hex');
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
 
             const token = jsonwebtoken.sign(
                 { mail, code, userType: 'customer', verified: false },
@@ -38,7 +39,7 @@ export const recoveryPasswordEcommerceController = {
                 from: config.email.user,
                 to: mail,
                 subject: 'Correo de recuperacion de contrasena',
-                text: `Usa este codigo para recuperar tu cuenta: ${code}. Expira en 15 minutos.`
+                html: HTMLRecoveryEmail(code)
             };
 
             transporter.sendMail(mailOptions, (error, info) => {

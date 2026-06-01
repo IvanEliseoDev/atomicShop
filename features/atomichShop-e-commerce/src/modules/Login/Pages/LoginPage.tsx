@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 
+import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { AuthCard } from "../Components/AuthCard";
 import { EmailInput } from "../Components/EmailInput";
 import { PasswordInput } from "../Components/PasswordInput";
-import { validateEmail, verifyCredentials } from "@/auth/mock/authMock";
+// import { validateEmail, verifyCredentials } from "@/auth/mock/authMock";
 import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 
@@ -14,52 +15,27 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       toast.error("Por favor completa todos los campos");
       return;
     }
-
-    if (!validateEmail(email)) {
-      toast.error("Correo no válido");
-      return;
-    }
-
     setLoading(true);
-
-    // Simulación de espera
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // --- PASO 1: Buscar en los usuarios que se registro (localStorage) ---
-    const localUsers = JSON.parse(localStorage.getItem("usuarios_registrados") || "[]");
-    const userInLocal = localUsers.find((u: any) => u.email === email && u.password === password);
-
-    if (userInLocal) {
-      toast.success(`¡Bienvenido de nuevo, ${userInLocal.nombres}!`);
-
-      // GUARDAMOS LA SESIÓN AQUÍ
-      localStorage.setItem("usuario_sesion", JSON.stringify(userInLocal));
-
-      navigate("/atomicShop"); 
-      setLoading(false);
-      return;
-    }
-
-    // --- PASO 2: Si no está en local, usar los mocks originales 
-    if (verifyCredentials(email, password)) {
-      toast.success("Sesión iniciada correctamente (Usuario Mock)");
-
-      // GUARDAMOS UN USUARIO GENÉRICO PARA EL MOCK
-      localStorage.setItem("usuario_sesion", JSON.stringify({ nombres: "Usuario Prueba", email: email }));
-
-      setEmail("");
-      setPassword("");
+    const result = await login(email, password);
+    if (result.ok) {
+      toast.success("Sesión iniciada correctamente");
       navigate("/atomicShop");
     } else {
-      toast.error("Credenciales incorrectas");
+      const messages: Record<string, string> = {
+        "Email not found": "Correo no registrado",
+        "Incorrect password": "Contraseña incorrecta",
+        "Account blocked": "Cuenta bloqueada, intenta en 15 minutos",
+        "Email not verified": "Debes verificar tu correo antes de ingresar",
+      };
+      toast.error(messages[result.message] ?? "Error al iniciar sesión");
     }
-
     setLoading(false);
   };
 
@@ -80,10 +56,10 @@ export const LoginPage = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 relative">
-
       <button
         onClick={() => navigate(-1)}
-        className="absolute cursor-pointer top-4 left-4 flex items-center gap-1 text-gray-600 hover:text-gray-800 transition text-sm font-medium">
+        className="absolute cursor-pointer top-4 left-4 flex items-center gap-1 text-gray-600 hover:text-gray-800 transition text-sm font-medium"
+      >
         <ChevronLeft size={18} />
         Regresar
       </button>

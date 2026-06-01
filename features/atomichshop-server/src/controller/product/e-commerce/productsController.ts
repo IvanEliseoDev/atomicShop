@@ -40,7 +40,7 @@ export const productsEcommerceController = {
   // Obtener productos con filtros (Precio, Marca, Relevancia)
   getProductsShop: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { minPrice, maxPrice, brandId, sort } = req.query;
+      const { minPrice, maxPrice, brandId, categoryId, sort } = req.query;
       let query: any = { state: true };
 
       // Filtro por rango de precio
@@ -53,6 +53,10 @@ export const productsEcommerceController = {
       // Filtro por marca
       if (brandId) {
         query.brandId = brandId;
+      }
+
+      if (categoryId) {
+        query.categoryId = categoryId;
       }
 
       // Orden de relevancia / precio

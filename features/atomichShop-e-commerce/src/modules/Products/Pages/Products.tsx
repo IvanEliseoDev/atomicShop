@@ -1,58 +1,106 @@
-import React, { useState } from "react";
-import { useCart } from "../../../lib/CartContext"; // ← ajusta la ruta si es necesario
-// Agrega este import al inicio
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useCart } from "../../../lib/CartContext";
+import { useNavigate, useSearchParams } from "react-router";
+import { ecommerceService } from "../../../services/ecommerceService";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   originalPrice: number;
-  brand: string;
+  brandId?: { _id: string; name: string };
+  categoryId: { _id: string; name: string };
   image: string;
   onSale: boolean;
 }
 
-const MOCK_PRODUCTS: Product[] = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  name: "Báscula para pesar cajas petri",
-  price: 80.0,
-  originalPrice: 80.0,
-  brand: "Marca A",
-  image: "https://placehold.co/220x160/e8f4fb/4a9bbe?text=Báscula",
-  onSale: true,
-}));
+interface Brand {
+  _id: string;
+  name: string;
+}
 
-const BRANDS = ["Todas", "Marca A", "Marca B", "Marca C"];
+interface Category {
+  _id: string;
+  name: string;
+}
+
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevancia" },
-  { value: "price-asc", label: "Precio: Menor a Mayor" },
-  { value: "price-desc", label: "Precio: Mayor a Menor" },
-  { value: "name", label: "Nombre" },
+  { value: "price_asc", label: "Precio: Menor a Mayor" },
+  { value: "price_desc", label: "Precio: Mayor a Menor" },
 ];
 
 function Products() {
-  const { addItem } = useCart(); // ← hook del carrito
-  // Dentro del componente Products(), agrega:
+  const { addItem } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(200);
-  const [brand, setBrand] = useState<string>("Todas");
-  const [sortBy, setSortBy] = useState<string>("relevance");
-  const [quantities, setQuantities] = useState<Record<number, number>>(
-    Object.fromEntries(MOCK_PRODUCTS.map((p) => [p.id, 1])),
+  const [categoryId, setCategoryId] = useState<string>(
+    () => searchParams.get("categoria") ?? "Todas",
   );
-  const [wishlist, setWishlist] = useState<Set<number>>(new Set());
 
-  const handleQty = (id: number, delta: number) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categorys, setCategorys] = useState<Category[]>([]);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(10000);
+  const [brandId, setBrandId] = useState<string>("Todas");
+  const [sortBy, setSortBy] = useState<string>("relevance");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+
+  // Leer categoría desde la URL al cargar o al cambiar la URL
+  useEffect(() => {
+    const categoriaFromUrl = searchParams.get("categoria");
+    if (categoriaFromUrl) {
+      setCategoryId(categoriaFromUrl);
+    } else {
+      setCategoryId("Todas");
+    }
+  }, [searchParams]);
+
+  // Carga inicial de marcas
+  useEffect(() => {
+    ecommerceService.getBrands().then((data) => {
+      if (Array.isArray(data)) setBrands(data);
+    });
+    ecommerceService.getCategories().then((data) => {
+      if (Array.isArray(data)) setCategorys(data);
+    });
+  }, []);
+
+  // Carga de productos cada vez que cambian los filtros
+  useEffect(() => {
+    const sort = sortBy === "relevance" ? undefined : sortBy;
+    ecommerceService
+      .getProductsShop({ minPrice, maxPrice, brandId, categoryId, sort })
+      .then((data) => {
+        if (!Array.isArray(data)) return;
+        const mapped = data.map((p: any) => ({
+          id: p._id,
+          name: p.name,
+          price: p.price,
+          originalPrice: p.discount
+            ? p.price / (1 - p.discount / 100)
+            : p.price,
+          brandId: p.brandId,
+          categoryId: p.category,
+          image: p.images?.[0] ?? "",
+          onSale: !!p.discount,
+        }));
+        setProducts(mapped);
+        setQuantities(Object.fromEntries(mapped.map((p) => [p.id, 1])));
+      });
+  }, [minPrice, maxPrice, brandId, categoryId, sortBy]);
+
+  const handleQty = (id: string, delta: number) => {
     setQuantities((prev) => ({
       ...prev,
       [id]: Math.max(1, (prev[id] ?? 1) + delta),
     }));
   };
 
-  const toggleWishlist = (id: number) => {
+  const toggleWishlist = (id: string) => {
     setWishlist((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -60,7 +108,6 @@ function Products() {
     });
   };
 
-  // Agrega al carrito respetando la cantidad seleccionada
   const handleAddToCart = (product: Product) => {
     const qty = quantities[product.id] ?? 1;
     for (let i = 0; i < qty; i++) {
@@ -73,17 +120,6 @@ function Products() {
       });
     }
   };
-
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
-    const inPrice = p.price >= minPrice && p.price <= maxPrice;
-    const inBrand = brand === "Todas" || p.brand === brand;
-    return inPrice && inBrand;
-  }).sort((a, b) => {
-    if (sortBy === "price-asc") return a.price - b.price;
-    if (sortBy === "price-desc") return b.price - a.price;
-    if (sortBy === "name") return a.name.localeCompare(b.name);
-    return 0;
-  });
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -120,13 +156,31 @@ function Products() {
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium text-gray-700">Por marca:</span>
             <select
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
               className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
             >
-              {BRANDS.map((b) => (
-                <option key={b} value={b}>
-                  {b}
+              <option value="Todas">Todas</option>
+              {brands.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Category */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium text-gray-700">Por categoría:</span>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
+            >
+              <option value="Todas">Todas</option>
+              {categorys.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
                 </option>
               ))}
             </select>
@@ -154,13 +208,13 @@ function Products() {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {filteredProducts.length === 0 ? (
+        {products.length === 0 ? (
           <div className="text-center py-20 text-gray-400 text-lg">
             No se encontraron productos con los filtros seleccionados.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
+            {products.map((product) => (
               <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 group cursor-pointer"
@@ -179,7 +233,6 @@ function Products() {
                       toggleWishlist(product.id);
                     }}
                     className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow hover:scale-110 transition-transform"
-                    aria-label="Agregar a favoritos"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -213,6 +266,11 @@ function Products() {
                   <p className="text-lg font-bold text-gray-800">
                     ${product.price.toFixed(2)}
                   </p>
+                  {product.onSale && (
+                    <p className="text-sm text-gray-400 line-through">
+                      ${product.originalPrice.toFixed(2)}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-500 mt-0.5 leading-snug">
                     {product.name}
                   </p>
@@ -230,7 +288,7 @@ function Products() {
                         −
                       </button>
                       <span className="px-3 py-1.5 text-sm font-medium text-gray-700 min-w-[2.5rem] text-center">
-                        {quantities[product.id]}
+                        {quantities[product.id] ?? 1}
                       </span>
                       <button
                         onClick={(e) => {

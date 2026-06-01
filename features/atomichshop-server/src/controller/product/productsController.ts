@@ -32,6 +32,7 @@ export const productsController = {
   getProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const products = await modelProducts.find();
+      if (!products) res.status(404).json({status: 404, message:"Productos no encontrados", data: null})
       res.status(200).json({status:200, message:"Productos encontrados exitosamente", data:products});
     } catch (error) {
       const err = error as Error;
