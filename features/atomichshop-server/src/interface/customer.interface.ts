@@ -13,4 +13,6 @@ export interface ICustomer extends Document {
     state: string;
     loginAttemps: number;
     timeOut: Date | null;
+    image?: string; //El "?" sirve para indicarnos que estos campos pueden ser opcionales, un cliente puede agregar una imagen y a la vez no, por eso es un campo opcional
+    public_id?: string;
 }

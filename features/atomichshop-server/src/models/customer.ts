@@ -44,6 +44,14 @@ const customerSchema = new Schema<ICustomer>(
             type: Date,           
             default: null,
         },
+        image: { 
+            type: String, 
+            default: ""  //Se pone asi ya que si un cliente no pone una imagen no deje el campo vacio, si no que mejor solo guarde un texto vacio
+        },
+        public_id: { 
+            type: String, 
+            default: "" 
+        }
     },
     {
         timestamps: true,
