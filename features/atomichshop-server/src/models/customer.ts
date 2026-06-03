@@ -41,9 +41,21 @@ const customerSchema = new Schema<ICustomer>(
             default: 0,
         },
         timeOut: {
-            type: Date,           
+            type: Date,
             default: null,
         },
+        image: {
+            type: String,
+            default: ""  //Se pone asi ya que si un cliente no pone una imagen no deje el campo vacio, si no que mejor solo guarde un texto vacio
+        },
+        public_id: {
+            type: String,
+            default: ""
+        },
+        wishlist: {
+            type: [String],
+            default: []
+        }
     },
     {
         timestamps: true,

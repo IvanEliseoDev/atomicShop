@@ -132,4 +132,26 @@ export const ecommerceService = {
 
   getBrands: () =>
     fetch(`${BASE_URL}/brands`).then((r) => r.json()),
+
+  // Wishlist
+getWishlist: (customerId: string) =>
+    fetch(`${BASE_URL}/wishlist/${customerId}`, {
+        credentials: "include"
+    }).then(r => r.json()),
+
+addToWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ customerId, productId })
+    }).then(r => r.json()),
+
+removeFromWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/remove`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ customerId, productId })
+    }).then(r => r.json()),
 };

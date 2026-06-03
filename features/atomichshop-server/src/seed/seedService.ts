@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { modelBrands } from "../models/brands";
-import { modelCategories } from "../models/categories";
+import { categoryModel  } from "../models/categories";
 import providerModel from "../models/providers";
 import { modelProducts } from "../models/product";
 import { modelBanner } from "../models/banner";
@@ -12,7 +12,7 @@ export const seedService = {
       // 1. Limpiar colecciones
       await Promise.all([
         modelBrands.deleteMany({}),
-        modelCategories.deleteMany({}),
+        categoryModel.deleteMany({}),
         providerModel.deleteMany({}),
         modelProducts.deleteMany({}),
         modelBanner.deleteMany({}),
@@ -27,7 +27,7 @@ export const seedService = {
         { name: "Jasco", state: true }
       ]);
 
-      const categories = await modelCategories.insertMany([
+      const categories = await categoryModel.insertMany([
         { name: "Equipamiento", state: true },
         { name: "Material de vidrio", state: true },
         { name: "Reactivos", state: true },
