@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "../../../lib/CartContext";
 import { useNavigate, useSearchParams } from "react-router";
 import { ecommerceService } from "../../../services/ecommerceService";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Product {
   id: string;
@@ -48,6 +49,7 @@ function Products() {
   const [sortBy, setSortBy] = useState<string>("relevance");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
 
   // Leer categoría desde la URL al cargar o al cambiar la URL
   useEffect(() => {
@@ -100,12 +102,27 @@ function Products() {
     }));
   };
 
-  const toggleWishlist = (id: string) => {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+  // Cargar wishlist del backend al montar
+  useEffect(() => {
+    if (!user?.id) return;
+    ecommerceService.getWishlist(user.id).then((data) => {
+      if (data.data && Array.isArray(data.data)) {
+        const ids = data.data.map((p: any) => p._id || p);
+        setWishlist(new Set(ids));
+      }
     });
+  }, [user?.id]);
+
+  const toggleWishlist = async (id: string) => {
+    if (!user?.id) return;
+
+    if (wishlist.has(id)) {
+      await ecommerceService.removeFromWishlist(user.id, id);
+      setWishlist(prev => { const next = new Set(prev); next.delete(id); return next; });
+    } else {
+      await ecommerceService.addToWishlist(user.id, id);
+      setWishlist(prev => new Set(prev).add(id));
+    }
   };
 
   const handleAddToCart = (product: Product) => {
@@ -237,11 +254,10 @@ function Products() {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
-                      className={`w-5 h-5 transition-colors ${
-                        wishlist.has(product.id)
-                          ? "fill-red-500 stroke-red-500"
-                          : "fill-none stroke-gray-400"
-                      }`}
+                      className={`w-5 h-5 transition-colors ${wishlist.has(product.id)
+                        ? "fill-red-500 stroke-red-500"
+                        : "fill-none stroke-gray-400"
+                        }`}
                       strokeWidth={1.8}
                     >
                       <path

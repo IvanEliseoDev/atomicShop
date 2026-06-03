@@ -24,6 +24,7 @@ import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerc
 import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories"
 import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
 import contactRoutes from "./routes/contactRoutes";
+import wishlistRoutes from "./routes/favorite/wishlistRoutes";
 
 
 // API
@@ -89,6 +90,7 @@ app.use("/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/e-commerce/brands", brandsEcommerceRoutes)
 app.use("/api", contactRoutes);
 app.use("/e-commerce/profile", profileRoutes);
+app.use("/e-commerce/wishlist", wishlistRoutes);
 
 
 

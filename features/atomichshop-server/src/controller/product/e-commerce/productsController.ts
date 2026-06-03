@@ -107,8 +107,8 @@ export const productsEcommerceController = {
       const { categoryId, currentId } = req.query;
       const products = await modelProducts
         .find({
-          categoryId,
-          _id: { $ne: currentId }, // Excluir el producto que ya se esta viendo
+          categoryId: categoryId as string,
+          _id: { $ne: currentId as string },
           state: true,
         })
         .limit(4);
