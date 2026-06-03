@@ -10,11 +10,11 @@ const productsSchema = new Schema<IProduct>(
     },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Categories",
+      ref: "categories",
     },
     providerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Providers",
+      ref: "providers",
     },
     name: { type: String },
     description: { type: String },

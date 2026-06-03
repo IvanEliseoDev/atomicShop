@@ -111,4 +111,47 @@ export const ecommerceService = {
 
   getCategories: () =>
   fetch(`${BASE_URL}/categories`).then((r) => r.json()),
+
+  // Pagina de productos
+  // ----------------
+  getProductsShop: (params: {
+    minPrice?: number;
+    maxPrice?: number;
+    brandId?: string;
+    sort?: string;
+    categoryId?: string;
+  }) => {
+    const query = new URLSearchParams();
+    if (params.minPrice !== undefined) query.append("minPrice", String(params.minPrice));
+    if (params.maxPrice !== undefined) query.append("maxPrice", String(params.maxPrice));
+    if (params.brandId && params.brandId !== "Todas") query.append("brandId", params.brandId);
+    if (params.sort) query.append("sort", params.sort);
+    if (params.categoryId && params.categoryId !== "Todas") query.append("categoryId", params.categoryId);
+    return fetch(`${BASE_URL}/products/shop?${query.toString()}`).then((r) => r.json());
+  },
+
+  getBrands: () =>
+    fetch(`${BASE_URL}/brands`).then((r) => r.json()),
+
+  // Wishlist
+getWishlist: (customerId: string) =>
+    fetch(`${BASE_URL}/wishlist/${customerId}`, {
+        credentials: "include"
+    }).then(r => r.json()),
+
+addToWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ customerId, productId })
+    }).then(r => r.json()),
+
+removeFromWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/remove`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ customerId, productId })
+    }).then(r => r.json()),
 };

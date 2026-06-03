@@ -1,20 +1,17 @@
-import { model, Schema, Types } from "mongoose";
-import { ICategorie } from "../interface/categories.interface";
 
-export const categorieSchema = new Schema<ICategorie>(
-  {
-    name: {
-      type: String,
-      required: true,
+import { model, Schema } from "mongoose";
+import { ICategory } from "../interface/category.interface";
+const categorySchema = new Schema<ICategory>({
+     name: {
+        type: String
+     },
+     state: {
+        type: String
+     }
     },
-    state: {
-      type: Boolean,
-    },
-  },
-  {
-    timestamps: true,
-    strict: false,
-  },
-);
-
-export const categorieModel = model("Categories", categorieSchema);
+    {
+        timestamps: true,
+        strict: false,
+    }
+)
+export const categoryModel = model<ICategory>("categories", categorySchema)

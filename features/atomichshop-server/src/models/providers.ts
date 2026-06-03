@@ -38,4 +38,4 @@ const productsSchema = new Schema<IProduct>(
 );
 
 // Exportamos el model pero con la unica diferencia que ahora le ponemos esto <IProduct>
-export default model<IProduct>("Providers", productsSchema);
+export default model<IProduct>("providers", productsSchema);

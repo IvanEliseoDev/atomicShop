@@ -51,7 +51,12 @@ export const loginEcommerceController = {
         { expiresIn: "30d" }
       );
 
-      res.cookie("authCookie", token, { httpOnly: true });
+      res.cookie("authCookie", token, {
+        httpOnly: true,
+        sameSite: "lax",   // ← permite que se envíe en el mismo origen
+        secure: false,      // ← false en desarrollo (sin HTTPS)
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 días en ms
+      });
 
       return res.status(200).json({ status: "200", message: "Successful login" });
     } catch (error) {
@@ -67,13 +72,22 @@ export const loginEcommerceController = {
       }
 
       const decoded: any = jsonwebtoken.verify(token, config.jwt.secret);
-      const user = await customerModel.findById(decoded.id).select("_id name mail");
+
+      const user = await customerModel.findById(decoded.id).select("_id name mail image");
 
       if (!user) {
         return res.status(404).json({ status: "404", message: "User not found" });
       }
 
-      return res.status(200).json({ status: "200", user: { id: user._id, name: user.name, mail: user.mail } });
+      return res.status(200).json({
+        status: "200",
+        user: {
+          id: user._id,
+          name: user.name,
+          mail: user.mail,
+          profilePic: user.image  
+        }
+      });
     } catch (error) {
       return res.status(401).json({ status: "401", message: "Invalid session" });
     }
