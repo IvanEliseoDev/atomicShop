@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AuthCard } from "../../Login/Components/AuthCard";
 import { PasswordInput } from "../../Login/Components/PasswordInput";
 import { toast } from "sonner";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const RecoverNewPassword = ({ onConfirm }: { onConfirm: (pass: string) => void }) => {
     const [pass, setPass] = useState("");
@@ -23,7 +24,7 @@ export const RecoverNewPassword = ({ onConfirm }: { onConfirm: (pass: string) =>
     return (
         <AuthCard className="max-w-md">
             <div className="flex flex-col items-center mb-6 text-center">
-                <img src="/logoatomicshop.png" alt="Logo" className="h-20 mb-4" />
+                <LogoYonJob className="h-20 mb-4" />
                 <p className="text-sm text-gray-700 font-medium px-4">¡Muchas gracias por tu paciencia! Ahora puedes crear tu contraseña.</p>
             </div>
             {/* El onKeyDown se coloca aquí para que funcione en ambos inputs */}
