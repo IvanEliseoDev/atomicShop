@@ -25,7 +25,7 @@ export const registerCustomerEcommerceController = {
                 password: passwordHash,
                 telephone,
                 direction,
-                typeCustomer,
+                typeCustomer: "consumidor final",
                 dui,
                 nit,
                 typeActivity,

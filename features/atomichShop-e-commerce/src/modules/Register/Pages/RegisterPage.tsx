@@ -8,6 +8,7 @@ import { EmailInput } from "../../Login/Components/EmailInput";
 import { PasswordInput } from "../../Login/Components/PasswordInput";
 import { TextInput } from "../Components/TextInput";
 import { ecommerceService } from "@/services/ecommerceService";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -80,11 +81,7 @@ export const RegisterPage = () => {
 
       <AuthCard className="max-w-md">
         <div className="flex flex-col items-center mb-6">
-          <img
-            src="/logoatomicshop.png"
-            alt="Logo"
-            className="h-20 w-auto object-contain mb-3"
-          />
+          <LogoYonJob className="h-20" />
           <h2 className="text-gray-800 font-bold text-lg">
             ¡Registrate en nuestra tienda!
           </h2>

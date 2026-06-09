@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { AuthCard } from "../Components/AuthCard";
 import { EmailInput } from "../Components/EmailInput";
 import { PasswordInput } from "../Components/PasswordInput";
+import { LogoYonJob } from "../../../components/ui/LogoYonJob"
 // import { validateEmail, verifyCredentials } from "@/auth/mock/authMock";
 import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
@@ -66,11 +67,7 @@ export const LoginPage = () => {
       <AuthCard>
         {/* Header with logo and divider */}
         <div className="flex items-center gap-4 mb-8">
-          <img
-            src="../public/logoatomicshop.png"
-            alt=""
-            className="object-contain w-39 h-24"
-          />
+          <LogoYonJob />
           {/*Line divider */}
           <div className="w-0.5 h-8 bg-gray-300" />
           {/*Title login */}

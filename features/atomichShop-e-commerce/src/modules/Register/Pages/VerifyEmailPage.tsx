@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { AuthCard } from "@/modules/Login/Components/AuthCard";
 import { ecommerceService } from "@/services/ecommerceService";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const VerifyEmailPage = () => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export const VerifyEmailPage = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <AuthCard>
         <div className="flex flex-col items-center mb-6 text-center">
-          <img src="/logoatomicshop.png" alt="Logo" className="h-20 mb-4" />
+          <LogoYonJob />
           <h2 className="text-gray-800 font-bold text-lg mb-2">
             Verifica tu correo
           </h2>

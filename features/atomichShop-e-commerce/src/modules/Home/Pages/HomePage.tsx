@@ -101,7 +101,7 @@ function HomePage() {
           {/* Targeta */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4  gap-3 relative flex justify-center">
             <img
-              src="/logoatomicshop.png"
+              src="../../../../public/logoatomicshop.png"
               alt=""
               className="w-full h-42 object-contain rounded-lg mt-4"
             />

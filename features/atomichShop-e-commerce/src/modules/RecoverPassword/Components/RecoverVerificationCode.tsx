@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import React, { useState, useRef } from "react";
 import { AuthCard } from "../../Login/Components/AuthCard";
 import { ecommerceService } from "@/services/ecommerceService";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const RecoverVerificationCode = ({ onNext }: { onNext: () => void }) => {
   const [code, setCode] = useState(new Array(6).fill(""));
@@ -73,7 +74,7 @@ export const RecoverVerificationCode = ({ onNext }: { onNext: () => void }) => {
   return (
     <AuthCard className="max-w-md">
       <div className="flex flex-col items-center mb-6 text-center">
-        <img src="/logoatomicshop.png" alt="Logo" className="h-20 mb-4" />
+        <LogoYonJob className="mb-4 h-22" />
         <p className="text-sm text-gray-700 px-4 leading-relaxed">
           Te enviamos un código a tu correo para una confirmación, agrega el
           código aquí:
