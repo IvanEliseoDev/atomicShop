@@ -4,6 +4,7 @@ import { Heart, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
 import { ecommerceService } from "../../../services/ecommerceService";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Product {
   id: string;
@@ -20,7 +21,9 @@ function ProductSlider() {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const { addItem } = useCart();
+  const { user } = useAuth();
 
+   //Cargar productos generales
   useEffect(() => {
     ecommerceService.getHomeProducts().then((data) => {
       const mapped = data.map((p: any) => ({
@@ -40,6 +43,20 @@ function ProductSlider() {
   useEffect(() => {
     setQuantities(Object.fromEntries(products.map((p) => [p.id, 1])));
   }, [products]);
+
+  // Cargar qué productos ya son favoritos del usuario
+  useEffect(() => {
+    if (user?.id) {
+      ecommerceService.getWishlist(user.id).then((res) => {
+        // res.data suele ser el array de productos favoritos
+        const favsMap: Record<string, boolean> = {};
+        res.data.forEach((p: any) => {
+          favsMap[p._id] = true;
+        });
+        setFavorites(favsMap);
+      });
+    }
+  }, [user?.id]);
 
   const updateQuantity = (id: string, delta: number) => {
     setQuantities((prev) => ({
@@ -61,8 +78,28 @@ function ProductSlider() {
     }
   };
 
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleFavorite = async (id: string) => {
+    if (!user?.id) {
+      alert("Debes iniciar sesión para guardar favoritos");
+      return;
+    }
+
+    const isFavorite = !!favorites[id];
+
+    try {
+      if (isFavorite) {
+        // Si ya es favorito, lo quitamos
+        await ecommerceService.removeFromWishlist(user.id, id);
+      } else {
+        // Si no lo es, lo agregamos
+        await ecommerceService.addToWishlist(user.id, id);
+      }
+
+      // Actualizamos el estado visual solo si la petición fue exitosa
+      setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    } catch (error) {
+      console.error("Error al actualizar favoritos:", error);
+    }
   };
 
   return (
