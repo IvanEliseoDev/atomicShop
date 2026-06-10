@@ -19,6 +19,8 @@ export interface ICustomer extends Document {
     password: string | null;
     telephone: string;
     direction: string;
+    deparmet: string,
+    municipality: string,
     typeCustomer: string;
     dui: string;
     nit: string;

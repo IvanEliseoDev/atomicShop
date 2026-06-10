@@ -2,54 +2,8 @@ import React, { useState } from "react";
 import { ShoppingCart, Truck, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
-
-// Datos de ejemplo para los selectores
-const DEPARTAMENTOS = [
-  "San Salvador",
-  "Santa Ana",
-  "San Miguel",
-  "La Libertad",
-  "Sonsonate",
-  "Chalatenango",
-  "Cuscatlán",
-  "La Paz",
-  "Cabañas",
-  "San Vicente",
-  "Usulután",
-  "Morazán",
-  "La Unión",
-  "Ahuachapán",
-];
-
-const MUNICIPIOS: Record<string, string[]> = {
-  "San Salvador": [
-    "San Salvador",
-    "Mejicanos",
-    "Soyapango",
-    "Apopa",
-    "Ilopango",
-    "San Marcos",
-  ],
-  "Santa Ana": ["Santa Ana", "Chalchuapa", "Metapán", "Texistepeque"],
-  "San Miguel": ["San Miguel", "Moncagua", "Quelepa", "Chirilagua"],
-  "La Libertad": [
-    "Santa Tecla",
-    "Antiguo Cuscatlán",
-    "Colón",
-    "Zaragoza",
-    "La Libertad",
-  ],
-  Sonsonate: ["Sonsonate", "Acajutla", "Nahuizalco", "Izalco"],
-  Chalatenango: ["Chalatenango", "La Palma", "San Ignacio"],
-  Cuscatlán: ["Cojutepeque", "Suchitoto", "San Pedro Perulapán"],
-  "La Paz": ["Zacatecoluca", "San Luis Talpa", "Olocuilta"],
-  Cabañas: ["Sensuntepeque", "Ilobasco"],
-  "San Vicente": ["San Vicente", "Apastepeque"],
-  Usulután: ["Usulután", "Jiquilisco", "Santa Elena"],
-  Morazán: ["San Francisco Gotera", "Corinto", "Jocoaitique"],
-  "La Unión": ["La Unión", "Santa Rosa de Lima", "Pasaquina"],
-  Ahuachapán: ["Ahuachapán", "Atiquizaya", "Tacuba"],
-};
+import { useAuth } from "@/lib/AuthContext";
+import { DEPARTAMENTOS, MUNICIPIOS } from "@/constants/locationData";
 
 interface FormData {
   direccion: string;
@@ -67,10 +21,27 @@ const DatosEntrega = () => {
     fechaEntrega: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const { user } = useAuth();
 
   const municipiosDisponibles = form.departamento
     ? (MUNICIPIOS[form.departamento] ?? [])
     : [];
+
+  const handleUsarMisDatos = () => {
+    if (!user) return;
+    setForm((prev) => ({
+      ...prev,
+      direccion: user.direction || "",
+      departamento: user.deparmet || "",
+      municipio: user.municipality || "",
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      direccion: "",
+      departamento: "",
+      municipio: "",
+    }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -160,9 +131,20 @@ const DatosEntrega = () => {
           <div className="flex flex-col gap-4">
             {/* Dirección */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-600">
-                *Dirección
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-gray-600">
+                  *Dirección
+                </label>
+                {user && (user.direction || user.deparmet) && (
+                  <button
+                    type="button"
+                    onClick={handleUsarMisDatos}
+                    className="text-xs text-sky-500 hover:text-sky-700 hover:underline transition cursor-pointer"
+                  >
+                    Utilizar mis datos de registro
+                  </button>
+                )}
+              </div>
               <textarea
                 name="direccion"
                 value={form.direccion}

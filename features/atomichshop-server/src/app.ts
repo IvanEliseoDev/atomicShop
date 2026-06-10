@@ -91,6 +91,7 @@ app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
 app.use("/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/e-commerce/brands", brandsEcommerceRoutes)
 app.use("/api", contactRoutes);
+
 app.use("/e-commerce/profile", profileRoutes);
 app.use("/e-commerce/wishlist", wishlistRoutes);
 app.use("/e-commerce/invoices", invoiceEcommerceRoutes);

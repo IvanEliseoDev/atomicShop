@@ -1,0 +1,47 @@
+// Datos de ejemplo para los selectores
+export const DEPARTAMENTOS = [
+  "San Salvador",
+  "Santa Ana",
+  "San Miguel",
+  "La Libertad",
+  "Sonsonate",
+  "Chalatenango",
+  "Cuscatlán",
+  "La Paz",
+  "Cabañas",
+  "San Vicente",
+  "Usulután",
+  "Morazán",
+  "La Unión",
+  "Ahuachapán",
+];
+
+export const MUNICIPIOS: Record<string, string[]> = {
+  "San Salvador": [
+    "San Salvador",
+    "Mejicanos",
+    "Soyapango",
+    "Apopa",
+    "Ilopango",
+    "San Marcos",
+  ],
+  "Santa Ana": ["Santa Ana", "Chalchuapa", "Metapán", "Texistepeque"],
+  "San Miguel": ["San Miguel", "Moncagua", "Quelepa", "Chirilagua"],
+  "La Libertad": [
+    "Santa Tecla",
+    "Antiguo Cuscatlán",
+    "Colón",
+    "Zaragoza",
+    "La Libertad",
+  ],
+  Sonsonate: ["Sonsonate", "Acajutla", "Nahuizalco", "Izalco"],
+  Chalatenango: ["Chalatenango", "La Palma", "San Ignacio"],
+  Cuscatlán: ["Cojutepeque", "Suchitoto", "San Pedro Perulapán"],
+  "La Paz": ["Zacatecoluca", "San Luis Talpa", "Olocuilta"],
+  Cabañas: ["Sensuntepeque", "Ilobasco"],
+  "San Vicente": ["San Vicente", "Apastepeque"],
+  Usulután: ["Usulután", "Jiquilisco", "Santa Elena"],
+  Morazán: ["San Francisco Gotera", "Corinto", "Jocoaitique"],
+  "La Unión": ["La Unión", "Santa Rosa de Lima", "Pasaquina"],
+  Ahuachapán: ["Ahuachapán", "Atiquizaya", "Tacuba"],
+};

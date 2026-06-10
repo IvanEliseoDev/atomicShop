@@ -172,9 +172,9 @@ const Navbar = () => {
               <div className="grid grid-cols-3 gap-3 p-4">
                 {searchResults.map((product) => (
                   <div
-                    key={product.id}
+                    key={product._id}
                     onClick={() => {
-                      navigate(`/atomicShop/productos/${product.id}`);
+                      navigate(`/atomicShop/productos/${product._id}`);
                       setShowDropdown(false);
                       setSearchQuery("");
                     }}

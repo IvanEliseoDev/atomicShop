@@ -10,7 +10,7 @@ import { HTMLVerificationEmail } from '../../../utils/HTMLVerificationEmail';
 export const registerCustomerEcommerceController = {
     register: async (req: Request, res: Response): Promise<any> => {
         try {
-            const { name, mail, password, telephone, direction, typeCustomer, dui, nit, typeActivity } = req.body;
+            const { name, mail, password, telephone, direction, deparmet, municipality, typeCustomer, dui, nit, typeActivity } = req.body;
 
             const existCustomer = await customerModel.findOne({ mail });
             if (existCustomer) {
@@ -25,6 +25,8 @@ export const registerCustomerEcommerceController = {
                 password: passwordHash,
                 telephone,
                 direction,
+                deparmet,
+                municipality,
                 typeCustomer: "consumidor final",
                 dui,
                 nit,

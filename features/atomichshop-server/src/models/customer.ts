@@ -21,6 +21,12 @@ const customerSchema = new Schema<ICustomer>(
         direction: {
             type: String,
         },
+        deparmet: {
+            type: String,
+        },
+        municipality: {
+            type: String
+        },
         typeCustomer: {
             type: String,
         },

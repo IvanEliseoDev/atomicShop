@@ -7,7 +7,6 @@ import ProviderCarts from "../Components/ProviderCarts";
 import { useState } from "react";
 // Para validar camopos
 import { MapPin, Mail, Phone, Star } from "lucide-react";
-// No se para que sirbe 😁
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 

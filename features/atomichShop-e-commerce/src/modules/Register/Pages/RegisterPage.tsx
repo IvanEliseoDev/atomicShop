@@ -9,6 +9,9 @@ import { PasswordInput } from "../../Login/Components/PasswordInput";
 import { TextInput } from "../Components/TextInput";
 import { ecommerceService } from "@/services/ecommerceService";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
+import { TextAreaInput } from "../Components/TextAreaInput";
+import { useAuth } from "@/lib/AuthContext";
+import { DEPARTAMENTOS, MUNICIPIOS } from "@/constants/locationData";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -19,12 +22,30 @@ export const RegisterPage = () => {
     dui: "",
     telefono: "",
     email: "",
+    direccion: "",
+    departamento: "",
+    municipio: "",
     password: "",
     confirmPassword: "",
   });
 
+  const { user } = useAuth();
+
+  const municipiosDisponibles = formData.departamento
+    ? (MUNICIPIOS[formData.departamento] ?? [])
+    : [];
+
+  const handleUsarMiUbicacion = () => {
+    if (!user) return;
+    setFormData((prev) => ({
+      ...prev,
+      departamento: user.deparmet || "",
+      municipio: user.municipality || "",
+    }));
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: string,
   ) => {
     setFormData({ ...formData, [field]: e.target.value });
@@ -37,6 +58,7 @@ export const RegisterPage = () => {
       dui,
       telefono,
       email,
+      direccion,
       password,
       confirmPassword,
     } = formData;
@@ -53,8 +75,10 @@ export const RegisterPage = () => {
       mail: email,
       password,
       telephone: telefono,
-      direction: "",
+      direction: direccion,
       dui,
+      deparmet: formData.departamento, // ← agregar
+      municipality: formData.municipio, // ← agregar
     });
 
     if (result.status === "201") {
@@ -118,6 +142,62 @@ export const RegisterPage = () => {
             value={formData.email}
             onChange={(e) => handleChange(e, "email")}
           />
+
+          <TextAreaInput
+            placeholder="Direccion"
+            value={formData.direccion}
+            onChange={(e) => handleChange(e, "direccion")}
+          />
+
+          {/* Departamento y Municipio */}
+          <div className="flex items-center justify-between">
+            {user && user.deparmet && (
+              <button
+                type="button"
+                onClick={handleUsarMiUbicacion}
+                className="text-xs text-blue-500 hover:text-blue-700 hover:underline transition cursor-pointer"
+              >
+                Utilizar mi ubicación
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <select
+              value={formData.departamento}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  departamento: e.target.value,
+                  municipio: "",
+                })
+              }
+              className="border border-gray-300 rounded-lg px-3 py-3.5 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
+            >
+              <option value="">Departamento...</option>
+              {DEPARTAMENTOS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={formData.municipio}
+              onChange={(e) =>
+                setFormData({ ...formData, municipio: e.target.value })
+              }
+              disabled={!formData.departamento}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              <option value="">Municipio...</option>
+              {municipiosDisponibles.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <PasswordInput
             value={formData.password}

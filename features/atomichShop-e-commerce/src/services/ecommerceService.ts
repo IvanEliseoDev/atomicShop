@@ -47,6 +47,8 @@ export const ecommerceService = {
     telephone: string;
     direction: string;
     dui: string;
+    deparmet?: string;
+    municipality?: string;
   }) =>
     fetch(`${BASE_URL}/register`, {
       method: "POST",

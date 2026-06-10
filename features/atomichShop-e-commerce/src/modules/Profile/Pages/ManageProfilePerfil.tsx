@@ -1,6 +1,4 @@
 import React from "react";
-import Navbar from "../../Home/Components/Navbar";
-import Footer from "../../Home/Components/Footer";
 import { ProfileHeader } from "../Components/ProfileHeader";
 import { PurchaseHistory } from "../Components/PurchaseHistory";
 
