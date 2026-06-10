@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "../../../lib/AuthContext";
 import { useCart } from "../../../lib/CartContext";
+import { ecommerceService } from "../../../services/ecommerceService";
 
 type MetodoPago = "credito" | "debito" | "efectivo";
 
@@ -32,8 +33,10 @@ const formatExpiry = (value: string) => {
 
 const DatosPago = () => {
   const navigate = useNavigate();
-  const { clearCart, items } = useCart();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  // Unificamos las propiedades del carrito necesarias para calcular los montos y limpiar la UI al terminar
+  const { clearCart, items, subtotal, discount } = useCart();
 
   const [metodo, setMetodo] = useState<MetodoPago>("credito");
   const [form, setForm] = useState<FormPago>({
@@ -74,54 +77,91 @@ const DatosPago = () => {
       return;
     }
 
+    if (!user?.id) {
+      toast.error("Debes iniciar sesión para finalizar la compra");
+      navigate("/atomicShop/login");
+      return;
+    }
+
+    const rawDelivery = sessionStorage.getItem("deliveryData");
+    if (!rawDelivery) {
+      toast.error("Faltan los datos de entrega");
+      navigate("/atomicShop/carrito/datos-entrega");
+      return;
+    }
+
+    setLoading(true);
     try {
-      // 3. ¡Aquí está el cambio clave! Obtenemos el ID directo del objeto global de la API
-      // Nota: Dependiendo de tu base de datos, puede ser user.id o user._id (si usas MongoDB)
-      const customerId = user?.id;
-      if (!customerId) {
-        toast.error("No se encontró una sesión activa del cliente en el sistema.");
-        return;
+      const deliveryData = JSON.parse(rawDelivery);
+      let wompiTransactionId: string | null = null;
+
+      // Solo procesar pago con Wompi si el método es tarjeta
+      if (metodo === "credito" || metodo === "debito") {
+        // 1. Obtener token Bearer de Wompi desde nuestro backend
+        const tokenResponse = await ecommerceService.getWompiToken();
+        if (!tokenResponse?.access_token) {
+          toast.error("No se pudo conectar con el procesador de pagos");
+          setLoading(false);
+          return;
+        }
+
+        // 2. Ejecutar el cargo con los datos de tarjeta del formulario
+        const wompiResponse = await ecommerceService.payWithWompi(
+          tokenResponse.access_token,
+          {
+            monto: subtotal - discount,
+            emailCliente: user.mail ?? "",
+            nombreCliente: user.name ?? "",
+            tokenTarjeta: form.numeroTarjeta.replace(/\s/g, ""),
+            cvv: form.cvv,
+            vigencia: form.vigencia,
+            nombreTitular: form.nombreTitular,
+            nombreProducto: "Compra en AtomicShop",
+          },
+        );
+
+        // 3. Verificar que Wompi haya aprobado el pago
+        if (!wompiResponse?.codigoAutorizacion && !wompiResponse?.id) {
+          toast.error(
+            "El pago fue rechazado. Verifica los datos de tu tarjeta.",
+          );
+          setLoading(false);
+          return;
+        }
+
+        wompiTransactionId =
+          wompiResponse.codigoAutorizacion ?? wompiResponse.id;
       }
 
-      // 2. Calcular los montos basados en lo que hay en el carrito
-      const subtotal = items.reduce((acc: number, item: any) => acc + (Number(item.price) * Number(item.quantity)), 0);
-      const descuentoPorcentaje = "10%";
-      const total = subtotal * 0.9;
-
-      // 3. Mapear los productos
-      const productosPayload = items.map((item: any) => ({
-        idProduct: String(item.id),
-        qty: Number(item.quantity),
-        unitPrice: Number(item.price)
-      }));
-
-      // 4. Enviar los datos al endpoint con Fetch
-      const response = await fetch(`http://localhost:4000/api/v1/e-commerce/profile/${customerId}/purchases`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          total: total,
-          descuento: descuentoPorcentaje,
-          productos: productosPayload
-        }),
+      // 4. Crear la factura en nuestro backend centralizado pasando la metadata del carrito si el servicio lo requiere
+      const result = await ecommerceService.createInvoice({
+        customerId: user.id,
+        deliveryData,
+        paymentMethod: metodo,
+        wompiTransactionId,
+        // Nota: Si tu backend necesita el desglose exacto de productos implementado en tu rama, se envía así de forma segura:
+        productos: items.map((item: any) => ({
+          idProduct: String(item.id),
+          qty: Number(item.quantity),
+          unitPrice: Number(item.price)
+        }))
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Error al registrar la compra");
+      if (result.status === "201" || result.ok) {
+        sessionStorage.removeItem("deliveryData");
+        clearCart();
+        toast.success(
+          "Compra finalizada. Revisa tu correo para ver tu factura.",
+        );
+        navigate("/atomicShop");
+      } else {
+        toast.error(result.message ?? "Ocurrió un error al procesar la compra");
       }
-
-      // 5. Todo salió bien
-      toast.success("¡Compra finalizada con éxito!");
-      clearCart();
-      navigate("/atomicShop");
-
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      toast.error(error.message || "Hubo un problema procesando tu pago en el servidor.");
+      toast.error("Error de conexión o de procesamiento del servidor. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -323,12 +363,13 @@ const DatosPago = () => {
 
           {/* Botón finalizar */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.97 }}
             onClick={handleFinalizar}
-            className="mt-6 w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2.5 rounded-lg transition cursor-pointer"
+            disabled={loading}
+            className="mt-6 w-full bg-sky-500 hover:bg-sky-600 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition cursor-pointer"
           >
-            Finalizar compra
+            {loading ? "Procesando..." : "Finalizar compra"}
           </motion.button>
         </div>
       </div>

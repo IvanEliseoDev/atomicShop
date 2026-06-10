@@ -13,13 +13,19 @@ export const config = {
   jwt: {
     secret: getEnvVar("JWT_SECRET"),
   },
-  email:{
-        user: process.env.USER_EMAIL,
-        password: process.env.USER_PASSWORD
+  email: {
+    user: process.env.USER_EMAIL,
+    password: process.env.USER_PASSWORD,
   },
   cloudinary: {
     cloudinary_name: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinary_key: process.env.CLOUDINARY_API_KEY,
-    cloudinary_secret: process.env.CLOUDINARY_API_SECRET
-  }
+    cloudinary_secret: process.env.CLOUDINARY_API_SECRET,
+  },
+  wompi: {
+    grant_type: process.env.GRANT_TYPE,
+    audience: process.env.AUDIENCE,
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+  },
 };

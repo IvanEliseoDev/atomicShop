@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AuthCard } from "../../Login/Components/AuthCard";
 import { EmailInput } from "../../Login/Components/EmailInput";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const RecoverEmailEntry = ({ onVerify }: { onVerify: (email: string) => void }) => {
     const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ export const RecoverEmailEntry = ({ onVerify }: { onVerify: (email: string) => v
     return (
         <AuthCard className="max-w-md">
             <div className="flex flex-col items-center mb-6 text-center">
-                <img src="/logoatomicshop.png" alt="Logo" className="h-20 mb-4" />
+                <LogoYonJob />
                 <h2 className="text-gray-800 font-bold text-lg">¿Olvidaste tu contraseña?</h2>
             </div>
             {/* Agregado onKeyPress aquí */}
