@@ -61,7 +61,7 @@ function ProductDetail() {
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addItem({
-        id: product.id,
+        id: product.id.toString(),
         name: product.name,
         price: product.price,
         originalPrice: product.originalPrice,
@@ -278,7 +278,7 @@ function ProductDetail() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addItem({ id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice, image: p.image });
+                    addItem({ id: String(p.id), name: p.name, price: p.price, originalPrice: p.originalPrice, image: p.image });
                   }}
                   className="w-8 h-8 bg-sky-500 hover:bg-sky-600 rounded-lg flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 >

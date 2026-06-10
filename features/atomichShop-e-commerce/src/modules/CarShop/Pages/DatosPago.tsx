@@ -3,6 +3,7 @@ import { ShoppingCart, Truck, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useAuth } from "../../../lib/AuthContext";
 import { useCart } from "../../../lib/CartContext";
 
 type MetodoPago = "credito" | "debito" | "efectivo";
@@ -31,7 +32,8 @@ const formatExpiry = (value: string) => {
 
 const DatosPago = () => {
   const navigate = useNavigate();
-  const { clearCart } = useCart();
+  const { clearCart, items } = useCart();
+  const { user } = useAuth();
 
   const [metodo, setMetodo] = useState<MetodoPago>("credito");
   const [form, setForm] = useState<FormPago>({
@@ -65,15 +67,62 @@ const DatosPago = () => {
     return newErrors;
   };
 
-  const handleFinalizar = () => {
+  const handleFinalizar = async () => {
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    toast.success("¡Compra finalizada con éxito!");
-    clearCart();
-    navigate("/atomicShop");
+
+    try {
+      // 3. ¡Aquí está el cambio clave! Obtenemos el ID directo del objeto global de la API
+      // Nota: Dependiendo de tu base de datos, puede ser user.id o user._id (si usas MongoDB)
+      const customerId = user?.id;
+      if (!customerId) {
+        toast.error("No se encontró una sesión activa del cliente en el sistema.");
+        return;
+      }
+
+      // 2. Calcular los montos basados en lo que hay en el carrito
+      const subtotal = items.reduce((acc: number, item: any) => acc + (Number(item.price) * Number(item.quantity)), 0);
+      const descuentoPorcentaje = "10%";
+      const total = subtotal * 0.9;
+
+      // 3. Mapear los productos
+      const productosPayload = items.map((item: any) => ({
+        idProduct: String(item.id),
+        qty: Number(item.quantity),
+        unitPrice: Number(item.price)
+      }));
+
+      // 4. Enviar los datos al endpoint con Fetch
+      const response = await fetch(`http://localhost:4000/api/v1/e-commerce/profile/${customerId}/purchases`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          total: total,
+          descuento: descuentoPorcentaje,
+          productos: productosPayload
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Error al registrar la compra");
+      }
+
+      // 5. Todo salió bien
+      toast.success("¡Compra finalizada con éxito!");
+      clearCart();
+      navigate("/atomicShop");
+
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Hubo un problema procesando tu pago en el servidor.");
+    }
   };
 
   return (

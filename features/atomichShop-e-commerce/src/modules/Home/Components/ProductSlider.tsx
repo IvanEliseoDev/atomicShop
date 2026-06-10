@@ -1,7 +1,7 @@
 import { useCart } from "../../../lib/CartContext";
 import { useEffect, useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import { ecommerceService } from "../../../services/ecommerceService";
 import { useAuth } from "@/lib/AuthContext";
@@ -23,6 +23,7 @@ function ProductSlider() {
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const { addItem } = useCart();
   const { user } = useAuth();
+  const [showCartAlert, setShowCartAlert] = useState(false)
 
   // Cargar productos generales
   useEffect(() => {
@@ -66,6 +67,12 @@ function ProductSlider() {
   };
 
   const handleAddToCart = (product: Product) => {
+    // 2. VALIDACIÓN: Si no está logueado, abre el nuevo modal y detiene la función
+    if (!user) {
+      setShowCartAlert(true);
+      return;
+    }
+
     const qty = quantities[product.id] ?? 1;
     for (let i = 0; i < qty; i++) {
       addItem({
@@ -96,6 +103,8 @@ function ProductSlider() {
       console.error("Error al actualizar favoritos:", error);
     }
   };
+
+
 
   return (
     <section className="w-full max-w-5xl mx-auto my-8 px-4 relative">
@@ -197,7 +206,7 @@ function ProductSlider() {
         ))}
       </div>
 
-      {/* MODAL CORREGIDO: Fuera del grid y con condicional */}
+      {/* MODAL FAVORITO */}
       <AnimatePresence>
         {showAlert && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 backdrop-blur-sm">
@@ -216,6 +225,37 @@ function ProductSlider() {
               </p>
               <button
                 onClick={() => setShowAlert(false)}
+                className="mt-8 w-full bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors cursor-pointer shadow-md"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ================= MODAL 2: CARRITO DE COMPRAS ================= */}
+      <AnimatePresence>
+        {showCartAlert && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center"
+            >
+              <div className="text-blue-500 mb-4 flex justify-center">
+                <div className="p-3 bg-blue-50 rounded-full">
+                  {/* Se eliminó 'animate-bounce' para mantener el icono estático */}
+                  <ShoppingCart size={46} className="text-blue-500" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800">¡Atención!</h3>
+              <p className="text-gray-600 mt-3">
+                Debes iniciar sesión para poder agregar productos a tu carrito de compras.
+              </p>
+              <button
+                onClick={() => setShowCartAlert(false)}
                 className="mt-8 w-full bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors cursor-pointer shadow-md"
               >
                 Entendido

@@ -15,7 +15,7 @@ function ButtonWhatsapp() {
       onClick={handleClick}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
-      className="fixed bottom-6 right-6 z-50 bg-gray-500 hover:bg-gray-600 transition rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer"
+      className="fixed bottom-6 right-6 z-40 bg-gray-500 hover:bg-gray-600 transition rounded-full w-15 h-15 flex items-center justify-center shadow-lg cursor-pointer"
       aria-label="Contactar por WhatsApp"
     >
       <img
