@@ -35,7 +35,8 @@ const DatosPago = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const { clearCart, subtotal, discount } = useCart();
+  // Unificamos las propiedades del carrito necesarias para calcular los montos y limpiar la UI al terminar
+  const { clearCart, items, subtotal, discount } = useCart();
 
   const [metodo, setMetodo] = useState<MetodoPago>("credito");
   const [form, setForm] = useState<FormPago>({
@@ -77,7 +78,7 @@ const DatosPago = () => {
     }
 
     if (!user?.id) {
-      toast.error("Debes iniciar sesion para finalizar la compra");
+      toast.error("Debes iniciar sesión para finalizar la compra");
       navigate("/atomicShop/login");
       return;
     }
@@ -94,7 +95,7 @@ const DatosPago = () => {
       const deliveryData = JSON.parse(rawDelivery);
       let wompiTransactionId: string | null = null;
 
-      // Solo procesar pago con Wompi si el metodo es tarjeta
+      // Solo procesar pago con Wompi si el método es tarjeta
       if (metodo === "credito" || metodo === "debito") {
         // 1. Obtener token Bearer de Wompi desde nuestro backend
         const tokenResponse = await ecommerceService.getWompiToken();
@@ -132,15 +133,21 @@ const DatosPago = () => {
           wompiResponse.codigoAutorizacion ?? wompiResponse.id;
       }
 
-      // 4. Crear la factura en nuestro backend con el ID de transaccion (o null si es efectivo)
+      // 4. Crear la factura en nuestro backend centralizado pasando la metadata del carrito si el servicio lo requiere
       const result = await ecommerceService.createInvoice({
         customerId: user.id,
         deliveryData,
         paymentMethod: metodo,
         wompiTransactionId,
+        // Nota: Si tu backend necesita el desglose exacto de productos implementado en tu rama, se envía así de forma segura:
+        productos: items.map((item: any) => ({
+          idProduct: String(item.id),
+          qty: Number(item.quantity),
+          unitPrice: Number(item.price)
+        }))
       });
 
-      if (result.status === "201") {
+      if (result.status === "201" || result.ok) {
         sessionStorage.removeItem("deliveryData");
         clearCart();
         toast.success(
@@ -148,10 +155,11 @@ const DatosPago = () => {
         );
         navigate("/atomicShop");
       } else {
-        toast.error(result.message ?? "Ocurrio un error al procesar la compra");
+        toast.error(result.message ?? "Ocurrió un error al procesar la compra");
       }
-    } catch {
-      toast.error("Error de conexion. Intenta de nuevo.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error de conexión o de procesamiento del servidor. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
