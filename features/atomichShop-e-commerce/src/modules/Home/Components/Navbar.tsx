@@ -7,6 +7,7 @@ import { toast } from "sonner"; //
 import { useCart } from "@/lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
 import { ecommerceService } from "@/services/ecommerceService";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 const Navbar = () => {
   // const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
@@ -94,11 +95,7 @@ const Navbar = () => {
           className="flex items-center gap-2 cursor-pointer shrink-0"
           onClick={() => navigate("/atomicShop")}
         >
-          <img
-            src="/logoatomicshop.png"
-            alt="Atomic Shop"
-            className="h-20 w-auto object-contain"
-          />
+          <LogoYonJob className="h-20" />
         </div>
 
         {/* Nav */}
@@ -175,9 +172,9 @@ const Navbar = () => {
               <div className="grid grid-cols-3 gap-3 p-4">
                 {searchResults.map((product) => (
                   <div
-                    key={product.id}
+                    key={product._id}
                     onClick={() => {
-                      navigate(`/atomicShop/productos/${product.id}`);
+                      navigate(`/atomicShop/productos/${product._id}`);
                       setShowDropdown(false);
                       setSearchQuery("");
                     }}
@@ -355,13 +352,12 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            /* Si no hay nadie, tu botón original de Crear Cuenta */
             <button
               onClick={() => navigate("/login")}
               className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
             >
               <User size={22} />
-              <span className="text-xs mt-0.5"> Crear cuenta</span>
+              <span className="text-xs mt-0.5"> Iniciar sesión</span>
             </button>
           )}
         </div>

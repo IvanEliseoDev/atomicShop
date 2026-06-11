@@ -47,6 +47,8 @@ export const ecommerceService = {
     telephone: string;
     direction: string;
     dui: string;
+    deparmet?: string;
+    municipality?: string;
   }) =>
     fetch(`${BASE_URL}/register`, {
       method: "POST",
@@ -54,7 +56,6 @@ export const ecommerceService = {
       credentials: "include",
       body: JSON.stringify({
         ...data,
-        typeCustomer: "natural",
         state: "unverified",
       }),
     }).then((r) => r.json()),
@@ -107,10 +108,11 @@ export const ecommerceService = {
     }).then((r) => r.json()),
 
   searchProducts: (q: string) =>
-  fetch(`${BASE_URL}/products/search?q=${encodeURIComponent(q)}`).then(r => r.json()),
+    fetch(`${BASE_URL}/products/search?q=${encodeURIComponent(q)}`).then((r) =>
+      r.json(),
+    ),
 
-  getCategories: () =>
-  fetch(`${BASE_URL}/categories`).then((r) => r.json()),
+  getCategories: () => fetch(`${BASE_URL}/categories`).then((r) => r.json()),
 
   // Pagina de productos
   // ----------------
@@ -122,14 +124,96 @@ export const ecommerceService = {
     categoryId?: string;
   }) => {
     const query = new URLSearchParams();
-    if (params.minPrice !== undefined) query.append("minPrice", String(params.minPrice));
-    if (params.maxPrice !== undefined) query.append("maxPrice", String(params.maxPrice));
-    if (params.brandId && params.brandId !== "Todas") query.append("brandId", params.brandId);
+    if (params.minPrice !== undefined)
+      query.append("minPrice", String(params.minPrice));
+    if (params.maxPrice !== undefined)
+      query.append("maxPrice", String(params.maxPrice));
+    if (params.brandId && params.brandId !== "Todas")
+      query.append("brandId", params.brandId);
     if (params.sort) query.append("sort", params.sort);
-    if (params.categoryId && params.categoryId !== "Todas") query.append("categoryId", params.categoryId);
-    return fetch(`${BASE_URL}/products/shop?${query.toString()}`).then((r) => r.json());
+    if (params.categoryId && params.categoryId !== "Todas")
+      query.append("categoryId", params.categoryId);
+    return fetch(`${BASE_URL}/products/shop?${query.toString()}`).then((r) =>
+      r.json(),
+    );
   },
 
-  getBrands: () =>
-    fetch(`${BASE_URL}/brands`).then((r) => r.json()),
+  getBrands: () => fetch(`${BASE_URL}/brands`).then((r) => r.json()),
+
+  // Wishlist
+  getWishlist: (customerId: string) =>
+    fetch(`${BASE_URL}/wishlist/${customerId}`, {
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  addToWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ customerId, productId }),
+    }).then((r) => r.json()),
+
+  removeFromWishlist: (customerId: string, productId: string) =>
+    fetch(`${BASE_URL}/wishlist/remove`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ customerId, productId }),
+    }).then((r) => r.json()),
+
+  // CartShop
+  createInvoice: (data: {
+    customerId: string;
+    deliveryData: {
+      direccion: string;
+      departamento: string;
+      municipio: string;
+      fechaEntrega?: string;
+    };
+    paymentMethod: "credito" | "debito" | "efectivo";
+    wompiTransactionId?: string | null;
+  }) =>
+    fetch(`${BASE_URL}/invoices`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }).then((r) => r.json()),
+
+  getInvoicesByCustomer: (customerId: string) =>
+    fetch(`${BASE_URL}/invoices/customer/${customerId}`, {
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  getInvoiceById: (invoiceId: string) =>
+    fetch(`${BASE_URL}/invoices/${invoiceId}`, {
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  getWompiToken: () =>
+    fetch(`${BASE_URL}/wompi/token`, {
+      method: "POST",
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  payWithWompi: (
+    bearerToken: string,
+    formData: {
+      monto: number;
+      emailCliente: string;
+      nombreCliente: string;
+      tokenTarjeta: string;
+      cvv: string;
+      vigencia: string;
+      nombreTitular: string;
+      nombreProducto?: string;
+    },
+  ) =>
+    fetch(`${BASE_URL}/wompi/pay`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ bearerToken, formData }),
+    }).then((r) => r.json()),
 };

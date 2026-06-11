@@ -10,6 +10,8 @@ import productsRoutes from "./routes/product/products";
 import providerRoutes from "./routes/provider/provider";
 import { customerRouter } from "./routes/customer/customer";
 import { employeeRouter } from "./routes/employee";
+import profileRoutes from "./routes/profileRoutes/profileRoutes";
+import wompiRoutes from "./routes/wompi";
 
 // E-COMMERCE
 import productsEcomerceRoutes from "./routes/product/e-commerce/products";
@@ -23,6 +25,8 @@ import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerc
 import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories"
 import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
 import contactRoutes from "./routes/contactRoutes";
+import wishlistRoutes from "./routes/favorite/wishlistRoutes";
+import invoiceEcommerceRoutes from "./routes/invoice/e-commerce/invoice";
 
 // API
 import { seedRouter } from "./routes/seed";
@@ -67,6 +71,18 @@ app.use("/api/v1/admin/sale", salesRouter)
 
 
 // E-COMMERCE
+app.use("/api/v1/e-commerce/products", productsEcomerceRoutes);
+app.use("/api/v1/e-commerce/banners", bannersEcommerceRotes)
+app.use("/api/v1/e-commerce/providers", providersEcommerceRoutes)
+app.use("/api/v1/e-commerce/carts", cartsEcommerceRoutes)
+app.use("/api/v1/e-commerce/login", loginEcommerceRoutes)
+app.use("/api/v1/e-commerce/logout", logoutEcommerceRoutes)
+app.use("/api/v1/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
+app.use("/api/v1/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
+app.use("/api/v1/e-commerce/profile", profileRoutes);
+app.use("/api/v1/e-commerce/invoices", invoiceEcommerceRoutes);
+app.use("/api/v1/e-commerce/wompi", wompiRoutes);
+
 app.use("/e-commerce/products", productsEcomerceRoutes);
 app.use("/e-commerce/banners", bannersEcommerceRotes)
 app.use("/e-commerce/providers", providersEcommerceRoutes)
@@ -78,5 +94,10 @@ app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
 app.use("/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/e-commerce/brands", brandsEcommerceRoutes)
 app.use("/api", contactRoutes);
+
+app.use("/e-commerce/profile", profileRoutes);
+app.use("/e-commerce/wishlist", wishlistRoutes);
+app.use("/e-commerce/invoices", invoiceEcommerceRoutes);
+app.use("/e-commerce/wompi", wompiRoutes);
 
 export default app;

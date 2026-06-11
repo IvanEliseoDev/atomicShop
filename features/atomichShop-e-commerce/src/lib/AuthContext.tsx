@@ -3,10 +3,13 @@ import type { ReactNode } from "react";
 import { ecommerceService } from "../services/ecommerceService";
 
 interface AuthUser {
-  id: string;
-  name: string;
-  mail: string;
-  profilePic?: string;
+    id: string;
+    name: string;
+    mail: string;
+    profilePic?: string;
+    direction?: string;
+    deparmet?: string;
+    municipality?: string;
 }
 
 interface AuthContextType {

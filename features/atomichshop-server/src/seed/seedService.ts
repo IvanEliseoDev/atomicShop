@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { modelBrands } from "../models/brands";
-import { categoryModel } from "../models/categories";
+import { categoryModel  } from "../models/categories";
 import providerModel from "../models/providers";
 import { modelProducts } from "../models/product";
 import { modelBanner } from "../models/banner";

@@ -21,6 +21,12 @@ const customerSchema = new Schema<ICustomer>(
         direction: {
             type: String,
         },
+        deparmet: {
+            type: String,
+        },
+        municipality: {
+            type: String
+        },
         typeCustomer: {
             type: String,
         },
@@ -41,9 +47,39 @@ const customerSchema = new Schema<ICustomer>(
             default: 0,
         },
         timeOut: {
-            type: Date,           
+            type: Date,
             default: null,
         },
+        image: {
+            type: String,
+            default: ""  //Se pone asi ya que si un cliente no pone una imagen no deje el campo vacio, si no que mejor solo guarde un texto vacio
+        },
+        public_id: {
+            type: String,
+            default: ""
+        },
+        wishlist: {
+            type: [String],
+            default: []
+        },
+        purchases: {
+            type: [
+                {
+                    id: { type: String, required: true },
+                    date: { type: String, required: true },
+                    discount: { type: String, default: "0%" },
+                    total: { type: Number, required: true },
+                    productos: [
+                        {
+                            idProduct: { type: String, required: true },
+                            qty: { type: Number, required: true },
+                            unitPrice: { type: Number }
+                        }
+                    ]
+                }
+            ],
+            default: [] // Empieza como un array vacío para cada cliente nuevo
+        }
     },
     {
         timestamps: true,
