@@ -28,6 +28,7 @@ import contactRoutes from "./routes/contactRoutes";
 import { seedRouter } from "./routes/seed";
 import cookieParser from "cookie-parser";
 import { categoryRouter } from "./routes/categories/categories";
+import { salesRouter } from "./routes/sales/sales";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -62,18 +63,10 @@ app.use("/api/v1/admin/provider", providerRoutes);
 app.use("/api/v1/admin/customers", customerRouter);
 app.use("/api/v1/admin/employees", employeeRouter);
 app.use("/api/v1/admin/category", categoryRouter);
+app.use("/api/v1/admin/sale", salesRouter)
+
 
 // E-COMMERCE
-<<<<<<< HEAD
-app.use("/api/v1/e-commerce/products", productsEcomerceRoutes);
-app.use("/api/v1/e-commerce/banners", bannersEcommerceRotes)
-app.use("/api/v1/e-commerce/providers", providersEcommerceRoutes)
-app.use("/api/v1/e-commerce/carts", cartsEcommerceRoutes)
-app.use("/api/v1/e-commerce/login", loginEcommerceRoutes)
-app.use("/api/v1/e-commerce/logout", logoutEcommerceRoutes)
-app.use("/api/v1/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
-app.use("/api/v1/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
-=======
 app.use("/e-commerce/products", productsEcomerceRoutes);
 app.use("/e-commerce/banners", bannersEcommerceRotes)
 app.use("/e-commerce/providers", providersEcommerceRoutes)
@@ -85,6 +78,5 @@ app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
 app.use("/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/e-commerce/brands", brandsEcommerceRoutes)
 app.use("/api", contactRoutes);
->>>>>>> 0351b7839c65bbc933b671bec715376221e0c661
 
 export default app;

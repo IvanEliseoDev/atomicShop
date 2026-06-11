@@ -64,7 +64,7 @@ export const categoryController = {
             const { id } = req.params;
             const { name, state } = req.body;
 
-            // { new: true } sirve para que retorne el documento ya actualizado y no el viejo
+            // sirve para que retorne el documento ya actualizado y no el viejo
             const updatedCategory = await categoryModel.findByIdAndUpdate(
                 id, 
                 { name, state }, 

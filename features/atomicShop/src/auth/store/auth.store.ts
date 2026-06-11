@@ -26,7 +26,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     email: null,
     position: null,
     _id: null,
-    authStatus: "not-authenticated",
+    authStatus: "checking",
 
     isAdmin: () => {
         const position = get().position
@@ -71,8 +71,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     },
 
     checkAuthStatus: async() => {
-        set({authStatus:"checking"})
         try {
+            set({authStatus:"checking"})
             const data = await CheckStatusAction()
             set({email: data.data.email, position: data.data.position, authStatus: "authenticated", _id: data.data._id})
             return true

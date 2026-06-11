@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { modelCategories } from "../../../models/categories";
+import { categoryModel } from "../../../models/categories";
 
 export const categoriesEcommerceController = {
   // Obtener las categorias para llenar el submenu de categorias que esta debajo del navbar en el ecommerce
   getCategories: async (req: Request, res: Response): Promise<void> => {
     try {
-      const categories = await modelCategories.find()
+      const categories = await categoryModel.find()
 
       if (!categories) {
         res.status(404).json({ message: "No hay categorias disponibles" });

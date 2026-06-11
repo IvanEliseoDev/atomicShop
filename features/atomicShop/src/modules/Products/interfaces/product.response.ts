@@ -16,7 +16,7 @@ export interface ProductI {
     stock:       number;
     price:       number;
     discount:    number;
-    state:       boolean;
+    state:       string;
     createdAt:   Date;
     updatedAt:   Date;
     __v:         number;
