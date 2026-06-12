@@ -10,6 +10,7 @@ import productsRoutes from "./routes/product/products";
 import providerRoutes from "./routes/provider/provider";
 import { customerRouter } from "./routes/customer/customer";
 import { employeeRouter } from "./routes/employee";
+import { adminRouter } from "./routes/admin";
 
 // E-COMMERCE
 import productsEcomerceRoutes from "./routes/product/e-commerce/products";
@@ -66,6 +67,7 @@ app.use("/api/admin/provider", providerRoutes);
 app.use("/api/admin/customers", customerRouter);
 app.use("/api/admin/employees", employeeRouter);
 app.use("/api/admin/category", categoryRouter);
+app.use("/api/admin", adminRouter),
 
 // E-COMMERCE
 app.use("/api/e-commerce/products", productsEcomerceRoutes);

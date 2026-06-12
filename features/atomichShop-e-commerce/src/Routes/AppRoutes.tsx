@@ -42,7 +42,7 @@ export const appRouter = createBrowserRouter([
     element: <VerifyEmailPage />,
   },
   {
-    path: "/atomicShop/",
+    path: "/",
     element: <AtomicShopLayout />,
     children: [
       {
