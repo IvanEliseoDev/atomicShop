@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/e-commerce";
+const BASE_URL = "http://localhost:4000/api/e-commerce";
 
 export const ecommerceService = {
   // Pagina de inicio

@@ -32,7 +32,7 @@ export const ProfileHeader = () => {
     useEffect(() => {
         if (!user?.id) return; // Si no hay sesión, no hace nada
 
-        axios.get(`http://localhost:4000/e-commerce/profile/${user.id}`, {
+        axios.get(`http://localhost:4000/api/e-commerce/profile/${user.id}`, {
             withCredentials: true // Envía la cookie de sesión
         })
             .then(response => {
@@ -80,7 +80,7 @@ export const ProfileHeader = () => {
             }
 
             const response = await axios.put(
-                `http://localhost:4000/e-commerce/profile/update/${user.id}`,
+                `http://localhost:4000/api/e-commerce/profile/update/${user.id}`,
                 formDataToSend,
                 {
                     withCredentials: true, // Envía la cookie

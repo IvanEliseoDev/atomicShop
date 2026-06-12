@@ -45,7 +45,7 @@ function HomePage() {
     setIsSending(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/contact", {
+      const response = await fetch("http://localhost:4000/api/e-commerce/contact/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contactForm),

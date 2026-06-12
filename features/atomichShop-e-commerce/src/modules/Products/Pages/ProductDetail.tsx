@@ -44,7 +44,7 @@ function ProductDetail() {
     setLoading(true);
 
     // Fetch producto principal
-    fetch(`http://localhost:4000/e-commerce/products/${id}`)
+    fetch(`http://localhost:4000/api/e-commerce/products/${id}`)
       .then((r) => r.json())
       .then((data) => {
         setProduct(data);
@@ -57,7 +57,7 @@ function ProductDetail() {
               : data.categoryId;
 
           fetch(
-            `http://localhost:4000/e-commerce/products/similar?categoryId=${categoryId}&currentId=${id}`,
+            `http://localhost:4000/api/e-commerce/products/similar?categoryId=${categoryId}&currentId=${id}`,
           )
             .then((r) => r.json())
             .then((similar) =>

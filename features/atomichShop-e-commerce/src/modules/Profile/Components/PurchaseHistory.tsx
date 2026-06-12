@@ -63,7 +63,7 @@ export const PurchaseHistory = () => {
       }
 
       const response = await fetch(
-        `http://localhost:4000/api/v1/e-commerce/invoices/customer/${customerId}`,
+        `http://localhost:4000/api/e-commerce/invoices/customer/${customerId}`,
         {
           credentials: "include",
         },
@@ -115,7 +115,7 @@ export const PurchaseHistory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/v1/e-commerce/invoices/${selectedPurchase.id}`,
+        `http://localhost:4000/api/e-commerce/invoices/${selectedPurchase.id}`,
         {
           method: "DELETE",
           headers: {
