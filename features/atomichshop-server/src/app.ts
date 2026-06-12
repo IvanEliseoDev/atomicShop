@@ -33,6 +33,7 @@ import { seedRouter } from "./routes/seed";
 import cookieParser from "cookie-parser";
 import { categoryRouter } from "./routes/categories/categories";
 import { salesRouter } from "./routes/sales/sales";
+import { brandsRouter } from "./routes/brands/brands";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -67,7 +68,8 @@ app.use("/api/v1/admin/provider", providerRoutes);
 app.use("/api/v1/admin/customers", customerRouter);
 app.use("/api/v1/admin/employees", employeeRouter);
 app.use("/api/v1/admin/category", categoryRouter);
-app.use("/api/v1/admin/sale", salesRouter)
+app.use("/api/v1/admin/sale", salesRouter);
+app.use("/api/v1/admin/brands", brandsRouter);
 
 
 // E-COMMERCE

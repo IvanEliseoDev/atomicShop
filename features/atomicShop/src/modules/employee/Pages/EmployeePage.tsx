@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Search,
-  Plus,
   SlidersHorizontal,
   MoreVertical,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import {
   Card,
   CardContent,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -23,12 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MOCK_EMPLOYEES } from '../Mock/Employee.mock';
-import { HeaderEmployee } from '../Components/HeaderEmployee';
+import { useGetEmployees } from '../hooks/useGetEmployees';
 import { useFilterEmployee } from '../hooks/useFilterEmployee';
 import { HeaderAdmin } from '@/components/custom/header/HeaderAdmin';
 import { CustomPaginationPage } from '@/components/custom/pagination/CustomPaginationPage';
-import { useNavigate } from 'react-router';
+import { data, useNavigate } from 'react-router';
 
 const getStatusDotColor = (status: string) => {
   switch (status) {
@@ -53,12 +46,29 @@ export const EmployeePage = () => {
   const [positionFilter, setPositionFilter] = useState('Ventas');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  // Filter and paginate employees
-  const filteredEmployees = MOCK_EMPLOYEES.filter((emp) =>
-    emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    emp.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
   const navigate = useNavigate()
+
+  const { data: employeesResponse, isLoading: isEmployeesLoading } = useGetEmployees();
+  const employees = employeesResponse?.data ?? [];
+
+  
+
+  if (isEmployeesLoading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-slate-50 p-4">
+        <p className="text-gray-600 text-lg">Cargando empleados...</p>
+      </div>
+    );
+  }
+
+  const filteredEmployees = employees.filter((emp) => {
+    const matchesSearch =
+      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.position?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesSearch 
+  });
 
   const paginatedEmployees = filteredEmployees.slice(
     (currentPage - 1) * itemsPerPage,
@@ -83,22 +93,23 @@ export const EmployeePage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: 'easeOut' },
     },
   };
 
+  console.log("Empleados paginados y obtenidos: ", paginatedEmployees)
+
   return (
     <motion.main
-      className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-4 md:p-6 lg:p-8"
+      className="w-full min-h-screen bg-linear-to-br from-blue-50 to-slate-50 p-4 md:p-6 lg:p-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       <div className="max-w-7xl mx-auto space-y-8">
 
-        <motion.div variants={{ itemVariants }} className="space-y-6">
+        <motion.div variants={itemVariants} className="space-y-6">
           {/* Header & Search */}
-          <HeaderAdmin title='Empleados' amount={MOCK_EMPLOYEES.length} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onAddClick={() => navigate("/atomicAdmin/empleados/nuevo")} />
+          <HeaderAdmin title='Empleados' amount={employees.length} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onAddClick={() => navigate("/atomicAdmin/empleados/nuevo")} />
           
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -178,7 +189,7 @@ export const EmployeePage = () => {
                     >
                       {paginatedEmployees.map((employee, index) => (
                         <motion.tr
-                          key={employee.id}
+                          key={employee._id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
@@ -188,12 +199,11 @@ export const EmployeePage = () => {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="w-10 h-10">
-                                <AvatarImage src={employee.avatar} alt={employee.name} />
                                 <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div>
                                 <p className="font-semibold text-gray-900 text-sm">{employee.name}</p>
-                                <p className="text-gray-500 text-xs">{employee.role}</p>
+                                <p className="text-gray-500 text-xs">{employee.position}</p>
                               </div>
                             </div>
                           </td>
@@ -202,22 +212,30 @@ export const EmployeePage = () => {
                               {employee.email}
                             </a>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{employee.nationality}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{employee.direction}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{employee.position}</td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{employee.document}</td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{employee.phone}</td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{employee.birthDate}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{employee.dui}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{employee.number_phone || '—'}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">
+                            {employee.birthDay ? new Date(employee.birthDay).toLocaleDateString('es-ES') : '—'}
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <div
                                 className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: getStatusDotColor(employee.status) }}
+                                style={{ backgroundColor: getStatusDotColor(employee.isVerified ? 'Activo' : 'Inactivo') }}
                               />
-                              <span className="text-sm text-gray-700 font-medium">{employee.status}</span>
+                              <span className="text-sm text-gray-700 font-medium">
+                                {employee.isVerified ? 'Activo' : 'Inactivo'}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/atomicAdmin/empleados/nuevo?mode=edit&id=${employee._id}`)}
+                              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
                               <MoreVertical className="w-5 h-5 text-gray-500" />
                             </button>
                           </td>

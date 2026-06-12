@@ -205,4 +205,52 @@ export const employeeController = {
         .json({ message: "Internal Server Error - Check Server Logs" });
     }
   },
+  updateEmployee: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      if (!id) {
+        return res
+          .status(400)
+          .json({
+            status: 400,
+            message: "Bad Request - ID must be entered as a parameter",
+            data: null
+          });
+      }
+
+      if (!updateData || Object.keys(updateData).length === 0) {
+        return res
+          .status(400)
+          .json({ status: 400, message: "Bad Request - No data provided to update" });
+      }
+
+      // { new: true } devuelve el documento actualizado en lugar del original
+      const updatedEmployee = await employeeModel.findByIdAndUpdate(id, updateData, { new: true });
+
+      if (!updatedEmployee) {
+        return res
+          .status(404)
+          .json({
+            status: 404,
+            message: "Not Found - Employee to update not found",
+            data: null
+          });
+      }
+
+      return res
+        .status(200)
+        .json({
+          status: 200,
+          message: "Employee updated successfully",
+          data: updatedEmployee,
+        });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: "Internal Server Error - Check Server Logs" });
+    }
+  },
 };

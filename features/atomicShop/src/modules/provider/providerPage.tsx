@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { containerVariants } from '@/utils/variants/containerVariants';
 import { itemVariants } from '@/utils/variants/itemVariants';
+import { useGetProviders } from '@/hooks/useGetProviders';
+import type { Providers } from './interface/provider.response';
 
 const getStatusDotColor = (status: string) => {
     switch (status) {
@@ -24,46 +26,12 @@ const getStatusDotColor = (status: string) => {
 
 export const ProviderPage = () => {
 
-    const MOCK_PROVIDERS = [
-        {
-            _id: 1,
-            name: "Farmacia Curacao",
-            logo: "http://imagen.png",
-            identification: "12345678-9",
-            numberPhone: "+503 7105-9926",
-            nationality: 'Salvadoreño',
-            representative: "Ivan Hernandez",
-            email: "Ivanovsky20007@gmail.com",
-            state: "Activo"
-        },
-        {
-            _id: 2,
-            name: "Echo ProLab",
-            logo: "http://imagen.png",
-            identification: "12345678-9",
-            numberPhone: "+503 7405-9926",
-            representative: "Jose Merino",
-            email: "IMerino123@gmail.com",
-            nationality: 'Salvadoreño',  
-            state: "Activo"
-        },
-        {
-            _id: 3,
-            name: "CientifcLab",
-            logo: "http://imagen.png",
-            identification: "1234ABC8-9",
-            numberPhone: "+505 7405-9926",
-            representative: "Oscar Abel",
-            email: "Abelongo777@gmail.com",
-            nationality: 'Guatelmalteco',
-            state: "Activo"
-        }
-    ]
+    const {data:providerResponse} = useGetProviders()
 
     const [searchQuery, setsearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    const totalPages = Math.ceil(MOCK_PROVIDERS.length / itemsPerPage);
+    const totalPages = Math.ceil((providerResponse?.length ?? 0) / itemsPerPage );
     const [statusFilter, setStatusFilter] = useState('Activo')
     const [nationalityFilter, setNationalityFilter] = useState('Salvadoreño')
     const [performanceArea, setPerformanceArea] = useState('Ventas')
@@ -71,12 +39,12 @@ export const ProviderPage = () => {
 
     
 
-    const filteredProviders = MOCK_PROVIDERS.filter((provider) => 
+    const filteredProviders = providerResponse?.filter((provider) => 
         provider.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        provider.nationality.toLowerCase().includes(searchQuery.toLowerCase())
+        provider.telephone.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
-    const paginatedProvider = filteredProviders.slice(
+    const paginatedProvider = filteredProviders?.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     )
@@ -92,7 +60,7 @@ export const ProviderPage = () => {
 
                 <motion.div variants={{ itemVariants }} className="space-y-6">
                     {/* Header & Search */}
-                    <HeaderAdmin title='Proveedores' amount={MOCK_PROVIDERS.length} searchQuery={searchQuery} setSearchQuery={setsearchQuery} onAddClick={() => navigate('/atomicAdmin/proveedores/nuevo')} />
+                    <HeaderAdmin title='Proveedores' amount={providerResponse?.length ?? 0} searchQuery={searchQuery} setSearchQuery={setsearchQuery} onAddClick={() => navigate('/atomicAdmin/proveedores/nuevo')} />
 
                     {/*Main Content */}
                     <motion.div
@@ -152,7 +120,6 @@ export const ProviderPage = () => {
                                                 <th className="text-center font-semibold px-4 py-3">Numero Telefonico</th>
                                                 <th className="text-center font-semibold px-4 py-3">Representante</th>
                                                 <th className="text-center font-semibold px-4 py-3">Nacionalidad</th>
-                                                <th className="text-center font-semibold px-4 py-3">Estado</th>
                                                 <th className="text-center font-semibold px-4 py-3 rounded-tr-lg">Acciones</th>
                                             </tr>
                                         </thead>
@@ -162,7 +129,7 @@ export const ProviderPage = () => {
                                             animate="visible"
                                             key={`${currentPage}-${statusFilter}-${nationalityFilter}-${performanceArea}`}
                                         >
-                                            {paginatedProvider.map((provider, index) => (
+                                            {paginatedProvider?.map((provider, index) => (
                                                 <motion.tr
                                                     key={provider._id}
                                                     initial={{ opacity: 0, y: 10 }}
@@ -174,7 +141,7 @@ export const ProviderPage = () => {
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-15 h-15 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                                                <img src={provider.logo} alt={`${provider.name} logo`} className='object-cover w-14 h-14' />
+                                                                <img src={provider.imgProvider[0]} alt={`${provider.name} logo`} className='object-cover w-14 h-14' />
                                                             </div>
                                                             <div>
                                                                 <p className="font-semibold text-gray-900 text-sm">{provider.name}</p>
@@ -182,26 +149,17 @@ export const ProviderPage = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <a href={`mailto:${provider.email}`} className="text-blue-600 text-sm hover:underline">
-                                                            {provider.email}
+                                                        <a href={`mailto:${provider.mail}`} className="text-blue-600 text-sm hover:underline">
+                                                            {provider.mail}
                                                         </a>
                                                     </td>
 
            
-                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider.identification}</td>
-                                                                                             <td className="px-6 py-4 text-sm text-gray-700">{provider.numberPhone}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider.representative}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider.nationality}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider._id}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider.telephone}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider._id}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{provider.direction}</td>
 
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <div
-                                                                className="w-2 h-2 rounded-full"
-                                                                style={{ backgroundColor: getStatusDotColor(provider.state) }}
-                                                            />
-                                                            <span className="text-sm text-gray-700 font-medium">{provider.state}</span>
-                                                        </div>
-                                                    </td>
 
                                                     <td className="px-6 py-4">
                                                         <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">

@@ -1,10 +1,18 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, MoreVertical, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, Plus, MoreVertical, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
 import { useGetProducts } from '../hooks/useGetProducts';
+import { useProductMutations } from '../hooks/useProductMutations';
+// Importaciones de Shadcn UI para el Dropdown
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // ─── Iniciales para el avatar del producto ────────────────────────────────────
 const getInitials = (nombre: string) =>
@@ -15,11 +23,23 @@ const ITEMS_POR_PAGINA = 10;
 // ─── Componente principal ──────────────────────────────────────────────────────
 export const ProductsPage = () => {
     const [search, setSearch] = useState('');
+    const { deleteProduct, isDeleting } = useProductMutations();
     const [paginaActual, setPaginaActual] = useState(1);
     const [filtroEstado, setFiltroEstado] = useState<string>('Todos');
     const [filtroCategoria, setFiltroCategoria] = useState<string>('Todas');
     const navigate = useNavigate();
 
+    const handleEliminar = async (id: string) => {
+        if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+            try {
+                await deleteProduct(id);
+                alert("Producto eliminado exitosamente");
+            } catch (error) {
+                alert("Hubo un error al eliminar el producto");
+            }
+        }
+    };
+    
     // Obtener datos de la API (asumimos que responde con { data: [...] })
     const { data: products, isLoading } = useGetProducts();
     const listaProductos = products?.data || [];
@@ -45,7 +65,7 @@ export const ProductsPage = () => {
             const coincideCategoria = 
                 filtroCategoria === 'Todas' || p.categoryId === filtroCategoria;
 
-            // Filtro por Estado (Nota: Ajusta 'p.status' según los campos de tu API)
+            // Filtro por Estado
             const coincideEstado = 
                 filtroEstado === 'Todos' || p.state === filtroEstado;
 
@@ -226,11 +246,32 @@ export const ProductsPage = () => {
                                                     ${typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                                                 </td>
 
-                                                {/* Acciones */}
+                                                {/* Acciones con Dropdown */}
                                                 <td className="px-4 py-3 text-center">
-                                                    <button className="p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-500 hover:text-gray-700">
-                                                        <MoreVertical size={16} />
-                                                    </button>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button className="p-1.5 hover:bg-gray-100 rounded-lg transition text-gray-500 hover:text-gray-700 focus:outline-none">
+                                                                <MoreVertical size={16} />
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-36 bg-white border border-gray-100 shadow-md rounded-lg p-1">
+                                                            <DropdownMenuItem 
+                                                                onClick={() => navigate(`/atomicAdmin/inventario/nuevo?mode=edit&id=${product._id}`)}
+                                                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                                                            >
+                                                                <Edit2 size={14} className="text-gray-400" />
+                                                                Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem 
+                                                                onClick={() => handleEliminar(product._id)}
+                                                                disabled={isDeleting}
+                                                                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
+                                                            >
+                                                                <Trash2 size={14} className="text-red-400" />
+                                                                Eliminar
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </td>
                                             </motion.tr>
                                         ))

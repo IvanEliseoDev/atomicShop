@@ -12,7 +12,7 @@ employeeRouter.route("/")
 .get(employeeController.getEmployees)
 .post(validateEmployee, employeeController.addEmployee)
 
-employeeRouter.route("/:id").delete(employeeController.deleteEmployee)
+employeeRouter.route("/:id").get(employeeController.getEmployeeByID).put(employeeController.updateEmployee).delete(employeeController.deleteEmployee)
 
 employeeRouter.route("/verifyCode").post(employeeController.verifyCode)
 

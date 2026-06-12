@@ -4,6 +4,7 @@ import { modelCarts } from "../../models/cart";
 import { modelProducts } from "../../models/product";
 import { modelCommercialInvoice } from "../../models/comercialInvoice";
 import { modelTaxCreditInvoice } from "../../models/taxCreditInvoice";
+import mongoose from "mongoose";
 
 
 export const saleController = {
@@ -12,6 +13,70 @@ export const saleController = {
         if(!saleswithComercialInvoice) res.status(404).json({status:404, message:"No hay ventas con facturas comerciales", data: null})
         res.status(200).json({status:200, message: "compras de facturas comerciales obtenidas exitosamente", data: saleswithComercialInvoice})
     },
+
+     getAllSalesUnified: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const [commercialInvoices, taxCreditInvoices] = await Promise.all([
+                modelCommercialInvoice.find().lean(),
+                modelTaxCreditInvoice.find().lean()
+            ]);
+
+            // Mapeamos para que el frontend identifique de qué tipo es cada venta
+            const commercialWithFormat = commercialInvoices.map(invoice => ({ ...invoice, invoice_type: "comercial" }));
+            const taxCreditWithFormat = taxCreditInvoices.map(invoice => ({ ...invoice, invoice_type: "credito_fiscal" }));
+
+            const allSales = [...commercialWithFormat, ...taxCreditWithFormat];
+
+            // Ordenar por fecha de emisión descendente (las más recientes primero)
+            allSales.sort((a, b) => new Date(b.emision_date).getTime() - new Date(a.emision_date).getTime());
+
+            res.status(200).json({
+                status: 200,
+                message: "Todas las ventas obtenidas exitosamente.",
+                data: allSales
+            });
+        } catch (error) {
+            console.error("Error al obtener todas las ventas:", error);
+            res.status(500).json({ status: 500, message: "Error interno del servidor", data: null });
+        }
+    },
+
+    // 2. GET POR ID Y TIPO: Busca dinámicamente en la colección correcta
+    getSaleByIdAndType: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { type } = req.query; // Espera ?type=comercial o ?type=credito_fiscal
+
+            if (!id) {
+                res.status(400).json({ status: 400, message: "ID de venta inválido o no provisto", data: null });
+                return;
+            }
+
+            if (type !== "comercial" && type !== "credito_fiscal") {
+                res.status(400).json({ status: 400, message: "El tipo de factura debe ser 'comercial' o 'credito_fiscal'", data: null });
+                return;
+            }
+
+            let sale = null;
+            if (type === "comercial") {
+                sale = await modelCommercialInvoice.findById(id).populate("customer_id", "name email");
+            } else {
+                sale = await modelTaxCreditInvoice.findById(id).populate("customer_id", "name email");
+            }
+
+            if (!sale) {
+                res.status(404).json({ status: 404, message: `No se encontró la factura en la categoría: ${type}`, data: null });
+                return;
+            }
+
+            res.status(200).json({ status: 200, message: "Factura encontrada con éxito", data: sale });
+        } catch (error) {
+            console.error("Error al obtener la factura por ID:", error);
+            res.status(500).json({ status: 500, message: "Error interno del servidor", data: null });
+        }
+    },
+
+    
     registerInvoiceComercial: async (req: Request, res: Response): Promise<void> => {
         try {
             const {
@@ -148,5 +213,73 @@ export const saleController = {
                 data: null,
             });
         }
+    },
+
+    updateInvoice: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { type } = req.query; // ?type=comercial o ?type=credito_fiscal
+            const updateData = req.body;
+
+            if (!id) {
+                res.status(400).json({ status: 400, message: "ID inválido", data: null });
+                return;
+            }
+
+            let updatedInvoice = null;
+
+            if (type === "comercial") {
+                updatedInvoice = await modelCommercialInvoice.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+            } else if (type === "credito_fiscal") {
+                updatedInvoice = await modelTaxCreditInvoice.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+            } else {
+                res.status(400).json({ status: 400, message: "Tipo de factura inválido en la query string", data: null });
+                return;
+            }
+
+            if (!updatedInvoice) {
+                res.status(404).json({ status: 404, message: "No se encontró el registro para actualizar", data: null });
+                return;
+            }
+
+            res.status(200).json({ status: 200, message: "Factura actualizada correctamente", data: updatedInvoice });
+        } catch (error) {
+            console.error("Error al actualizar la factura:", error);
+            res.status(500).json({ status: 500, message: "Error interno del servidor", data: null });
+        }
+    },
+
+     deleteInvoice: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { type } = req.query; 
+
+            if (!id) {
+                res.status(400).json({ status: 400, message: "ID inválido", data: null });
+                return;
+            }
+
+            let deletedInvoice = null;
+
+            if (type === "comercial") {
+                deletedInvoice = await modelCommercialInvoice.findByIdAndDelete(id);
+            } else if (type === "credito_fiscal") {
+                deletedInvoice = await modelTaxCreditInvoice.findByIdAndDelete(id);
+            } else {
+                res.status(400).json({ status: 400, message: "Tipo de factura inválido", data: null });
+                return;
+            }
+
+            if (!deletedInvoice) {
+                res.status(404).json({ status: 404, message: "No se encontró la factura a eliminar", data: null });
+                return;
+            }
+
+            res.status(200).json({ status: 200, message: "Factura eliminada del sistema correctamente", data: null });
+        } catch (error) {
+            console.error("Error al eliminar la factura:", error);
+            res.status(500).json({ status: 500, message: "Error interno del servidor", data: null });
+        }
     }
+
 };

@@ -42,6 +42,19 @@ export const productsController = {
     }
   },
 
+  getProductById: async(req:Request, res:Response) => {
+    try {
+      const product = await modelProducts.findById(req.params.id);
+      if (!product) res.status(404).json({status: 404, message:"Producto no encontrados", data: null})
+      res.status(200).json({status:200, message:"Producto encontrado exitosamente", data:product});
+    } catch (error) {
+      const err = error as Error;
+      res
+        .status(500)
+        .json({status:500, message: "Error al obtener el producto", error: err.message });
+    }
+  },
+
   // INSERT ONE
   insertProducts: async (req: Request, res: Response): Promise<void> => {
     try {

@@ -9,6 +9,7 @@ router
   .post(productsController.insertProducts);
 router
   .route("/:id")
+  .get(productsController.getProductById)
   .put(productsController.updateProducts)
   .delete(productsController.deleteProducts);
 

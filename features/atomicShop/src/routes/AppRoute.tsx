@@ -77,7 +77,7 @@ export const appRouter = createBrowserRouter([
                 element: <ProductsPage />
             },
             {
-                path: 'inventario/nuevo',
+                path: 'inventario/nuevo' ,
                 element: <ProductRegisterForm />
             },
             {

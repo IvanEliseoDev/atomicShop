@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router'; 
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, Plus, Minus } from 'lucide-react';
+import { Upload, X, Plus, Minus, Loader2 } from 'lucide-react';
 import { containerVariants } from '@/utils/variants/containerVariants';
 import { itemVariants } from '@/utils/variants/itemVariants';
+
+// Hooks de React Query
+import { useProductMutations } from '../hooks/useProductMutations'; 
+import { useGetProductByID } from '../hooks/useGetProductByID';
+import { useGetBrands } from '@/hooks/useGetBrands';
+import { useGetCategories } from '@/hooks/useGetCategories';
+import { useGetProviders } from '@/hooks/useGetProviders';     
 
 interface ProductFormState {
     nombre: string;
@@ -16,14 +24,41 @@ interface ProductFormState {
     categoria: string;
     stock: number;
     stockMinimo: number;
-    precioVenta: number;
-    precioCoste: number;
+    precioVenta: number | string; // Permitimos string temporal para la fluidez del input decimal
+    precioCoste: number | string;
+    discount: number | string; // Descuento del producto
     proveedorPreferido: string;
     descripcion: string;
     imagenes: File[];
 }
 
-export const ProductRegisterForm = () => {
+interface ProductFormProps {
+    onSuccessSubmit?: () => void;
+}
+
+interface ImagePreview {
+    id: string;
+    url: string;
+    isLocal: boolean;
+    fileIndex?: number; // Para mapear al array de archivos locales si es nueva
+}
+
+export const ProductRegisterForm = ({ onSuccessSubmit }: ProductFormProps) => {
+    // 1. EXTRAER PARÁMETROS DE LA URL
+    const [searchParams] = useSearchParams();
+    const mode = searchParams.get('mode');
+    const idFromUrl = searchParams.get('id');
+
+    const isEditMode = mode === 'edit' && Boolean(idFromUrl);
+    const productId = idFromUrl || '';
+
+    // Hooks de React Query
+    const { createProduct, mutateUpdate, isCreating, isUpdating } = useProductMutations();
+    const { data: fetchedProduct, isLoading: isLoadingProduct } = useGetProductByID(productId);
+    const { data: brands } = useGetBrands();
+    const { data: categories } = useGetCategories();
+    const { data: providers } = useGetProviders();
+
     const [formData, setFormData] = useState<ProductFormState>({
         nombre: '',
         codigo: '',
@@ -32,53 +67,83 @@ export const ProductRegisterForm = () => {
         categoria: '',
         stock: 0,
         stockMinimo: 0,
-        precioVenta: 0,
-        precioCoste: 0,
+        precioVenta: '',
+        precioCoste: '',
+        discount: '',
         proveedorPreferido: '',
         descripcion: '',
         imagenes: [],
     });
 
-    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    // Estados para la gestión avanzada de imágenes
+    const [previews, setPreviews] = useState<ImagePreview[]>([]);
+    const [imagenesEliminadas, setImagenesEliminadas] = useState<string[]>([]); // URLs viejas a borrar en el backend
     const [isDragging, setIsDragging] = useState(false);
 
+    // Rellenar el formulario en Modo Edición
+    useEffect(() => {
+        if (isEditMode && fetchedProduct?.data) {
+            const product = fetchedProduct.data;
+            setFormData({
+                nombre: product.name || '',
+                codigo: product.code || '',
+                tipoUnidad: '',
+                marca: product.brandId || '',
+                categoria: product.categoryId || '',
+                stock: product.stock || 0,
+                stockMinimo: 0,
+                precioVenta: product.price ?? '',
+                precioCoste: '',
+                discount: product.discount ?? '',
+                proveedorPreferido: product.providerId || '',
+                descripcion: product.description || '',
+                imagenes: [], 
+            });
 
+            // Cargar imágenes previas del backend
+            if (product.images && Array.isArray(product.images)) {
+                setPreviews(product.images.map((url: string) => ({ id: url, url, isLocal: false })));
+            }
+        }
+    }, [isEditMode, fetchedProduct]);
+
+    // --- Manejadores de Cambios ---
     const handleInputChange = (field: keyof ProductFormState, value: string | number) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSelectChange = (field: keyof ProductFormState, value: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleNumericChange = (field: keyof ProductFormState, value: number) => {
-        if (value >= 0) {
-            setFormData((prev) => ({
-                ...prev,
-                [field]: value,
-            }));
+    // Manejo nativo de números enteros (Stock)
+    const handleIntegerChange = (field: 'stock' | 'stockMinimo', value: string) => {
+        const parsed = parseInt(value, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+            setFormData((prev) => ({ ...prev, [field]: parsed }));
+        } else if (value === '') {
+            setFormData((prev) => ({ ...prev, [field]: 0 }));
         }
     };
 
-    const handleIncrement = (field: 'stock' | 'stockMinimo' | 'precioVenta' | 'precioCoste') => {
-        const increment = ['precioVenta', 'precioCoste'].includes(field) ? 0.1 : 1;
-        handleNumericChange(field, formData[field] + increment);
+    // Manejo de incremento / decremento manual
+    const handleIncrement = (field: 'stock' | 'stockMinimo' | 'precioVenta' | 'precioCoste' | 'discount') => {
+        const currentValue = parseFloat(formData[field].toString()) || 0;
+        const increment = ['precioVenta', 'precioCoste', 'discount'].includes(field) ? 0.10 : 1;
+        const newValue = parseFloat((currentValue + increment).toFixed(2));
+        handleInputChange(field, newValue);
     };
 
-    const handleDecrement = (field: 'stock' | 'stockMinimo' | 'precioVenta' | 'precioCoste') => {
-        const increment = ['precioVenta', 'precioCoste'].includes(field) ? 0.1 : 1;
-        const newValue = formData[field] - increment;
+    const handleDecrement = (field: 'stock' | 'stockMinimo' | 'precioVenta' | 'precioCoste' | 'discount') => {
+        const currentValue = parseFloat(formData[field].toString()) || 0;
+        const increment = ['precioVenta', 'precioCoste', 'discount'].includes(field) ? 0.10 : 1;
+        const newValue = parseFloat((currentValue - increment).toFixed(2));
         if (newValue >= 0) {
-            handleNumericChange(field, newValue);
+            handleInputChange(field, newValue);
         }
     };
 
+    // --- Lógica de subida de Imágenes ---
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(true);
@@ -91,9 +156,7 @@ export const ProductRegisterForm = () => {
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(false);
-        const files = Array.from(e.dataTransfer.files).filter((file) =>
-            file.type.startsWith('image/')
-        );
+        const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith('image/'));
         processFiles(files);
     };
 
@@ -103,57 +166,122 @@ export const ProductRegisterForm = () => {
     };
 
     const processFiles = (files: File[]) => {
-        const newFiles = [...formData.imagenes, ...files];
+        const startIndex = formData.imagenes.length;
+        
         setFormData((prev) => ({
             ...prev,
-            imagenes: newFiles,
+            imagenes: [...prev.imagenes, ...files],
         }));
 
-        files.forEach((file) => {
+        files.forEach((file, index) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setPreviewUrls((prev) => [...prev, reader.result as string]);
+                setPreviews((prev) => [
+                    ...prev,
+                    {
+                        id: Math.random().toString(36).substr(2, 9),
+                        url: reader.result as string,
+                        isLocal: true,
+                        fileIndex: startIndex + index
+                    }
+                ]);
             };
             reader.readAsDataURL(file);
         });
     };
 
-    const removeImage = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            imagenes: prev.imagenes.filter((_, i) => i !== index),
-        }));
-        setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+    const removeImage = (previewToRemove: ImagePreview) => {
+        if (!previewToRemove.isLocal) {
+            // Si venía del servidor, la mandamos al pool de eliminación
+            setImagenesEliminadas((prev) => [...prev, previewToRemove.url]);
+            setPreviews((prev) => prev.filter((p) => p.id !== previewToRemove.id));
+        } else {
+            // Si es un archivo recién cargado localmente
+            setFormData((prev) => ({
+                ...prev,
+                imagenes: prev.imagenes.filter((_, i) => i !== previewToRemove.fileIndex),
+            }));
+            setPreviews((prev) => prev.filter((p) => p.id !== previewToRemove.id));
+        }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // --- Submit del Formulario ---
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
-        if (!formData.nombre || !formData.codigo || !formData.stock || !formData.precioVenta) {
-            alert('Por favor completa los campos requeridos');
+        if (!formData.nombre || !formData.codigo || !formData.precioVenta) {
+            alert('Por favor completa los campos requeridos (*)');
             return;
         }
 
-        console.log('Producto registrado:', formData);
-        alert('Producto registrado exitosamente');
+        // Mapear datos del formulario al formato que espera el backend
+        const dataToSubmit = {
+            name: formData.nombre,
+            code: formData.codigo,
+            brandId: formData.marca,
+            categoryId: formData.categoria,
+            providerId: formData.proveedorPreferido,
+            description: formData.descripcion,
+            stock: formData.stock,
+            price: parseFloat(formData.precioVenta.toString()) || 0,
+            discount: parseFloat(formData.discount.toString()) || 0,
+            images: formData.imagenes,
+            state: true,
+            imagenesEliminadas: imagenesEliminadas // Para que el backend sepa cuáles eliminar
+        };
+
+        try {
+            if (isEditMode && productId) {
+                await mutateUpdate({ id: productId, dataProduct: dataToSubmit });
+                alert('Producto actualizado exitosamente');
+            } else {
+                await createProduct({ dataProduct: dataToSubmit });
+                alert('Producto registrado exitosamente');
+                
+                // Reset de estados completo
+                setFormData({
+                    nombre: '', codigo: '', tipoUnidad: '', marca: '', categoria: '',
+                    stock: 0, stockMinimo: 0, precioVenta: '', precioCoste: '', discount: '',
+                    proveedorPreferido: '', descripcion: '', imagenes: []
+                });
+                setPreviews([]);
+                setImagenesEliminadas([]);
+            }
+
+            if (onSuccessSubmit) onSuccessSubmit();
+        } catch (error) {
+            console.error("Error al procesar la solicitud del formulario:", error);
+            alert("Ocurrió un error al procesar la transacción.");
+        }
     };
 
+    if (isEditMode && isLoadingProduct) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" />
+                    <p className="text-gray-600 font-medium">Cargando datos del producto...</p>
+                </div>
+            </div>
+        );
+    }
+
+    const isSubmitting = isCreating || isUpdating;
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-4 md:p-8">
+        <div className="min-h-screen bg-linear-to-br from-blue-50 to-slate-50 p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-8"
                 >
-                    Registro de producto
+                    {isEditMode ? 'Editar producto' : 'Registro de producto'}
                 </motion.h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Form Area */}
+                    {/* Formulario Principal */}
                     <div className="lg:col-span-2">
                         <motion.form
                             variants={containerVariants}
@@ -162,12 +290,11 @@ export const ProductRegisterForm = () => {
                             onSubmit={handleSubmit}
                             className="space-y-6"
                         >
-                            {/* DATOS DEL PRODUCTO Section */}
-                            <motion.div variants={{ itemVariants }}>
+                            {/* SECCIÓN: DATOS DEL PRODUCTO */}
+                            <motion.div variants={itemVariants}>
                                 <Card className="p-6 border-0 shadow-lg">
                                     <h2 className="text-lg font-bold text-gray-700 mb-6">DATOS DEL PRODUCTO</h2>
 
-                                    {/* Nombre & Código */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
                                             <label className="block text-gray-700 font-semibold mb-2">
@@ -179,6 +306,7 @@ export const ProductRegisterForm = () => {
                                                 value={formData.nombre}
                                                 onChange={(e) => handleInputChange('nombre', e.target.value)}
                                                 className="border-2 border-gray-300 focus:border-blue-500 rounded-lg"
+                                                disabled={isSubmitting}
                                             />
                                         </div>
                                         <div>
@@ -191,11 +319,11 @@ export const ProductRegisterForm = () => {
                                                 value={formData.codigo}
                                                 onChange={(e) => handleInputChange('codigo', e.target.value)}
                                                 className="border-2 border-gray-300 focus:border-blue-500 rounded-lg"
+                                                disabled={isSubmitting || isEditMode} 
                                             />
                                         </div>
                                     </div>
 
-                                    {/* Tipo de Unidad & Marca */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
                                             <label className="block text-gray-700 font-semibold mb-2">Tipo de unidad</label>
@@ -205,35 +333,47 @@ export const ProductRegisterForm = () => {
                                                 value={formData.tipoUnidad}
                                                 onChange={(e) => handleInputChange('tipoUnidad', e.target.value)}
                                                 className="border-2 border-gray-300 focus:border-blue-500 rounded-lg"
+                                                disabled={isSubmitting}
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-gray-700 font-semibold mb-2">Marca</label>
-                                            <Select value={formData.marca} onValueChange={(value) => handleSelectChange('marca', value)}>
+                                            <Select 
+                                                value={formData.marca} 
+                                                onValueChange={(value) => handleSelectChange('marca', value)} 
+                                                disabled={isSubmitting}
+                                            >
                                                 <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500 rounded-lg">
                                                     <SelectValue placeholder="Seleccionar marca" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="sonar">Sonar</SelectItem>
-                                                    <SelectItem value="lb-kka">LB-KKA</SelectItem>
-                                                    <SelectItem value="generic">Genérico</SelectItem>
+                                                    {brands?.map((brand) => (
+                                                        <SelectItem key={brand._id} value={brand._id}>
+                                                            {brand.name}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
 
-                                    {/* Categoría & Stock */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
                                             <label className="block text-gray-700 font-semibold mb-2">Categoría</label>
-                                            <Select value={formData.categoria} onValueChange={(value) => handleSelectChange('categoria', value)}>
+                                            <Select 
+                                                value={formData.categoria} 
+                                                onValueChange={(value) => handleSelectChange('categoria', value)} 
+                                                disabled={isSubmitting}
+                                            >
                                                 <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500 rounded-lg">
                                                     <SelectValue placeholder="Seleccionar categoría" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="balanzas">Balanzas</SelectItem>
-                                                    <SelectItem value="pipetas">Pipetas</SelectItem>
-                                                    <SelectItem value="medidores">Medidores</SelectItem>
+                                                    {categories?.map((category) => (
+                                                        <SelectItem key={category._id} value={category._id}>
+                                                            {category.name}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -243,26 +383,25 @@ export const ProductRegisterForm = () => {
                                             </label>
                                             <div className="flex items-center gap-2">
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
+                                                    type="button" size="sm" variant="outline"
                                                     onClick={() => handleDecrement('stock')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Minus className="w-4 h-4" />
                                                 </Button>
                                                 <Input
                                                     type="number"
                                                     value={formData.stock}
-                                                    onChange={(e) => handleNumericChange('stock', parseInt(e.target.value) || 0)}
+                                                    onChange={(e) => handleIntegerChange('stock', e.target.value)}
                                                     className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
+                                                    disabled={isSubmitting}
                                                 />
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
+                                                    type="button" size="sm" variant="outline"
                                                     onClick={() => handleIncrement('stock')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </Button>
@@ -270,74 +409,71 @@ export const ProductRegisterForm = () => {
                                         </div>
                                     </div>
 
-                                    {/* Stock Mínimo */}
-                                    <div>
-                                        <label className="block text-gray-700 font-semibold mb-2">Stock mínimo</label>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => handleDecrement('stockMinimo')}
-                                                className="border-2 border-gray-300"
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </Button>
-                                            <Input
-                                                type="number"
-                                                value={formData.stockMinimo}
-                                                onChange={(e) => handleNumericChange('stockMinimo', parseInt(e.target.value) || 0)}
-                                                className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
-                                            />
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => handleIncrement('stockMinimo')}
-                                                className="border-2 border-gray-300"
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </motion.div>
-
-                            {/* DATOS DE VENTA Section */}
-                            <motion.div variants={{ itemVariants }}>
-                                <Card className="p-6 border-0 shadow-lg">
-                                    <h2 className="text-lg font-bold text-gray-700 mb-6">DATOS DE VENTA</h2>
-
-                                    {/* Precio Venta & Precio Coste */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-gray-700 font-semibold mb-2">
-                                                Precio venta <span className="text-red-500">*</span>
-                                            </label>
+                                            <label className="block text-gray-700 font-semibold mb-2">Stock mínimo</label>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-500">$</span>
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleDecrement('precioVenta')}
+                                                    type="button" size="sm" variant="outline"
+                                                    onClick={() => handleDecrement('stockMinimo')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Minus className="w-4 h-4" />
                                                 </Button>
                                                 <Input
                                                     type="number"
-                                                    step="0.01"
-                                                    value={formData.precioVenta.toFixed(2)}
-                                                    onChange={(e) => handleNumericChange('precioVenta', parseFloat(e.target.value) || 0)}
+                                                    value={formData.stockMinimo}
+                                                    onChange={(e) => handleIntegerChange('stockMinimo', e.target.value)}
                                                     className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
+                                                    disabled={isSubmitting}
                                                 />
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
+                                                    type="button" size="sm" variant="outline"
+                                                    onClick={() => handleIncrement('stockMinimo')}
+                                                    className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+
+                            {/* SECCIÓN: DATOS DE VENTA */}
+                            <motion.div variants={itemVariants}>
+                                <Card className="p-6 border-0 shadow-lg">
+                                    <h2 className="text-lg font-bold text-gray-700 mb-6">DATOS DE VENTA</h2>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div>
+                                            <label className="block text-gray-700 font-semibold mb-2">
+                                                Precio venta <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-500 font-bold">$</span>
+                                                <Button
+                                                    type="button" size="sm" variant="outline"
+                                                    onClick={() => handleDecrement('precioVenta')}
+                                                    className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    <Minus className="w-4 h-4" />
+                                                </Button>
+                                                <Input
+                                                    type="number" step="0.01"
+                                                    value={formData.precioVenta}
+                                                    onChange={(e) => handleInputChange('precioVenta', e.target.value)}
+                                                    className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
+                                                    disabled={isSubmitting}
+                                                />
+                                                <Button
+                                                    type="button" size="sm" variant="outline"
                                                     onClick={() => handleIncrement('precioVenta')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </Button>
@@ -346,29 +482,56 @@ export const ProductRegisterForm = () => {
                                         <div>
                                             <label className="block text-gray-700 font-semibold mb-2">Precio coste</label>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-500">$</span>
+                                                <span className="text-gray-500 font-bold">$</span>
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
+                                                    type="button" size="sm" variant="outline"
                                                     onClick={() => handleDecrement('precioCoste')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Minus className="w-4 h-4" />
                                                 </Button>
                                                 <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={formData.precioCoste.toFixed(2)}
-                                                    onChange={(e) => handleNumericChange('precioCoste', parseFloat(e.target.value) || 0)}
+                                                    type="number" step="0.01"
+                                                    value={formData.precioCoste}
+                                                    onChange={(e) => handleInputChange('precioCoste', e.target.value)}
                                                     className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
+                                                    disabled={isSubmitting}
                                                 />
                                                 <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="outline"
+                                                    type="button" size="sm" variant="outline"
                                                     onClick={() => handleIncrement('precioCoste')}
                                                     className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-700 font-semibold mb-2">Descuento (%)</label>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-500 font-bold">%</span>
+                                                <Button
+                                                    type="button" size="sm" variant="outline"
+                                                    onClick={() => handleDecrement('discount')}
+                                                    className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    <Minus className="w-4 h-4" />
+                                                </Button>
+                                                <Input
+                                                    type="number" step="0.01"
+                                                    value={formData.discount}
+                                                    onChange={(e) => handleInputChange('discount', e.target.value)}
+                                                    className="border-2 border-gray-300 focus:border-blue-500 rounded-lg text-center flex-1"
+                                                    disabled={isSubmitting}
+                                                />
+                                                <Button
+                                                    type="button" size="sm" variant="outline"
+                                                    onClick={() => handleIncrement('discount')}
+                                                    className="border-2 border-gray-300"
+                                                    disabled={isSubmitting}
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </Button>
@@ -376,99 +539,98 @@ export const ProductRegisterForm = () => {
                                         </div>
                                     </div>
 
-                                    {/* Proveedor Preferido */}
                                     <div className="mb-4">
                                         <label className="block text-gray-700 font-semibold mb-2">Proveedor preferido</label>
-                                        <Select
-                                            value={formData.proveedorPreferido}
-                                            onValueChange={(value) => handleSelectChange('proveedorPreferido', value)}
+                                        <Select 
+                                            value={formData.proveedorPreferido} 
+                                            onValueChange={(value) => handleSelectChange('proveedorPreferido', value)} 
+                                            disabled={isSubmitting}
                                         >
                                             <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500 rounded-lg">
                                                 <SelectValue placeholder="Seleccionar proveedor" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="proveedor1">Proveedor 1</SelectItem>
-                                                <SelectItem value="proveedor2">Proveedor 2</SelectItem>
-                                                <SelectItem value="proveedor3">Proveedor 3</SelectItem>
+                                                {providers?.map((provider) => (
+                                                    <SelectItem key={provider._id} value={provider._id}>
+                                                        {provider.name}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
 
-                                    {/* Descripción */}
                                     <div>
                                         <label className="block text-gray-700 font-semibold mb-2">Descripción del producto</label>
                                         <textarea
-                                            placeholder="Información detallada del producto..."
+                                            placeholder="Información detallada..."
                                             value={formData.descripcion}
                                             onChange={(e) => handleInputChange('descripcion', e.target.value)}
                                             rows={4}
-                                            className="w-full border-2 border-gray-300 focus:border-blue-500 rounded-lg px-3 py-2 focus:outline-none"
+                                            className="w-full border-2 border-gray-300 focus:border-blue-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            disabled={isSubmitting}
                                         />
                                     </div>
                                 </Card>
                             </motion.div>
 
-                            {/* Submit Button */}
-                            <motion.div variants={{ itemVariants }}>
+                            {/* Botón Submit Dinámico */}
+                            <motion.div variants={itemVariants}>
                                 <Button
                                     type="submit"
-                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-2 rounded-lg transition-colors"
+                                    disabled={isSubmitting}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-2 rounded-lg transition-colors flex items-center gap-2"
                                 >
-                                    Registrar
+                                    {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    {isEditMode ? 'Guardar Cambios' : 'Registrar'}
                                 </Button>
                             </motion.div>
                         </motion.form>
                     </div>
 
-                    {/* Image Upload Area */}
-                    <motion.div variants={{ itemVariants }} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
+                    {/* Zona Lateral de Imágenes */}
+                    <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
                         <Card className="p-6 border-0 shadow-lg h-fit sticky top-8">
                             <h2 className="text-lg font-bold text-gray-700 mb-6">IMÁGENES DEL PRODUCTO</h2>
 
-                            {/* Drag & Drop Area */}
                             <div
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer mb-6 ${isDragging
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
-                                    }`}
+                                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer mb-6 ${
+                                    isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                                }`}
                             >
                                 <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
+                                    type="file" multiple accept="image/*"
                                     onChange={handleFileSelect}
-                                    className="hidden"
-                                    id="image-upload"
+                                    className="hidden" id="image-upload"
+                                    disabled={isSubmitting}
                                 />
                                 <label htmlFor="image-upload" className="cursor-pointer">
                                     <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                                     <p className="text-gray-600 text-sm">
-                                        Arrastra la imagen del producto aquí o haz clic para buscar
+                                        Arrastra imágenes aquí o haz clic para buscar
                                     </p>
                                 </label>
                             </div>
 
-                            {/* Image Preview */}
-                            {previewUrls.length > 0 && (
+                            {previews.length > 0 && (
                                 <div>
-                                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Imágenes actuales</h3>
-                                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                                        {previewUrls.map((url, index) => (
+                                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Vista previa</h3>
+                                    <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                                        {previews.map((preview) => (
                                             <motion.div
-                                                key={index}
+                                                key={preview.id}
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.8 }}
                                                 className="relative group rounded-lg overflow-hidden border border-gray-200"
                                             >
-                                                <img src={url} alt={`Preview ${index}`} className="w-full h-32 object-cover" />
+                                                <img src={preview.url} alt="Preview" className="w-full h-32 object-cover" />
                                                 <button
                                                     type="button"
-                                                    onClick={() => removeImage(index)}
-                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    onClick={() => removeImage(preview)}
+                                                    disabled={isSubmitting}
+                                                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
@@ -483,4 +645,4 @@ export const ProductRegisterForm = () => {
             </div>
         </div>
     );
-}
+};
