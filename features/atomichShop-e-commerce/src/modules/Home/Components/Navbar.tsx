@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 // Esto son como los iconos creo
-import { Heart, ShoppingCart, User, Search, LogOut, X } from "lucide-react";
+import {
+  Heart,
+  ShoppingCart,
+  User,
+  Search,
+  LogOut,
+  X,
+  Menu,
+} from "lucide-react";
 import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
 import CategoriesBar from "./CategoriesBar";
 import { toast } from "sonner"; //
@@ -10,15 +18,6 @@ import { ecommerceService } from "@/services/ecommerceService";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 const Navbar = () => {
-  // const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
-  //   id: i + 1,
-  //   name: "Báscula para pesar cajas petri",
-  //   price: 80.0,
-  //   originalPrice: 99.0,
-  //   image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
-  //   onSale: true,
-  // }));
-
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,13 +58,14 @@ const Navbar = () => {
     setShowDropdown(false);
   };
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown hamburguesa
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // Controla el dropdown de usuario
 
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
     toast.info("Has cerrado sesión correctamente", {
       description: "¡Vuelve pronto a Atomic Shop!",
       position: "bottom-right",
@@ -89,16 +89,16 @@ const Navbar = () => {
 
   return (
     <header className="w-full shadow-sm border-b">
-      <div className="bg-white px-10 py-3 flex items-center justify-between gap-4">
+      <div className="bg-white px-4 md:px-10 py-3 flex items-center justify-between gap-3">
         {/* Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer shrink-0"
           onClick={() => navigate("/atomicShop")}
         >
-          <LogoYonJob className="h-20" />
+          <LogoYonJob className="h-14 md:h-20" />
         </div>
 
-        {/* Nav */}
+        {/* Nav — solo desktop */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
           <button
             onClick={() => navigate("/atomicShop")}
@@ -126,8 +126,11 @@ const Navbar = () => {
           </button>
         </nav>
 
-        {/* Buscador con dropdown */}
-        <div ref={wrapperRef} className="relative w-full max-w-sm">
+        {/* Buscador — solo desktop */}
+        <div
+          ref={wrapperRef}
+          className="relative hidden md:block w-full max-w-sm"
+        >
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <input
               type="text"
@@ -151,14 +154,12 @@ const Navbar = () => {
               <Search size={18} className="text-white" />
             </button>
           </div>
-
-          {/* Dropdown de resultados */}
+          {/* Dropdown resultados */}
           {showDropdown && (
             <div
               className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
               style={{ width: "480px" }}
             >
-              {/* Título */}
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm text-gray-600">
                   Productos para{" "}
@@ -167,8 +168,6 @@ const Navbar = () => {
                   </span>
                 </p>
               </div>
-
-              {/* Grid de 3 productos */}
               <div className="grid grid-cols-3 gap-3 p-4">
                 {searchResults.map((product) => (
                   <div
@@ -180,7 +179,6 @@ const Navbar = () => {
                     }}
                     className="flex flex-col gap-2 cursor-pointer group"
                   >
-                    {/* Badge + wishlist */}
                     <div className="flex items-center justify-between">
                       {!!product.discount ? (
                         <span className="bg-sky-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
@@ -196,8 +194,6 @@ const Navbar = () => {
                         <Heart size={14} />
                       </button>
                     </div>
-
-                    {/* Imagen */}
                     <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center h-20">
                       <img
                         src={product.images?.[0] ?? ""}
@@ -205,13 +201,9 @@ const Navbar = () => {
                         className="object-contain h-14 w-auto group-hover:scale-105 transition-transform"
                       />
                     </div>
-
-                    {/* Nombre */}
                     <p className="text-xs text-gray-700 font-medium line-clamp-2 leading-snug">
                       {product.name}
                     </p>
-
-                    {/* Cantidad + carrito */}
                     <div className="flex items-center gap-1 mt-auto">
                       <div className="flex items-center border border-gray-200 rounded-md overflow-hidden text-xs flex-1">
                         <button
@@ -221,7 +213,7 @@ const Navbar = () => {
                           −
                         </button>
                         <span className="flex-1 text-center text-gray-700 font-medium text-[11px]">
-                          100
+                          1
                         </span>
                         <button
                           onClick={(e) => e.stopPropagation()}
@@ -239,7 +231,7 @@ const Navbar = () => {
                             price: product.price,
                             originalPrice: product.discount
                               ? product.price / (1 - product.discount / 100)
-                              : product.price, // Calculado igual que en ProductSlider
+                              : product.price,
                             image: product.images?.[0] ?? "",
                           });
                         }}
@@ -251,8 +243,6 @@ const Navbar = () => {
                   </div>
                 ))}
               </div>
-
-              {/* Footer — ver todos */}
               <div className="border-t border-gray-100 px-4 py-2.5 text-center">
                 <button
                   onClick={() => {
@@ -271,14 +261,22 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Iconos de accion */}
-        <div className="flex items-center justify-evenly px-2 p-0 gap-15">
+        {/* Iconos derecha */}
+        <div className="flex items-center gap-3 md:gap-6">
+          {/* Buscador móvil — solo icono */}
+          <button
+            className="md:hidden text-gray-600 hover:text-blue-500 transition cursor-pointer"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <Search size={22} />
+          </button>
+
           <button
             onClick={() => navigate("/atomicShop/favoritos")}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <Heart size={22} />
-            <span className="text-xs mt-0.5">Favoritos</span>
+            <span className="text-xs mt-0.5 hidden md:block">Favoritos</span>
           </button>
 
           <button
@@ -293,17 +291,17 @@ const Navbar = () => {
                 </span>
               )}
             </div>
-            <span className="text-xs mt-0.5">Carrito</span>
+            <span className="text-xs mt-0.5 hidden md:block">Carrito</span>
           </button>
 
-          {/* Lógica de Sesión con Menú Desplegable */}
+          {/* Usuario */}
           {user ? (
             <div className="relative">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 p-1 pr-3 rounded-full border border-blue-200 transition cursor-pointer"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 p-1 pr-2 md:pr-3 rounded-full border border-blue-200 transition cursor-pointer"
               >
-                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
                   {user?.profilePic ? (
                     <img
                       src={user.profilePic}
@@ -317,9 +315,7 @@ const Navbar = () => {
                   {user?.name?.split(" ")[0]}
                 </span>
               </button>
-
-              {/* Menú que aparece al dar clic */}
-              {isMenuOpen && (
+              {isUserMenuOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 mb-1">
                     <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
@@ -329,18 +325,16 @@ const Navbar = () => {
                       {user.name}
                     </p>
                   </div>
-
                   <button
                     onClick={() => {
                       navigate("/atomicShop/perfil");
-                      setIsMenuOpen(false);
+                      setIsUserMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"
                   >
                     <User size={18} />
                     Ver mi perfil
                   </button>
-
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-3 border-t border-gray-50"
@@ -357,11 +351,80 @@ const Navbar = () => {
               className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
             >
               <User size={22} />
-              <span className="text-xs mt-0.5"> Iniciar sesión</span>
+              <span className="text-xs mt-0.5 hidden md:block">
+                Iniciar sesión
+              </span>
             </button>
           )}
+
+          {/* Hamburguesa — solo móvil */}
+          <button
+            className="md:hidden text-gray-600 hover:text-blue-500 transition cursor-pointer"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <Menu size={24} />
+          </button>
         </div>
       </div>
+
+      {/* Menú móvil desplegable */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col gap-1 shadow-md">
+          <button
+            onClick={() => {
+              navigate("/atomicShop");
+              setIsMenuOpen(false);
+            }}
+            className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
+          >
+            Inicio
+          </button>
+          <button
+            onClick={() => {
+              handleScroll("nosotros");
+              setIsMenuOpen(false);
+            }}
+            className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
+          >
+            Nosotros
+          </button>
+          <button
+            onClick={() => {
+              handleScroll("contacto");
+              setIsMenuOpen(false);
+            }}
+            className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
+          >
+            Contáctanos
+          </button>
+          <button
+            onClick={() => {
+              navigate("/atomicShop/productos");
+              setIsMenuOpen(false);
+            }}
+            className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
+          >
+            Productos
+          </button>
+          {/* Buscador en menú móvil */}
+          <div
+            ref={wrapperRef}
+            className="mt-2 flex items-center border border-gray-300 rounded-lg overflow-hidden"
+          >
+            <input
+              type="text"
+              placeholder="Buscar un producto"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="flex-1 px-4 py-2 text-sm text-gray-700 outline-none"
+            />
+            <button className="bg-blue-500 px-3 py-2.5 cursor-pointer">
+              <Search size={16} className="text-white" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <CategoriesBar />
     </header>
   );

@@ -45,11 +45,14 @@ function HomePage() {
     setIsSending(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/e-commerce/contact/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(contactForm),
-      });
+      const response = await fetch(
+        "http://localhost:4000/api/e-commerce/contact/contact",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(contactForm),
+        },
+      );
 
       if (response.ok) {
         toast.success("¡Mensaje enviado correctamente!");
@@ -129,10 +132,10 @@ function HomePage() {
           </div>
         </section>
 
-        {/* Sección Contáctenos — pégala dentro del <main> */}
+        {/* Sección Contáctenos */}
         <section id="contacto" className="w-full max-w-5xl mx-auto my-8 px-4">
           {/* Título */}
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 tracking-wide ">
+          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 tracking-wide">
             Contáctenos
           </h2>
 
@@ -178,7 +181,7 @@ function HomePage() {
             <div className="hidden md:block w-px bg-gray-100" />
 
             {/* Columna derecha — formulario */}
-            <div className="flex flex-col gap-4 flex-1">
+            <div className="flex flex-col gap-4 flex-1 w-full">
               {/* Nombre */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-gray-600">
@@ -189,12 +192,12 @@ function HomePage() {
                   name="nombre"
                   value={contactForm.nombre}
                   onChange={handleContactChange}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />
               </div>
 
-              {/* Teléfono y Correo */}
-              <div className="flex gap-3">
+              {/* Teléfono y Correo - ¡AQUÍ ESTÁ EL ARREGLO RESPONSIVE! */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="flex flex-col gap-1 flex-1">
                   <label className="text-xs font-medium text-gray-600">
                     *Teléfono:
@@ -204,7 +207,7 @@ function HomePage() {
                     name="telefono"
                     value={contactForm.telefono}
                     onChange={handleContactChange}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   />
                 </div>
                 <div className="flex flex-col gap-1 flex-1">
@@ -216,7 +219,7 @@ function HomePage() {
                     name="correo"
                     value={contactForm.correo}
                     onChange={handleContactChange}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   />
                 </div>
               </div>
@@ -231,17 +234,18 @@ function HomePage() {
                   value={contactForm.mensaje}
                   onChange={handleContactChange}
                   rows={4}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
                 />
               </div>
 
-              <div>
+              {/* Botón Enviar */}
+              <div className="w-full sm:w-auto">
                 <motion.button
                   whileHover={!isSending ? { scale: 1.02 } : {}}
                   whileTap={!isSending ? { scale: 0.98 } : {}}
                   onClick={handleContactSubmit}
                   disabled={isSending}
-                  className={`transition text-white text-sm font-semibold px-6 py-2 rounded-lg ${
+                  className={`w-full sm:w-auto transition text-white text-sm font-semibold px-6 py-2 rounded-lg ${
                     isSending
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-500 hover:bg-blue-600 cursor-pointer"

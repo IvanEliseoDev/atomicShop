@@ -118,10 +118,14 @@ function Products() {
 
     if (wishlist.has(id)) {
       await ecommerceService.removeFromWishlist(user.id, id);
-      setWishlist(prev => { const next = new Set(prev); next.delete(id); return next; });
+      setWishlist((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     } else {
       await ecommerceService.addToWishlist(user.id, id);
-      setWishlist(prev => new Set(prev).add(id));
+      setWishlist((prev) => new Set(prev).add(id));
     }
   };
 
@@ -142,10 +146,12 @@ function Products() {
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Filter Bar */}
       <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
-          {/* Price Range */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-medium text-gray-700">Por precio:</span>
+        <div className="max-w-7xl mx-auto px-4 py-3 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3">
+          {/* Price Range — ocupa las 2 columnas en móvil */}
+          <div className="col-span-2 flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700 whitespace-nowrap">
+              Por precio:
+            </span>
             <div className="flex items-center gap-1">
               <span className="text-gray-400">$</span>
               <input
@@ -153,7 +159,7 @@ function Products() {
                 value={minPrice}
                 min={0}
                 onChange={(e) => setMinPrice(Number(e.target.value))}
-                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="w-16 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
             </div>
             <span className="text-gray-400">—</span>
@@ -164,18 +170,18 @@ function Products() {
                 value={maxPrice}
                 min={0}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="w-16 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
             </div>
           </div>
 
           {/* Brand */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-col gap-1 text-sm">
             <span className="font-medium text-gray-700">Por marca:</span>
             <select
               value={brandId}
               onChange={(e) => setBrandId(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
+              className="border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer w-full"
             >
               <option value="Todas">Todas</option>
               {brands.map((b) => (
@@ -187,12 +193,12 @@ function Products() {
           </div>
 
           {/* Category */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-col gap-1 text-sm">
             <span className="font-medium text-gray-700">Por categoría:</span>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
+              className="border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer w-full"
             >
               <option value="Todas">Todas</option>
               {categorys.map((b) => (
@@ -203,15 +209,15 @@ function Products() {
             </select>
           </div>
 
-          {/* Sort */}
-          <div className="flex items-center gap-2 text-sm ml-auto">
-            <span className="font-medium text-gray-700">
-              Ordenar por relevancia:
+          {/* Sort — ocupa las 2 columnas en móvil, se va al final en desktop */}
+          <div className="col-span-2 flex flex-col gap-1 text-sm sm:ml-auto sm:flex-row sm:items-center sm:gap-2">
+            <span className="font-medium text-gray-700 whitespace-nowrap">
+              Ordenar por:
             </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer"
+              className="border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer w-full sm:w-auto"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -254,10 +260,11 @@ function Products() {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
-                      className={`w-5 h-5 transition-colors ${wishlist.has(product.id)
-                        ? "fill-red-500 stroke-red-500"
-                        : "fill-none stroke-gray-400"
-                        }`}
+                      className={`w-5 h-5 transition-colors ${
+                        wishlist.has(product.id)
+                          ? "fill-red-500 stroke-red-500"
+                          : "fill-none stroke-gray-400"
+                      }`}
                       strokeWidth={1.8}
                     >
                       <path
