@@ -5,6 +5,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { customerModel } from '../../../models/customer';
 import { config } from '../../../config';
+import { HTMLVerificationEmail } from '../../../utils/HTMLVerificationEmail';
 
 export const registerCustomerEcommerceController = {
     register: async (req: Request, res: Response): Promise<any> => {
@@ -24,7 +25,7 @@ export const registerCustomerEcommerceController = {
                 password: passwordHash,
                 telephone,
                 direction,
-                typeCustomer,
+                typeCustomer: "consumidor final",
                 dui,
                 nit,
                 typeActivity,
@@ -35,7 +36,8 @@ export const registerCustomerEcommerceController = {
 
             await newCustomer.save();
 
-            const verificationCode = crypto.randomBytes(3).toString('hex');
+            // Solo numeros
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const tokenCode = jsonwebtoken.sign(
                 { mail, verificationCode },
@@ -57,7 +59,7 @@ export const registerCustomerEcommerceController = {
                 from: config.email.user,
                 to: mail,
                 subject: 'Verificacion de cuenta',
-                text: `Para verificar tu cuenta, utiliza este codigo: ${verificationCode}. Expira en 15 minutos.`
+                html: HTMLVerificationEmail(verificationCode)
             };
 
             transporter.sendMail(mailOptions, (error, info) => {

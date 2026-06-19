@@ -15,6 +15,7 @@ import { RegisterPage } from "@/modules/Register/Pages/RegisterPage";
 import { RecoverPasswordPage } from "@/modules/RecoverPassword/Pages/RecoverPasswordPage";
 import { ManageProfilePage } from "@/modules/Profile/Pages/ManageProfilePerfil";
 import TerminosCondiciones from "@/modules/Terms/Pages/TerminosCondiciones";
+import { VerifyEmailPage } from "@/modules/Register/Pages/VerifyEmailPage";
 
 export const appRouter = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ export const appRouter = createBrowserRouter([
   {
     path: "/recover-password",
     element: <RecoverPasswordPage />,
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmailPage />,
   },
   {
     path: "/atomicShop/",

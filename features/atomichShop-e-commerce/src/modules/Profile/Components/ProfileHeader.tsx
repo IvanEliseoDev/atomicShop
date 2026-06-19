@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Mail, MapPin, Phone, CreditCard, Pencil, Check, X, Camera } from "lucide-react";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
+import axios from "axios";
+import { useAuth } from "@/lib/AuthContext"; 
+
+interface EditableFieldProps {
+    isEditing: boolean;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
 
 export const ProfileHeader = () => {
+    const { user, setUser } = useAuth(); 
     const [isEditing, setIsEditing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    // 1. Estado inicial vacío (se llenará con el localStorage)
     const [userData, setUserData] = useState({
         nombres: "",
-        apellidos: "",
         correo: "",
         telefono: "Sin definir",
         dni: "Sin definir",
@@ -17,54 +26,103 @@ export const ProfileHeader = () => {
         profilePic: ""
     });
 
-    // 2. Cargar datos al montar el componente
+    // ==========================================
+    // 1. CARGAR DATOS DESDE LA BASE DE DATO
+    // ==========================================
     useEffect(() => {
-        const session = localStorage.getItem("usuario_sesion");
-        if (session) {
-            const data = JSON.parse(session);
-            setUserData({
-                // Usamos los nombres exactos que vienen del formulario de registro
-                nombres: data.nombres || "",
-                apellidos: data.apellidos || "",
-                correo: data.email || data.correo || "", 
-                telefono: data.telefono || "",
-                dni: data.dui || data.dni || "", 
-                direccion: data.direccion || "Tu dirección aquí",
-                profilePic: data.profilePic || ""
+        if (!user?.id) return; // Si no hay sesión, no hace nada
+
+        axios.get(`http://localhost:4000/e-commerce/profile/${user.id}`, {
+            withCredentials: true // Envía la cookie de sesión
+        })
+            .then(response => {
+                const customer = response.data.data;
+                if (customer) {
+                    setUserData({
+                        nombres: customer.name || "",
+                        correo: customer.mail || "",
+                        telefono: customer.telephone || "Sin definir",
+                        dni: customer.dui || "Sin definir",
+                        direccion: customer.direction || "Sin definir",
+                        profilePic: customer.image || ""
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar datos del perfil:", error);
+                toast.error("No se pudieron cargar los datos del perfil");
             });
-        }
-    }, []);
+    }, [user?.id]); // Se ejecuta cuando el ID del usuario esté disponible
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setUserData({ ...userData, [name]: value });
     };
 
-    const handleSave = () => {
-        // Guardamos la sesión 
-        localStorage.setItem("usuario_sesion", JSON.stringify(userData));
+    // ==========================================
+    // 2. GUARDAR CAMBIOS EN LA BASE DE DATOS
+    // ==========================================
+    const handleSave = async () => {
+        if (!user?.id) {
+            toast.error("No hay sesión activa");
+            return;
+        }
 
-        const usuarios = JSON.parse(localStorage.getItem("usuarios_registrados") || "[]");
-        const nuevosUsuarios = usuarios.map((u: any) =>
-            (u.email === userData.correo || u.correo === userData.correo) ? { ...u, ...userData } : u
-        );
-        localStorage.setItem("usuarios_registrados", JSON.stringify(nuevosUsuarios));
+        try {
+            const formDataToSend = new FormData();
+            formDataToSend.append("name", userData.nombres);
+            formDataToSend.append("telephone", userData.telefono);
+            formDataToSend.append("direction", userData.direccion);
+            formDataToSend.append("dui", userData.dni);
 
-        // Lanzamos este evento para que el Navbar lo escuche y se refresque solo
-        window.dispatchEvent(new Event("profileUpdate"));
+            if (selectedFile) {
+                formDataToSend.append("image", selectedFile);
+            }
 
-        setIsEditing(false);
-        toast.success("Perfil actualizado correctamente");
+            const response = await axios.put(
+                `http://localhost:4000/e-commerce/profile/update/${user.id}`,
+                formDataToSend,
+                {
+                    withCredentials: true, // Envía la cookie
+                    headers: { "Content-Type": "multipart/form-data" }
+                }
+            );
+
+            if (response.status === 200) {
+                const updatedCustomer = response.data.data;
+
+                setUserData({
+                    nombres: updatedCustomer.name || "",
+                    correo: updatedCustomer.mail || "",
+                    telefono: updatedCustomer.telephone || "Sin definir",
+                    dni: updatedCustomer.dui || "Sin definir",
+                    direccion: updatedCustomer.direction || "Sin definir",
+                    profilePic: updatedCustomer.image || ""
+                });
+
+                // Actualiza el contexto global para que el navbar u otros componentes
+                // reflejen el nuevo nombre/foto sin recargar
+                setUser({
+                    ...user,
+                    name: updatedCustomer.name,
+                    profilePic: updatedCustomer.image
+                });
+
+                setIsEditing(false);
+                setSelectedFile(null);
+                toast.success("¡Perfil actualizado correctamente!");
+            }
+        } catch (error) {
+            console.error("Error al actualizar el perfil:", error);
+            toast.error("Hubo un error al guardar los cambios");
+        }
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setUserData({ ...userData, profilePic: reader.result as string });
-            };
-            reader.readAsDataURL(file);
+            setSelectedFile(file);
+            setUserData({ ...userData, profilePic: URL.createObjectURL(file) });
         }
     };
 
@@ -76,10 +134,10 @@ export const ProfileHeader = () => {
                     <div className="relative group">
                         <div className="w-32 h-32 bg-[#E5E7EB] rounded-full border-4 border-white flex items-center justify-center overflow-hidden shadow-sm">
                             {userData.profilePic ? (
-                                <img src={userData.profilePic} className="w-full h-full object-cover" />
+                                <img src={userData.profilePic} className="w-full h-full object-cover" alt="Profile" />
                             ) : (
                                 <div className="text-gray-400 font-bold text-4xl">
-                                    {userData.nombres.charAt(0).toUpperCase()}
+                                    {userData.nombres ? userData.nombres.charAt(0).toUpperCase() : "U"}
                                 </div>
                             )}
                         </div>
@@ -95,14 +153,14 @@ export const ProfileHeader = () => {
 
                 <div className="ml-40 mt-4 flex items-center gap-3">
                     {isEditing ? (
-                        <div className="flex gap-2">
-                            <input name="nombres" value={userData.nombres} onChange={handleInputChange} className="bg-white/20 border-b border-white text-white text-2xl font-bold outline-none px-2 rounded" />
-                            <input name="apellidos" value={userData.apellidos} onChange={handleInputChange} className="bg-white/20 border-b border-white text-white text-2xl font-bold outline-none px-2 rounded" />
-                        </div>
+                        <input
+                            name="nombres"
+                            value={userData.nombres}
+                            onChange={handleInputChange}
+                            className="bg-white/20 border-b border-white text-white text-2xl font-bold outline-none px-2 rounded w-80"
+                        />
                     ) : (
-                        <h1 className="text-2xl font-bold text-white">
-                            {userData.nombres} {userData.apellidos}
-                        </h1>
+                        <h1 className="text-2xl font-bold text-white">{userData.nombres}</h1>
                     )}
                     <button onClick={() => setIsEditing(!isEditing)} className="text-white/80 hover:text-white">
                         {isEditing ? <X size={20} /> : <Pencil size={18} />}
@@ -143,7 +201,7 @@ export const ProfileHeader = () => {
     );
 };
 
-const EditableField = ({ isEditing, name, value, onChange }: any) => {
+const EditableField = ({ isEditing, name, value, onChange }: EditableFieldProps) => {
     if (!isEditing) return <span className="text-gray-600 text-sm">{value}</span>;
     return <input name={name} value={value} onChange={onChange} className="text-sm text-gray-700 border-b border-blue-300 outline-none w-full" />;
 };

@@ -14,15 +14,18 @@ import { motion } from "framer-motion";
 function HomePage() {
   // ---------------- Para el formulario de contactanos (inicio)
 
+  const [isSending, setIsSending] = useState(false);
+
   const handleContactChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setContactForm({ ...contactForm, [e.target.name]: e.target.value });
   };
 
-  const handleContactSubmit = () => {
+  const handleContactSubmit = async () => {
     const { nombre, telefono, correo, mensaje } = contactForm;
 
+    // 1. Validaciones básicas
     if (
       !nombre.trim() ||
       !telefono.trim() ||
@@ -39,8 +42,29 @@ function HomePage() {
       return;
     }
 
-    toast.success("¡Mensaje enviado correctamente!");
-    setContactForm({ nombre: "", telefono: "", correo: "", mensaje: "" });
+    // 2. Iniciamos el estado de carga
+    setIsSending(true);
+
+    try {
+      const response = await fetch("http://localhost:4000/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+
+      if (response.ok) {
+        toast.success("¡Mensaje enviado correctamente!");
+        setContactForm({ nombre: "", telefono: "", correo: "", mensaje: "" });
+        // Si quieres que el botón se reactive después de enviar, ponlo en false.
+        // Si quieres que no puedan enviar NADA más, déjalo en true.
+        setIsSending(false);
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
+      toast.error("Error al enviar el mensaje, intenta de nuevo" + error);
+      setIsSending(false); // Re-habilitamos el botón para que lo intenten de nuevo
+    }
   };
 
   // ---------------- Para el formulario de contactanos (fin)
@@ -77,7 +101,7 @@ function HomePage() {
           {/* Targeta */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4  gap-3 relative flex justify-center">
             <img
-              src="/logoatomicshop.png"
+              src="../../../../public/logoatomicshop.png"
               alt=""
               className="w-full h-42 object-contain rounded-lg mt-4"
             />
@@ -212,23 +236,25 @@ function HomePage() {
                 />
               </div>
 
-              {/* Botón enviar */}
               <div>
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={!isSending ? { scale: 1.02 } : {}}
+                  whileTap={!isSending ? { scale: 0.98 } : {}}
                   onClick={handleContactSubmit}
-                  className="bg-blue-500 hover:bg-blue-600 transition text-white text-sm font-semibold px-6 py-2 rounded-lg cursor-pointer"
+                  disabled={isSending}
+                  className={`transition text-white text-sm font-semibold px-6 py-2 rounded-lg ${
+                    isSending
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                  }`}
                 >
-                  Enviar
+                  {isSending ? "Enviando..." : "Enviar"}
                 </motion.button>
               </div>
             </div>
           </div>
         </section>
       </main>
-
-      
     </>
   );
 }

@@ -3,20 +3,23 @@ import React, { useState, useEffect, useRef } from "react";
 import { Heart, ShoppingCart, User, Search, LogOut, X } from "lucide-react";
 import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
 import CategoriesBar from "./CategoriesBar";
-import { toast } from "sonner"; // 
+import { toast } from "sonner"; //
 import { useCart } from "@/lib/CartContext";
-
+import { useAuth } from "@/lib/AuthContext";
+import { ecommerceService } from "@/services/ecommerceService";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 const Navbar = () => {
-  const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
-    id: i + 1,
-    name: "Báscula para pesar cajas petri",
-    price: 80.0,
-    originalPrice: 99.0,
-    image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
-    onSale: true,
-  }));
+  // const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
+  //   id: i + 1,
+  //   name: "Báscula para pesar cajas petri",
+  //   price: 80.0,
+  //   originalPrice: 99.0,
+  //   image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
+  //   onSale: true,
+  // }));
 
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -26,7 +29,10 @@ const Navbar = () => {
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -34,11 +40,18 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    // Mostrar dropdown solo si hay 3 o más caracteres
-    setShowDropdown(value.trim().length >= 3);
+
+    if (value.trim().length >= 3) {
+      const data = await ecommerceService.searchProducts(value);
+      setSearchResults(data.slice(0, 3));
+      setShowDropdown(true);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
   };
 
   const handleClear = () => {
@@ -48,40 +61,15 @@ const Navbar = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown
 
-  // Estado que acepta nombre, apellido y foto
-  const [user, setUser] = useState<{ nombres: string, apellidos?: string, profilePic?: string } | null>(null);
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    const checkSession = () => {
-      const session = localStorage.getItem("usuario_sesion");
-      if (session) {
-        const data = JSON.parse(session);
-        setUser(data);
-      }
-    };
-
-    checkSession(); // Carga inicial
-
-    window.addEventListener("profileUpdate", checkSession);
-    window.addEventListener("storage", checkSession);
-
-    return () => {
-      window.removeEventListener("profileUpdate", checkSession);
-      window.removeEventListener("storage", checkSession);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("usuario_sesion");
-    setUser(null);
+  const handleLogout = async () => {
+    await logout();
     setIsMenuOpen(false);
-
-    // Mostramos el mensaje antes o después de navegar
     toast.info("Has cerrado sesión correctamente", {
       description: "¡Vuelve pronto a Atomic Shop!",
       position: "bottom-right",
     });
-
     navigate("/atomicShop");
   };
 
@@ -99,11 +87,6 @@ const Navbar = () => {
     }
   };
 
-  // Solo mostramos 3 productos en el dropdown
-  const previewProducts = SEARCH_MOCK_PRODUCTS.slice(0, 3);
-
-  const TOTAL_RESULTS = 264;
-
   return (
     <header className="w-full shadow-sm border-b">
       <div className="bg-white px-10 py-3 flex items-center justify-between gap-4">
@@ -112,25 +95,33 @@ const Navbar = () => {
           className="flex items-center gap-2 cursor-pointer shrink-0"
           onClick={() => navigate("/atomicShop")}
         >
-          <img
-            src="/logoatomicshop.png"
-            alt="Atomic Shop"
-            className="h-20 w-auto object-contain"
-          />
+          <LogoYonJob className="h-20" />
         </div>
 
         {/* Nav */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-          <button onClick={() => navigate("/atomicShop")} className="hover:text-blue-500 transition cursor-pointer">
+          <button
+            onClick={() => navigate("/atomicShop")}
+            className="hover:text-blue-500 transition cursor-pointer"
+          >
             Inicio
           </button>
-          <button onClick={() => handleScroll("nosotros")} className="hover:text-blue-500 transition cursor-pointer">
+          <button
+            onClick={() => handleScroll("nosotros")}
+            className="hover:text-blue-500 transition cursor-pointer"
+          >
             Nosotros
           </button>
-          <button onClick={() => handleScroll("contacto")} className="hover:text-blue-500 transition cursor-pointer">
+          <button
+            onClick={() => handleScroll("contacto")}
+            className="hover:text-blue-500 transition cursor-pointer"
+          >
             Contáctanos
           </button>
-          <button onClick={() => navigate("/atomicShop/productos")} className="hover:text-blue-500 transition cursor-pointer">
+          <button
+            onClick={() => navigate("/atomicShop/productos")}
+            className="hover:text-blue-500 transition cursor-pointer"
+          >
             Productos
           </button>
         </nav>
@@ -163,18 +154,23 @@ const Navbar = () => {
 
           {/* Dropdown de resultados */}
           {showDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden" style={{ width: "480px" }}>
+            <div
+              className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
+              style={{ width: "480px" }}
+            >
               {/* Título */}
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm text-gray-600">
                   Productos para{" "}
-                  <span className="text-sky-500 font-semibold">"{searchQuery}"</span>
+                  <span className="text-sky-500 font-semibold">
+                    "{searchQuery}"
+                  </span>
                 </p>
               </div>
 
               {/* Grid de 3 productos */}
               <div className="grid grid-cols-3 gap-3 p-4">
-                {previewProducts.map((product) => (
+                {searchResults.map((product) => (
                   <div
                     key={product.id}
                     onClick={() => {
@@ -186,7 +182,7 @@ const Navbar = () => {
                   >
                     {/* Badge + wishlist */}
                     <div className="flex items-center justify-between">
-                      {product.onSale ? (
+                      {!!product.discount ? (
                         <span className="bg-sky-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
                           Oferta
                         </span>
@@ -204,7 +200,7 @@ const Navbar = () => {
                     {/* Imagen */}
                     <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center h-20">
                       <img
-                        src={product.image}
+                        src={product.images?.[0] ?? ""}
                         alt={product.name}
                         className="object-contain h-14 w-auto group-hover:scale-105 transition-transform"
                       />
@@ -238,11 +234,13 @@ const Navbar = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           addItem({
-                            id: product.id,
+                            id: product._id,
                             name: product.name,
                             price: product.price,
-                            originalPrice: product.originalPrice,
-                            image: product.image,
+                            originalPrice: product.discount
+                              ? product.price / (1 - product.discount / 100)
+                              : product.price, // Calculado igual que en ProductSlider
+                            image: product.images?.[0] ?? "",
                           });
                         }}
                         className="w-7 h-7 bg-sky-500 hover:bg-sky-600 rounded-md flex items-center justify-center transition-colors cursor-pointer shrink-0"
@@ -264,9 +262,8 @@ const Navbar = () => {
                   }}
                   className="text-xs text-gray-500 hover:text-sky-500 transition-colors cursor-pointer"
                 >
-                  Ver todos los{" "}
                   <span className="text-sky-500 font-semibold underline underline-offset-2">
-                    {TOTAL_RESULTS} productos
+                    Ver todos los productos
                   </span>
                 </button>
               </div>
@@ -308,13 +305,16 @@ const Navbar = () => {
               >
                 <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
                   {user?.profilePic ? (
-                    <img src={user.profilePic} className="w-full h-full object-cover" />
+                    <img
+                      src={user.profilePic}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    user?.nombres?.charAt(0).toUpperCase() || "U"
+                    user?.name?.charAt(0).toUpperCase() || "U"
                   )}
                 </div>
                 <span className="text-sm font-semibold text-blue-700 hidden lg:block">
-                  {user?.nombres.split(" ")[0]}
+                  {user?.name?.split(" ")[0]}
                 </span>
               </button>
 
@@ -322,8 +322,12 @@ const Navbar = () => {
               {isMenuOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 mb-1">
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Sesión activa</p>
-                    <p className="text-sm font-bold text-gray-800 truncate">{user.nombres}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
+                      Sesión activa
+                    </p>
+                    <p className="text-sm font-bold text-gray-800 truncate">
+                      {user.name}
+                    </p>
                   </div>
 
                   <button
@@ -348,13 +352,12 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            /* Si no hay nadie, tu botón original de Crear Cuenta */
             <button
               onClick={() => navigate("/login")}
               className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
             >
               <User size={22} />
-              <span className="text-xs mt-0.5"> Crear cuenta</span>
+              <span className="text-xs mt-0.5"> Iniciar sesión</span>
             </button>
           )}
         </div>

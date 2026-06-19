@@ -1,7 +1,8 @@
 import React from "react";
 import { AuthCard } from "../../Login/Components/AuthCard";
-import { Check } from "lucide-react"; 
+import { Check } from "lucide-react";
 import { useNavigate } from "react-router";
+import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 export const RecoverFinalMessage = () => {
   const navigate = useNavigate();
@@ -9,11 +10,7 @@ export const RecoverFinalMessage = () => {
   return (
     <AuthCard className="max-w-md text-center py-12 px-8">
       <div className="flex justify-center mb-10">
-        <img 
-          src="/logoatomicshop.png" 
-          alt="Logo" 
-          className="h-20 w-auto object-contain" 
-        />
+        <LogoYonJob className="h-20 object-contain" />
       </div>
 
       <h2 className="text-gray-800 font-semibold text-[17px] mb-12">
@@ -26,7 +23,7 @@ export const RecoverFinalMessage = () => {
         </div>
       </div>
 
-      <button 
+      <button
         onClick={() => navigate("/login")}
         className="mt-6 text-[#5BA4E1] text-sm font-medium hover:underline cursor-pointer transition-all"
       >
