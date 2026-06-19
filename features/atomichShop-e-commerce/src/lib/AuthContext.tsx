@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { ecommerceService } from "../services/ecommerceService";
+
+const BASE_URL = "http://localhost:4000/api/e-commerce";
 
 interface AuthUser {
   id: string;
@@ -23,21 +24,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Al montar, verificar si hay sesion activa por cookie
   useEffect(() => {
-    ecommerceService.getMe()
-      .then((data) => {
-        if (data.user) setUser(data.user);
-      })
-      .catch(() => {})
+    fetch(`${BASE_URL}/login/me`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => { if (data.user) setUser(data.user); })
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   const login = async (mail: string, password: string) => {
-    const data = await ecommerceService.login(mail, password);
+    const data = await fetch(`${BASE_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mail, password }),
+    }).then((r) => r.json());
+
     if (data.status === "200") {
-      // Volver a pedir los datos del usuario tras login exitoso
-      const me = await ecommerceService.getMe();
+      const me = await fetch(`${BASE_URL}/login/me`, {
+        credentials: "include",
+      }).then((r) => r.json());
       if (me.user) setUser(me.user);
       return { ok: true, message: data.message };
     }
@@ -45,7 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await ecommerceService.logout();
+    await fetch(`${BASE_URL}/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
     setUser(null);
   };
 

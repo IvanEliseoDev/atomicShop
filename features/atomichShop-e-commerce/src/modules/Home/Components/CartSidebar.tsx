@@ -18,7 +18,7 @@ function CartSidebar() {
 
   const handleCheckout = () => {
     closeCart();
-    navigate("/atomicShop/carrito");
+    navigate("/carrito");
   };
 
   return (
@@ -90,9 +90,9 @@ function CartSidebar() {
                       <div
                         onClick={() => {
                           closeCart();
-                          navigate(`/atomicShop/productos/${item.id}`);
+                          navigate(`/productos/${item.id}`);
                         }}
-                        className="w-16 h-14 bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-16 h-14 bg-linear-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                       >
                         <img
                           src={item.image}
@@ -121,7 +121,7 @@ function CartSidebar() {
                           >
                             −
                           </button>
-                          <span className="px-3 py-1 text-xs font-medium text-gray-700 min-w-[2rem] text-center">
+                          <span className="px-3 py-1 text-xs font-medium text-gray-700 min-w-8 text-center">
                             {item.quantity}
                           </span>
                           <button

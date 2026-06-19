@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/e-commerce";
+const BASE_URL = "http://localhost:4000/api/e-commerce";
 
 export const ecommerceService = {
   // Pagina de inicio
@@ -135,6 +135,9 @@ export const ecommerceService = {
       r.json(),
     );
   },
+
+  getProductById: (id: string) =>
+  fetch(`${BASE_URL}/products/${id}`).then((r) => r.json()),
 
   getBrands: () => fetch(`${BASE_URL}/brands`).then((r) => r.json()),
 

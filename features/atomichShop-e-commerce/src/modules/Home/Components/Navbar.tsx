@@ -10,15 +10,6 @@ import { ecommerceService } from "@/services/ecommerceService";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
 
 const Navbar = () => {
-  // const SEARCH_MOCK_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
-  //   id: i + 1,
-  //   name: "Báscula para pesar cajas petri",
-  //   price: 80.0,
-  //   originalPrice: 99.0,
-  //   image: "https://placehold.co/100x80/e8f4fb/4a9bbe?text=Báscula",
-  //   onSale: true,
-  // }));
-
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,13 +61,13 @@ const Navbar = () => {
       description: "¡Vuelve pronto a Atomic Shop!",
       position: "bottom-right",
     });
-    navigate("/atomicShop");
+    navigate("/");
   };
 
   // Funcion para scroll para las secciones de contactanos y nosotros en la pagina principal del proyecto
   const handleScroll = (id: string) => {
-    if (window.location.pathname !== "/atomicShop") {
-      navigate("/atomicShop");
+    if (window.location.pathname !== "/") {
+      navigate("/");
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) element.scrollIntoView({ behavior: "smooth" });
@@ -93,7 +84,7 @@ const Navbar = () => {
         {/* Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer shrink-0"
-          onClick={() => navigate("/atomicShop")}
+          onClick={() => navigate("/")}
         >
           <LogoYonJob className="h-20" />
         </div>
@@ -101,7 +92,7 @@ const Navbar = () => {
         {/* Nav */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
           <button
-            onClick={() => navigate("/atomicShop")}
+            onClick={() => navigate("/")}
             className="hover:text-blue-500 transition cursor-pointer"
           >
             Inicio
@@ -119,7 +110,7 @@ const Navbar = () => {
             Contáctanos
           </button>
           <button
-            onClick={() => navigate("/atomicShop/productos")}
+            onClick={() => navigate("/productos")}
             className="hover:text-blue-500 transition cursor-pointer"
           >
             Productos
@@ -174,7 +165,7 @@ const Navbar = () => {
                   <div
                     key={product.id}
                     onClick={() => {
-                      navigate(`/atomicShop/productos/${product.id}`);
+                      navigate(`/productos/${product.id}`);
                       setShowDropdown(false);
                       setSearchQuery("");
                     }}
@@ -256,7 +247,7 @@ const Navbar = () => {
               <div className="border-t border-gray-100 px-4 py-2.5 text-center">
                 <button
                   onClick={() => {
-                    navigate("/atomicShop/productos");
+                    navigate("/productos");
                     setShowDropdown(false);
                     setSearchQuery("");
                   }}
@@ -274,7 +265,7 @@ const Navbar = () => {
         {/* Iconos de accion */}
         <div className="flex items-center justify-evenly px-2 p-0 gap-15">
           <button
-            onClick={() => navigate("/atomicShop/favoritos")}
+            onClick={() => navigate("/favoritos")}
             className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
             <Heart size={22} />
@@ -332,7 +323,7 @@ const Navbar = () => {
 
                   <button
                     onClick={() => {
-                      navigate("/atomicShop/perfil");
+                      navigate("/perfil");
                       setIsMenuOpen(false);
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"

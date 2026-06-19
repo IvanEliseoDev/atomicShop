@@ -1,28 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCart } from "../../../lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
-import { ecommerceService } from "@/services/ecommerceService";
-
-interface FavoriteProduct {
-  _id: string;
-  name: string;
-  category?: { name: string };
-  price: number;
-  images?: string[];
-  selected: boolean;
-}
+import { useWishlistPage } from "../hooks/useWishlist";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 function CustomCheckbox({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
-    <div
-      onClick={onChange}
-      className={`w-5 h-5 rounded flex items-center justify-center cursor-pointer border-2 transition-all flex-shrink-0 ${checked ? "bg-sky-500 border-sky-500" : "bg-white border-gray-300 hover:border-sky-400"
-        }`}
-    >
+    <div onClick={onChange}
+      className={`w-5 h-5 rounded flex items-center justify-center cursor-pointer border-2 transition-all flex-shrink-0 ${checked ? "bg-sky-500 border-sky-500" : "bg-white border-gray-300 hover:border-sky-400"}`}>
       {checked && (
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-white" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 13l4 4L19 7" />
         </svg>
       )}
@@ -34,78 +23,50 @@ function Favorites() {
   const { addItem } = useCart();
   const { user } = useAuth();
 
-  const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  // ← Hook con fetch directo, sin ecommerceService
+  const { favorites, setFavorites, loading, remove: removeFromFavorites } = useWishlistPage(user?.id);
+
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Si no hay usuario, no intentar cargar favoritos y dejar de cargar
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-    
-    setLoading(true);
-    ecommerceService.getWishlist(user.id)
-      .then((data) => {
-        if (data.data && Array.isArray(data.data)) {
-          setFavorites(data.data.map((p: any) => ({ ...p, selected: false })));
-        } else {
-          setFavorites([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error loading wishlist:", error);
-        setFavorites([]);
-      })
-      .finally(() => setLoading(false));
-  }, [user?.id]);
+  const formatPrice = (price: number | undefined | null): string => {
+    if (price === undefined || price === null || isNaN(price)) return "0.00";
+    return price.toFixed(2);
+  };
 
   const toggleSelect = (id: string) => {
-    setFavorites(prev => prev.map(p => p._id === id ? { ...p, selected: !p.selected } : p));
+    setFavorites((prev) => prev.map((p) => p._id === id ? { ...p, selected: !p.selected } : p));
   };
 
   const toggleSelectAll = () => {
-    const allSelected = paginatedItems.every(p => p.selected);
-    const pageIds = new Set(paginatedItems.map(p => p._id));
-    setFavorites(prev => prev.map(p => pageIds.has(p._id) ? { ...p, selected: !allSelected } : p));
-  };
-
-  const removeFromFavorites = async (id: string) => {
-    if (!user?.id) return;
-    await ecommerceService.removeFromWishlist(user.id, id);
-    setFavorites(prev => prev.filter(p => p._id !== id));
-    setOpenMenuId(null);
+    const allSelected = paginatedItems.every((p) => p.selected);
+    const pageIds = new Set(paginatedItems.map((p) => p._id));
+    setFavorites((prev) => prev.map((p) => pageIds.has(p._id) ? { ...p, selected: !allSelected } : p));
   };
 
   const addSelectedToCart = () => {
-    favorites.filter(p => p.selected).forEach(p => {
+    favorites.filter((p) => p.selected).forEach((p) => {
       addItem({ id: p._id, name: p.name, price: p.price, originalPrice: p.price, image: p.images?.[0] ?? "" });
     });
   };
 
-  const addSingleToCart = (product: FavoriteProduct) => {
+  const addSingleToCart = (product: typeof favorites[0]) => {
     addItem({ id: product._id, name: product.name, price: product.price, originalPrice: product.price, image: product.images?.[0] ?? "" });
     setOpenMenuId(null);
   };
 
-  // Función segura para formatear precio
-  const formatPrice = (price: number | undefined | null): string => {
-    if (price === undefined || price === null || isNaN(price)) {
-      return "0.00";
-    }
-    return price.toFixed(2);
+  const handleRemove = async (id: string) => {
+    await removeFromFavorites(id);
+    setOpenMenuId(null);
   };
 
   const totalPages = Math.ceil(favorites.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedItems = favorites.slice(startIndex, startIndex + pageSize);
-  const allPageSelected = paginatedItems.length > 0 && paginatedItems.every(p => p.selected);
-  const selectedCount = favorites.filter(p => p.selected).length;
+  const allPageSelected = paginatedItems.length > 0 && paginatedItems.every((p) => p.selected);
+  const selectedCount = favorites.filter((p) => p.selected).length;
 
-  // Primero: Verificar si el usuario no está autenticado
   if (!user?.id && !loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
@@ -116,21 +77,21 @@ function Favorites() {
         </div>
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Inicia sesión</h2>
         <p className="text-gray-500 mb-6">Para ver tus productos favoritos</p>
-        <button 
-          onClick={() => window.location.href = '/login'}
-          className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
-        >
+        <button onClick={() => window.location.href = "/login"}
+          className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors">
           Ir a iniciar sesión
         </button>
       </div>
     );
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-400">Cargando favoritos...</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-400">Cargando favoritos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -143,7 +104,9 @@ function Favorites() {
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-800">Tus favoritos</h1>
-            <p className="text-gray-500 text-sm mt-1">{favorites.length} producto{favorites.length !== 1 ? "s" : ""} guardado{favorites.length !== 1 ? "s" : ""}</p>
+            <p className="text-gray-500 text-sm mt-1">
+              {favorites.length} producto{favorites.length !== 1 ? "s" : ""} guardado{favorites.length !== 1 ? "s" : ""}
+            </p>
           </div>
           <button onClick={addSelectedToCart} disabled={selectedCount === 0}
             className={`flex items-center gap-2 px-5 py-4 rounded-lg text-sm font-semibold shadow-sm transition-all ${selectedCount > 0 ? "bg-sky-500 hover:bg-sky-600 active:scale-95 text-white cursor-pointer" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>
@@ -151,7 +114,9 @@ function Favorites() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Agregar al carrito
-            {selectedCount > 0 && <span className="bg-white text-sky-600 rounded-full px-2 py-0.5 text-xs font-bold leading-none">{selectedCount}</span>}
+            {selectedCount > 0 && (
+              <span className="bg-white text-sky-600 rounded-full px-2 py-0.5 text-xs font-bold leading-none">{selectedCount}</span>
+            )}
           </button>
         </div>
 
@@ -180,7 +145,8 @@ function Favorites() {
               </thead>
               <tbody>
                 {paginatedItems.map((product) => (
-                  <tr key={product._id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${product.selected ? "bg-sky-50" : ""}`}>
+                  <tr key={product._id}
+                    className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${product.selected ? "bg-sky-50" : ""}`}>
                     <td className="py-3 px-4"><CustomCheckbox checked={product.selected} onChange={() => toggleSelect(product._id)} /></td>
                     <td className="py-3 px-4">
                       <div className="w-16 h-12 bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
@@ -190,10 +156,7 @@ function Favorites() {
                     <td className="py-3 px-4 text-gray-700 font-medium">{product.name}</td>
                     <td className="py-3 px-4 text-gray-500">{product.category?.name ?? "Sin categoría"}</td>
                     <td className="py-3 px-4">
-                      <span className="text-gray-800 font-semibold">
-                        {/* LÍNEA CORREGIDA - Usando la función segura */}
-                        ${formatPrice(product.price)}
-                      </span>
+                      <span className="text-gray-800 font-semibold">${formatPrice(product.price)}</span>
                     </td>
                     <td className="py-3 px-4 relative">
                       <button onClick={() => setOpenMenuId(openMenuId === product._id ? null : product._id)}
@@ -204,13 +167,15 @@ function Favorites() {
                       </button>
                       {openMenuId === product._id && (
                         <div className="absolute right-4 top-10 z-20 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[120px]">
-                          <button onClick={() => addSingleToCart(product)} className="w-full flex items-center gap-2 px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+                          <button onClick={() => addSingleToCart(product)}
+                            className="w-full flex items-center gap-2 px-4 py-3.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             Agregar
                           </button>
-                          <button onClick={() => removeFromFavorites(product._id)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
+                          <button onClick={() => handleRemove(product._id)}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -223,20 +188,24 @@ function Favorites() {
                 ))}
               </tbody>
             </table>
+
+            {/* Paginación */}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>Mostrar más</span>
+                <span>Mostrar</span>
                 <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
                   className="border border-gray-300 rounded px-2 py-1 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer">
-                  {PAGE_SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  {PAGE_SIZE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <span>{startIndex + 1}-{Math.min(startIndex + pageSize, favorites.length)} de {favorites.length}</span>
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-600">
+                <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-600">
+                <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>

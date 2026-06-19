@@ -32,7 +32,7 @@ function CategoriesBar() {
           key={cat._id}
           className="text-white text-sm font-medium hover:underline transition whitespace-nowrap cursor-pointer"
           onClick={() =>
-            navigate(`/atomicShop/productos?categoria=${cat._id}`)
+            navigate(`/productos?categoria=${cat._id}`)
           }
         >
           {cat.name}

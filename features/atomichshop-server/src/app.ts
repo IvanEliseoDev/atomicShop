@@ -58,42 +58,30 @@ app.use(cookieParser());
  */
 
 // API
-app.use("/api/v1/seed", seedRouter);
+app.use("/api/seed", seedRouter);
 
 // ADMINISTRACION
-app.use("/api/v1/admin/products", productsRoutes);
-app.use("/api/v1/admin/provider", providerRoutes);
-app.use("/api/v1/admin/customers", customerRouter);
-app.use("/api/v1/admin/employees", employeeRouter);
-app.use("/api/v1/admin/category", categoryRouter);
+app.use("/api/admin/products", productsRoutes);
+app.use("/api/admin/provider", providerRoutes);
+app.use("/api/admin/customers", customerRouter);
+app.use("/api/admin/employees", employeeRouter);
+app.use("/api/admin/category", categoryRouter);
 
 // E-COMMERCE
-app.use("/api/v1/e-commerce/products", productsEcomerceRoutes);
-app.use("/api/v1/e-commerce/banners", bannersEcommerceRotes)
-app.use("/api/v1/e-commerce/providers", providersEcommerceRoutes)
-app.use("/api/v1/e-commerce/carts", cartsEcommerceRoutes)
-app.use("/api/v1/e-commerce/login", loginEcommerceRoutes)
-app.use("/api/v1/e-commerce/logout", logoutEcommerceRoutes)
-app.use("/api/v1/e-commerce/registerCustommer", registerCustommerEcommerceRoutes)
-app.use("/api/v1/e-commerce/recoveryPasswordEcommerce", recoveryPasswordEcommerceRoutes)
-app.use("/api/v1/e-commerce/profile", profileRoutes);
-app.use("/api/v1/e-commerce/invoices", invoiceEcommerceRoutes);
-app.use("/api/v1/e-commerce/wompi", wompiRoutes);
-
-app.use("/e-commerce/products", productsEcomerceRoutes);
-app.use("/e-commerce/banners", bannersEcommerceRotes)
-app.use("/e-commerce/providers", providersEcommerceRoutes)
-app.use("/e-commerce/carts", cartsEcommerceRoutes)
-app.use("/e-commerce/login", loginEcommerceRoutes)
-app.use("/e-commerce/logout", logoutEcommerceRoutes)
-app.use("/e-commerce/register", registerCustommerEcommerceRoutes)
-app.use("/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
-app.use("/e-commerce/categories", categoriesEcommerceRoutes)
-app.use("/e-commerce/brands", brandsEcommerceRoutes)
-app.use("/api", contactRoutes);
-app.use("/e-commerce/profile", profileRoutes);
-app.use("/e-commerce/wishlist", wishlistRoutes);
-app.use("/e-commerce/invoices", invoiceEcommerceRoutes);
-app.use("/e-commerce/wompi", wompiRoutes);
+app.use("/api/e-commerce/products", productsEcomerceRoutes);
+app.use("/api/e-commerce/banners", bannersEcommerceRotes)
+app.use("/api/e-commerce/providers", providersEcommerceRoutes)
+app.use("/api/e-commerce/carts", cartsEcommerceRoutes)
+app.use("/api/e-commerce/login", loginEcommerceRoutes)
+app.use("/api/e-commerce/logout", logoutEcommerceRoutes)
+app.use("/api/e-commerce/register", registerCustommerEcommerceRoutes)
+app.use("/api/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
+app.use("/api/e-commerce/categories", categoriesEcommerceRoutes)
+app.use("/api/e-commerce/brands", brandsEcommerceRoutes)
+app.use("/api/e-commerce/profile", profileRoutes);
+app.use("/api/e-commerce/wishlist", wishlistRoutes);
+app.use("/api/e-commerce/invoices", invoiceEcommerceRoutes);
+app.use("/api/e-commerce/wompi", wompiRoutes);
+app.use("/api/e-commerce/contact", contactRoutes)
 
 export default app;

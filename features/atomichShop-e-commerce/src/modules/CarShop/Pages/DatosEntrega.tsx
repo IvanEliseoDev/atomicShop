@@ -104,7 +104,7 @@ const DatosEntrega = () => {
       return;
     }
     sessionStorage.setItem("deliveryData", JSON.stringify(form));
-    navigate("/atomicShop/carrito/datos-pago");
+    navigate("/carrito/datos-pago");
   };
 
   return (
@@ -115,7 +115,7 @@ const DatosEntrega = () => {
           {/* Paso 1 — completado */}
           <div
             className="flex items-center gap-2 text-gray-400 cursor-pointer hover:text-sky-500 transition"
-            onClick={() => navigate("/atomicShop/carrito")}
+            onClick={() => navigate("/carrito")}
           >
             <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold">
               1
