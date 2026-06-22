@@ -1,120 +1,76 @@
 // DESPUÉS — reemplaza el archivo completo con esto
 import { useParams, useNavigate } from "react-router";
 import { useCart } from "../../../lib/CartContext";
-import { useState, useEffect } from "react";
-import {
-  Heart,
-  ShoppingCart,
-  Star,
-  Truck,
-  Clock,
-  Store,
-  Plus,
-  Loader2,
-} from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { useState } from "react";
+import { Heart, ShoppingCart, Star, Truck, Clock, Store, Plus } from "lucide-react";
+import { useProductDetail } from "../hooks/useProductDetail";
+import { useSimilarProducts } from "../hooks/useSimilarProducts";
+import { useWishlistToggle } from "../hooks/useWishlist";
 
 function StarRating({ rating = 3 }: { rating?: number }) {
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={
-            i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"
-          }
-        />
+        <Star key={i} size={14}
+          className={i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"} />
       ))}
     </div>
   );
 }
 
 function ProductDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { user } = useAuth();
+
   const [quantity, setQuantity] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
-  const [product, setProduct] = useState<any>(null);
-  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
+  // ← Hooks con fetch directo a la API
+  const { product, loading, error } = useProductDetail(id);
+  const { products: similarProducts } = useSimilarProducts(
+    product?.categoryId?._id,
+    id,
+  );
+  const { wishlist, toggle: toggleWishlist } = useWishlistToggle(user?.id);
 
-    // Fetch producto principal
-    fetch(`http://localhost:4000/api/e-commerce/products/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setProduct(data);
-
-        // Fetch productos similares usando categoryId del producto
-        if (data?.categoryId) {
-          const categoryId =
-            typeof data.categoryId === "object"
-              ? data.categoryId._id
-              : data.categoryId;
-
-          fetch(
-            `http://localhost:4000/api/e-commerce/products/similar?categoryId=${categoryId}&currentId=${id}`,
-          )
-            .then((r) => r.json())
-            .then((similar) =>
-              setSimilarProducts(Array.isArray(similar) ? similar : []),
-            );
-        }
-      })
-      .catch(() => setProduct(null))
-      .finally(() => setLoading(false));
-  }, [id]);
-
+  // ─── Estados de carga y error ───
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin text-sky-500" size={36} />
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        <p>Cargando producto...</p>
       </div>
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-gray-400 gap-4">
         <p className="text-lg">Producto no encontrado.</p>
-        <button
-          onClick={() => navigate("/atomicShop/productos")}
-          className="text-sky-500 hover:underline text-sm"
-        >
+        <button onClick={() => navigate("/productos")}
+          className="text-sky-500 hover:underline text-sm">
           Volver al catálogo
         </button>
       </div>
     );
   }
 
-  const price = product.price ?? 0;
-  const discountPercent = product.discount ?? 0;
-  const originalPrice = discountPercent
-    ? price / (1 - discountPercent / 100)
-    : price;
-  const image =
-    product.images?.[0] ??
-    "https://placehold.co/420x280/e8f4fb/4a9bbe?text=Producto";
-  const brandName =
-    typeof product.brandId === "object"
-      ? product.brandId?.name
-      : product.brandId;
-  const categoryName =
-    typeof product.categoryId === "object"
-      ? product.categoryId?.name
-      : product.categoryId;
+  // ─── Datos del backend mapeados ───
+  // El backend devuelve _id, images[], brandId.name, categoryId.name, discount
+  const image = product.images?.[0] ?? "";
+  const discountedPrice = product.discount
+    ? product.price * (1 - product.discount / 100)
+    : product.price;
+  const hasDiscount = !!product.discount && product.discount > 0;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product._id,
         name: product.name,
-        price,
-        originalPrice,
+        price: discountedPrice,
+        originalPrice: product.price,
         image,
       });
     }
@@ -125,13 +81,11 @@ function ProductDetail() {
       {/* ─── HERO ─── */}
       <div className="bg-sky-400 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-10 py-12 flex flex-col md:flex-row items-center gap-8">
+
           {/* Imagen */}
           <div className="flex-shrink-0 flex items-center justify-center md:w-80">
-            <img
-              src={image}
-              alt={product.name}
-              className="object-contain h-52 w-auto drop-shadow-xl"
-            />
+            <img src={image} alt={product.name}
+              className="object-contain h-52 w-auto drop-shadow-xl" />
           </div>
 
           {/* Info */}
@@ -140,59 +94,52 @@ function ProductDetail() {
               {product.name}
             </h1>
 
+            {/* Meta: marca y categoría desde el backend */}
             <p className="text-sky-100 text-sm">
-              Sku: {product.sku ?? "—"} &nbsp;·&nbsp; Marca: {brandName ?? "—"}{" "}
-              &nbsp;·&nbsp; Categoría: {categoryName ?? "—"}
+              {product.brandId && <>Marca: {product.brandId.name}</>}
+              {product.brandId && product.categoryId && <> &nbsp;·&nbsp; </>}
+              {product.categoryId && <>Categoría: {product.categoryId.name}</>}
             </p>
 
+            {/* Precio */}
             <div className="flex items-baseline gap-3 mt-1">
-              <span className="text-3xl font-extrabold">
-                ${price.toFixed(2)}
-              </span>
-              {originalPrice > price && (
-                <span className="text-sky-200 line-through text-lg">
-                  ${originalPrice.toFixed(2)}
-                </span>
+              <span className="text-3xl font-extrabold">${discountedPrice.toFixed(2)}</span>
+              {hasDiscount && (
+                <>
+                  <span className="text-sky-200 line-through text-lg">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  <span className="bg-white/20 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    -{product.discount}%
+                  </span>
+                </>
               )}
             </div>
 
+            {/* Controles */}
             <div className="flex items-center gap-3 mt-2 flex-wrap">
+              {/* Cantidad */}
               <div className="flex items-center bg-white/20 backdrop-blur rounded-lg overflow-hidden border border-white/30">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer"
-                >
-                  −
-                </button>
-                <span className="px-4 py-2 text-sm font-semibold text-white min-w-[3rem] text-center">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer"
-                >
-                  +
-                </button>
+                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer">−</button>
+                <span className="px-4 py-2 text-sm font-semibold text-white min-w-[3rem] text-center">{quantity}</span>
+                <button onClick={() => setQuantity((q) => q + 1)}
+                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer">+</button>
               </div>
 
-              <button
-                onClick={handleAddToCart}
-                className="flex items-center gap-2 bg-white text-sky-500 hover:bg-sky-50 active:scale-95 transition-all rounded-lg px-5 py-2.5 text-sm font-bold shadow cursor-pointer"
-              >
+              {/* Agregar al carrito */}
+              <button onClick={handleAddToCart}
+                className="flex items-center gap-2 bg-white text-sky-500 hover:bg-sky-50 active:scale-95 transition-all rounded-lg px-5 py-2.5 text-sm font-bold shadow cursor-pointer">
                 <ShoppingCart size={16} />
                 Agregar al carrito
               </button>
 
+              {/* Wishlist — conectada al backend */}
               <button
-                onClick={() => setWishlisted((w) => !w)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 border border-white/30 transition-colors cursor-pointer"
-              >
-                <Heart
-                  size={18}
-                  className={
-                    wishlisted ? "fill-red-400 text-red-400" : "text-white"
-                  }
-                />
+                onClick={() => toggleWishlist(product._id)}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 border border-white/30 transition-colors cursor-pointer">
+                <Heart size={18}
+                  className={wishlist.has(product._id) ? "fill-red-400 text-red-400" : "text-white"} />
               </button>
             </div>
           </div>
@@ -201,12 +148,12 @@ function ProductDetail() {
 
       {/* ─── 3 COLUMNAS ─── */}
       <div className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        {/* Características / descripción */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h2 className="text-base font-bold text-gray-800 mb-3">
-            Descripción
-          </h2>
+          <h2 className="text-base font-bold text-gray-800 mb-3">Características</h2>
           <p className="text-sm text-gray-500 leading-relaxed">
-            {product.description || "Sin descripción disponible."}
+            {product.description ?? "Sin descripción disponible."}
           </p>
         </div>
 
@@ -222,7 +169,7 @@ function ProductDetail() {
             <div className="flex items-start gap-3">
               <Truck size={20} className="text-sky-400 mt-0.5 shrink-0" />
               <p className="text-sm text-gray-600">
-                Envío gratis en compras realizadas dentro de los últimos 30 días
+                Envío gratis en compras en línea dentro de los últimos 30 días
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -234,6 +181,7 @@ function ProductDetail() {
           </div>
         </div>
 
+        {/* Reseñas (estáticas por ahora) */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-gray-800">Reseñas</h2>
@@ -246,7 +194,7 @@ function ProductDetail() {
               <div key={idx} className="flex flex-col gap-1">
                 <StarRating rating={rating} />
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+                  Excelente producto, muy buena calidad y entrega rápida.
                 </p>
               </div>
             ))}
@@ -257,69 +205,49 @@ function ProductDetail() {
       {/* ─── PRODUCTOS SIMILARES ─── */}
       {similarProducts.length > 0 && (
         <div className="max-w-6xl mx-auto px-6 pb-12">
-          <h2 className="text-lg font-bold text-gray-800 mb-5 text-center">
-            Productos similares
-          </h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-5 text-center">Productos similares</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {similarProducts.map((p) => {
-              const pPrice = p.price ?? 0;
-              const pDiscount = p.discount ?? 0;
-              const pOriginal = pDiscount
-                ? pPrice / (1 - pDiscount / 100)
-                : pPrice;
-              const pImage =
-                p.images?.[0] ??
-                "https://placehold.co/200x150/e8f4fb/4a9bbe?text=Producto";
+            {similarProducts.map((p) => (
+              <div key={p.id} onClick={() => navigate(`/productos/${p.id}`)}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all">
 
-              return (
-                <div
-                  key={p._id}
-                  onClick={() => navigate(`/atomicShop/productos/${p._id}`)}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
-                >
-                  <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center h-28">
-                    <img
-                      src={pImage}
-                      alt={p.name}
-                      className="object-contain h-20 w-auto"
-                    />
+                <div className="flex items-center justify-between">
+                  {p.onSale
+                    ? <span className="bg-sky-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">Oferta</span>
+                    : <span />}
+                  <button onClick={(e) => e.stopPropagation()}
+                    className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 hover:border-red-300 transition-colors">
+                    <Heart size={13} className="text-gray-400" />
+                  </button>
+                </div>
+
+                <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-lg flex items-center justify-center h-28">
+                  <img src={p.image} alt={p.name} className="object-contain h-20 w-auto" />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-semibold text-gray-700 line-clamp-2">{p.name}</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold text-gray-800">${p.price.toFixed(2)}</span>
+                    {p.originalPrice > p.price && (
+                      <span className="text-xs text-gray-400 line-through">${p.originalPrice.toFixed(2)}</span>
+                    )}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-xs font-semibold text-gray-700 line-clamp-2">
-                      {p.name}
-                    </p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-bold text-gray-800">
-                        ${pPrice.toFixed(2)}
-                      </span>
-                      {pOriginal > pPrice && (
-                        <span className="text-xs text-gray-400 line-through">
-                          ${pOriginal.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-auto">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      addItem({
-                        id: p._id,
-                        name: p.name,
-                        price: pPrice,
-                        originalPrice: pOriginal,
-                        image: pImage,
-                      });
+                      addItem({ id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice, image: p.image });
                     }}
-                    className="mt-auto w-full bg-sky-500 hover:bg-sky-600 rounded-lg py-1.5 flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <ShoppingCart size={14} className="text-white" />
-                    <span className="text-white text-xs font-semibold">
-                      Agregar
-                    </span>
+                    className="w-full flex items-center justify-center gap-1 bg-sky-500 hover:bg-sky-600 rounded-lg py-1.5 text-xs text-white font-semibold transition-colors cursor-pointer">
+                    <ShoppingCart size={13} />
+                    Agregar
                   </button>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       )}

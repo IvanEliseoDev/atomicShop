@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { ecommerceService } from "../services/ecommerceService";
 import { useAuth } from "./AuthContext";
+
+const BASE_URL = "http://localhost:4000/api/e-commerce";
 
 export interface CartItem {
   id: string;
@@ -29,7 +30,6 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-// Convierte la respuesta del backend al formato local
 function mapCartFromBackend(cart: any): CartItem[] {
   if (!cart?.products) return [];
   return cart.products.map((p: any) => {
@@ -57,49 +57,45 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = () => setIsOpen(false);
   const toggleCart = () => setIsOpen((prev) => !prev);
 
-  // Cargar el carrito del backend cuando el usuario inicia sesion
   useEffect(() => {
-    if (!user?.id) {
-      setItems([]);
-      return;
-    }
-    ecommerceService.getCart(user.id).then((cart) => {
-      setItems(mapCartFromBackend(cart));
-    });
+    if (!user?.id) { setItems([]); return; }
+    fetch(`${BASE_URL}/carts/${user.id}`)
+      .then((r) => r.json())
+      .then((cart) => setItems(mapCartFromBackend(cart)));
   }, [user?.id]);
 
   const addItem = async (product: Omit<CartItem, "quantity">) => {
-    if (!user?.id) {
-      setIsOpen(true);
-      return;
-    }
-
-    const updatedCart = await ecommerceService.addToCart(user.id, String(product.id), 1);
+    if (!user?.id) { setIsOpen(true); return; }
+    const updatedCart = await fetch(`${BASE_URL}/carts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: user.id, idProduct: product.id, amount: 1 }),
+    }).then((r) => r.json());
     setItems(mapCartFromBackend(updatedCart));
     setIsOpen(true);
   };
 
   const removeItem = async (id: string) => {
     if (!user?.id) return;
-
-    await ecommerceService.removeFromCart(user.id, id);
+    await fetch(`${BASE_URL}/carts/remove`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: user.id, idProduct: id }),
+    });
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const updateQuantity = async (id: string, quantity: number) => {
-    if (quantity < 1) {
-      removeItem(id);
-      return;
-    }
-
+    if (quantity < 1) { removeItem(id); return; }
     if (!user?.id) return;
-
-    // Calcula el delta respecto a la cantidad actual
     const current = items.find((i) => i.id === id);
     const delta = quantity - (current?.quantity ?? 0);
-
     if (delta !== 0) {
-      const updatedCart = await ecommerceService.addToCart(user.id, id, delta);
+      const updatedCart = await fetch(`${BASE_URL}/carts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: user.id, idProduct: id, amount: delta }),
+      }).then((r) => r.json());
       setItems(mapCartFromBackend(updatedCart));
     }
   };
@@ -109,30 +105,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
   const subtotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const discount = items.reduce(
-    (acc, i) =>
-      i.originalPrice > i.price
-        ? acc + (i.originalPrice - i.price) * i.quantity
-        : acc,
-    0,
+    (acc, i) => i.originalPrice > i.price
+      ? acc + (i.originalPrice - i.price) * i.quantity : acc, 0,
   );
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        isOpen,
-        openCart,
-        closeCart,
-        toggleCart,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        subtotal,
-        discount,
-      }}
-    >
+    <CartContext.Provider value={{
+      items, isOpen, openCart, closeCart, toggleCart,
+      addItem, removeItem, updateQuantity, clearCart,
+      totalItems, subtotal, discount,
+    }}>
       {children}
     </CartContext.Provider>
   );

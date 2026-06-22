@@ -20,10 +20,9 @@ import { VerifyEmailPage } from "@/modules/Register/Pages/VerifyEmailPage";
 export const appRouter = createBrowserRouter([
   {
     path: "/login/",
-    // element: <Login> cuando se cree el componente Login,
     children: [
       {
-        index: true, // Esto hace que cuando se habra solo la ruta /login, se va a mostrar este componete por defecto
+        index: true,
         element: <LoginPage />,
       },
     ],

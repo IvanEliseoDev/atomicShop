@@ -78,15 +78,15 @@ const DatosPago = () => {
     }
 
     if (!user?.id) {
-      toast.error("Debes iniciar sesión para finalizar la compra");
-      navigate("/atomicShop/login");
+      toast.error("Debes iniciar sesion para finalizar la compra");
+      navigate("/login");
       return;
     }
 
     const rawDelivery = sessionStorage.getItem("deliveryData");
     if (!rawDelivery) {
       toast.error("Faltan los datos de entrega");
-      navigate("/atomicShop/carrito/datos-entrega");
+      navigate("/carrito/datos-entrega");
       return;
     }
 
@@ -153,7 +153,7 @@ const DatosPago = () => {
         toast.success(
           "Compra finalizada. Revisa tu correo para ver tu factura.",
         );
-        navigate("/atomicShop");
+        navigate("/");
       } else {
         toast.error(result.message ?? "Ocurrió un error al procesar la compra");
       }
@@ -173,7 +173,7 @@ const DatosPago = () => {
           {/* Paso 1 — completado */}
           <div
             className="flex items-center gap-2 text-gray-400 cursor-pointer hover:text-sky-500 transition"
-            onClick={() => navigate("/atomicShop/carrito")}
+            onClick={() => navigate("/carrito")}
           >
             <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold">
               1
@@ -185,7 +185,7 @@ const DatosPago = () => {
           {/* Paso 2 — completado */}
           <div
             className="flex items-center gap-2 text-gray-400 cursor-pointer hover:text-sky-500 transition"
-            onClick={() => navigate("/atomicShop/carrito/datos-entrega")}
+            onClick={() => navigate("/carrito/datos-entrega")}
           >
             <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold">
               2

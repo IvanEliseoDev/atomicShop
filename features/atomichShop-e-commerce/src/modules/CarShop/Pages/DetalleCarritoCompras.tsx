@@ -43,7 +43,7 @@ const DetalleCarritoCompras = () => {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm py-16 text-center">
               <p className="text-gray-400 text-base">Tu carrito está vacío.</p>
               <button
-                onClick={() => navigate("/atomicShop/productos")}
+                onClick={() => navigate("/productos")}
                 className="mt-4 text-sky-500 text-sm hover:underline cursor-pointer"
               >
                 Ver productos
@@ -118,7 +118,7 @@ const DetalleCarritoCompras = () => {
                 <span>${total.toFixed(2)}</span>
               </div>
               <button
-                onClick={() => navigate("/atomicShop/carrito/datos-entrega")}
+                onClick={() => navigate("/carrito/datos-entrega")}
                 className="mt-2 w-full bg-sky-500 hover:bg-sky-600 active:scale-95 transition-all text-white text-sm font-semibold py-2.5 rounded-lg cursor-pointer"
               >
                 Continuar

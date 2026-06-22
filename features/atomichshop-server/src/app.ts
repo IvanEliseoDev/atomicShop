@@ -67,7 +67,6 @@ app.use("/api/admin/provider", providerRoutes);
 app.use("/api/admin/customers", customerRouter);
 app.use("/api/admin/employees", employeeRouter);
 app.use("/api/admin/category", categoryRouter);
-app.use("/api/admin", adminRouter),
 
 // E-COMMERCE
 app.use("/api/e-commerce/products", productsEcomerceRoutes);
@@ -77,13 +76,13 @@ app.use("/api/e-commerce/carts", cartsEcommerceRoutes)
 app.use("/api/e-commerce/login", loginEcommerceRoutes)
 app.use("/api/e-commerce/logout", logoutEcommerceRoutes)
 app.use("/api/e-commerce/register", registerCustommerEcommerceRoutes)
-app.use("/api/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/api/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
-app.use("/api/e-commerce/profile", profileRoutes);
-app.use("/api/e-commerce/invoices", invoiceEcommerceRoutes);
+app.use("/api/e-commerce/categories", categoriesEcommerceRoutes)
 app.use("/api/e-commerce/brands", brandsEcommerceRoutes)
+app.use("/api/e-commerce/profile", profileRoutes);
 app.use("/api/e-commerce/wishlist", wishlistRoutes);
-app.use("/api/e-commerce/contact", contactRoutes);
+app.use("/api/e-commerce/invoices", invoiceEcommerceRoutes);
 app.use("/api/e-commerce/wompi", wompiRoutes);
+app.use("/api/e-commerce/contact", contactRoutes)
 
 export default app;

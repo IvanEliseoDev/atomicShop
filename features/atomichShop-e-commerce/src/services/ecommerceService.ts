@@ -138,6 +138,9 @@ export const ecommerceService = {
     );
   },
 
+  getProductById: (id: string) =>
+  fetch(`${BASE_URL}/products/${id}`).then((r) => r.json()),
+
   getBrands: () => fetch(`${BASE_URL}/brands`).then((r) => r.json()),
 
   // Wishlist

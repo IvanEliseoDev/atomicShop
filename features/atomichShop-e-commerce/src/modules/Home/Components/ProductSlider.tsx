@@ -118,8 +118,8 @@ function ProductSlider() {
             key={product.id}
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            onClick={() => navigate(`/atomicShop/productos/${product.id}`)}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col gap-3 relative cursor-pointer"
+            onClick={() => navigate(`/productos/${product.id}`)}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex-col gap-3 relative cursor-pointer"
           >
             {product.isOffer && (
               <span className="absolute top-3 left-3 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full z-10">
@@ -176,8 +176,8 @@ function ProductSlider() {
                 >
                   -
                 </button>
-                <span className="px-2 py-1 text-gray-700 min-w-[3rem] text-center">
-                  {(quantities[product.id] ?? 1)}
+                <span className="px-2 py-1 text-gray-700 min-w-8 text-center">
+                  {(quantities[product.id] ?? 1).toFixed(2)}
                 </span>
                 <button
                   onClick={(e) => {
