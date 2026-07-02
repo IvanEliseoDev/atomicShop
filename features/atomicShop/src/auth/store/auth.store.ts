@@ -6,17 +6,14 @@ import { CheckStatusAction } from "../actions/checkAuthStatus";
 type AuthStatus = "authenticated" | "not-authenticated" | "checking";
 
 type AuthState = {
-  //propiedades
   email: string | null;
   position: string | null;
   _id: string | null;
   authStatus: AuthStatus;
 
-  //getters
-  isAdmin: () => boolean;
+  isAdmin: boolean;
   isEmployee: () => boolean;
 
-  //metodos
   login: (email: string, password: string) => Promise<boolean>;
   checkAuthStatus: () => Promise<boolean>;
   logOut: () => void;
@@ -27,16 +24,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   position: null,
   _id: null,
   authStatus: "checking",
-
-  isAdmin: () => {
-    const position = get().position;
-    console.log("Cargo del usuario", position);
-    return position === "Admin";
-  },
+  isAdmin: false,
 
   isEmployee: () => {
     const position = get().position;
-    console.log("Cargo del usuario", position);
     return position === "Employee";
   },
 
@@ -44,12 +35,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const data = await loginActions(email, password);
       if (!data.data && data.status !== 200) return false;
-      console.log("si vino data del login");
-      console.log(data.data);
+      
       set({
         email: data.data.email,
         position: data.data.position,
         authStatus: "authenticated",
+        isAdmin: data.data.position === "Admin",
       });
       return true;
     } catch (error) {
@@ -59,6 +50,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         position: null,
         authStatus: "not-authenticated",
         _id: null,
+        isAdmin: false,
       });
       return false;
     }
@@ -75,6 +67,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         position: null,
         _id: null,
         authStatus: "not-authenticated",
+        isAdmin: false,
       });
     }
   },
@@ -85,12 +78,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const data = await CheckStatusAction();
 
       if (!data) {
-        // null = sin sesión activa
         set({
           email: null,
           position: null,
           _id: null,
           authStatus: "not-authenticated",
+          isAdmin: false,
         });
         return false;
       }
@@ -101,6 +94,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           position: data.data.position,
           authStatus: "authenticated",
           _id: data.data._id,
+          isAdmin: data.data.position === "Admin",
         });
         return true;
       }
@@ -110,6 +104,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         position: null,
         _id: null,
         authStatus: "not-authenticated",
+        isAdmin: false,
       });
       return false;
     } catch (error) {
@@ -119,6 +114,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         position: null,
         _id: null,
         authStatus: "not-authenticated",
+        isAdmin: false,
       });
       return false;
     }

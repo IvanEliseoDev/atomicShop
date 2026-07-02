@@ -38,7 +38,7 @@ export default function CreatePasswordPage() {
         setConfirmPassword('');
         setLoading(false);
 
-        navigate('/admin/succeschangepassword')
+        navigate('/succeschangepassword')
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -51,10 +51,7 @@ export default function CreatePasswordPage() {
         <AuthCard>
             {/* Logo - centered */}
             <div className="flex justify-start cursor-pointer">
-                <ArrowLeft onClick={() => navigate('/admin/login')} />
-            </div>
-            <div className="flex justify-center mb-6">
-                <img src="public/logoatomicshop.png" alt="" />
+                <ArrowLeft onClick={() => navigate('/login')} />
             </div>
 
             {/* Text */}

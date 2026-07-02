@@ -78,7 +78,7 @@ export const LoginPage = () => {
           <div className="text-right">
             <button
               type="button"
-              onClick={() => navigate("/admin/ForgetPassword")}
+              onClick={() => navigate("/ForgetPassword")}
               className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 transition"
             >
               ¿Olvidó su contraseña?

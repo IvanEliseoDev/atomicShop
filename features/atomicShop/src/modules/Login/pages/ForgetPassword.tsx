@@ -29,7 +29,7 @@ export const ForgotPasswordPage = () => {
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
         toast.success('Enlace de recuperación enviado a tu correo');
-        navigate('/admin/createpassword')
+        navigate('/createpassword')
         setEmail('');
 
         setLoading(false);
@@ -44,7 +44,7 @@ export const ForgotPasswordPage = () => {
     return (
         <AuthCard>
             <div className="flex justify-start cursor-pointer ">
-                <ArrowLeft color='gray' onClick={() => navigate('/admin/login')} />
+                <ArrowLeft color='gray' onClick={() => navigate('/login')} />
             </div>
             {/* Logo - centered */}
             <div className="flex justify-center mb-6">

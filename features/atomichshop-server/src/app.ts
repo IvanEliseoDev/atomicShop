@@ -67,6 +67,7 @@ app.use("/api/admin/provider", providerRoutes);
 app.use("/api/admin/customers", customerRouter);
 app.use("/api/admin/employees", employeeRouter);
 app.use("/api/admin/category", categoryRouter);
+app.use("/api/admin", adminRouter)
 
 // E-COMMERCE
 app.use("/api/e-commerce/products", productsEcomerceRoutes);

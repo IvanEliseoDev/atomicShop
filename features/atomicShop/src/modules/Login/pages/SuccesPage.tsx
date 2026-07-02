@@ -9,7 +9,7 @@ export default function SuccessPage() {
     const navigate = useNavigate()
 
     const handleBackToLogin = () => {
-        navigate("/admin/login")
+        navigate("/login")
     };
 
     return (
