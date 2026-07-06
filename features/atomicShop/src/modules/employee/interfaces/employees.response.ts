@@ -5,25 +5,15 @@ export interface Employees {
 }
 
 export interface Datum {
-    _id:            string;
-    name:           string;
-    dui:            string;
-    birthDay:       Date;
-    number_phone:   string;
-    afp_affiliated: string;
-    isss:           string;
-    dui_img:        string;
-    direction:      string;
-    position:       string;
-    payroll_month:  string;
-    salary:         Salary;
-    email:          string;
-    isVerified:     boolean;
-    createdAt:      Date;
-    updatedAt:      Date;
-    __v:            number;
-}
-
-export interface Salary {
-    $numberDecimal: string;
+    _id:          string;
+    name:         string;
+    number_phone: string;
+    direction:    string;
+    position:     string;
+    payroll_month: string;
+    email:        string;
+    isVerified:   boolean;
+    createdAt:    Date;
+    updatedAt:    Date;
+    __v:          number;
 }

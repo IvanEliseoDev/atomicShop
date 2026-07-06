@@ -32,13 +32,15 @@ export const HeaderAdmin = ({ title, amount, searchQuery, setSearchQuery, onAddC
                         className="pl-10 border-2 border-gray-300 rounded-lg focus:border-blue-500 w-full sm:w-56"
                     />
                 </div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 w-full sm:w-auto"
-                    onClick={onAddClick}>
-                        <Plus className="w-5 h-5" />
-                        Agregar
-                    </Button>
-                </motion.div>
+                {onAddClick && (
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 w-full sm:w-auto"
+                        onClick={onAddClick}>
+                            <Plus className="w-5 h-5" />
+                            Agregar
+                        </Button>
+                    </motion.div>
+                )}
             </div>
         </div>
     )

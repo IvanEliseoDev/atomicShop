@@ -5,7 +5,8 @@ export interface LoginResponse {
 }
 
 export interface Data {
+    _id:      string;
+    name:     string;
     email:    string;
     position: string;
 }
-

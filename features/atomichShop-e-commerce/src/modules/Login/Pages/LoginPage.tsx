@@ -1,22 +1,20 @@
 import { motion } from "framer-motion";
+import { ChevronLeft } from "lucide-react";
 import { AuthCard } from "../Components/AuthCard";
 import { EmailInput } from "../Components/EmailInput";
 import { PasswordInput } from "../Components/PasswordInput";
 import { LogoYonJob } from "../../../components/ui/LogoYonJob";
-import { ChevronLeft } from "lucide-react";
 import { useLogin } from "../hooks/useLogin";
 
 export const LoginPage = () => {
   const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    loading,
-    handleLogin,
+    register,
+    handleSubmit,
+    errors,
+    isSubmitting,
+    onSubmit,
     handleForgotPassword,
     handleRegisterNavigation,
-    handleKeyPress,
     navigate,
   } = useLogin();
 
@@ -39,22 +37,30 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <EmailInput
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Correo electrónico"
-          />
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <div>
+            <EmailInput
+              {...register("email")}
+              placeholder="Correo electrónico"
+            />
+            {errors.email && (
+              <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+            )}
+          </div>
 
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Contraseña"
-            onKeyPress={handleKeyPress}
-          />
+          <div>
+            <PasswordInput
+              {...register("password")}
+              placeholder="Contraseña"
+            />
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+            )}
+          </div>
 
           <div className="text-right">
             <button
+              type="button"
               onClick={handleForgotPassword}
               className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 transition"
             >
@@ -65,22 +71,23 @@ export const LoginPage = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleLogin}
-            disabled={loading}
+            type="submit"
+            disabled={isSubmitting}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mt-1"
           >
-            {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+            {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
           </motion.button>
 
           <div className="text-center">
             <button
+              type="button"
               onClick={handleRegisterNavigation}
               className="text-sm text-center text-blue-600 cursor-pointer hover:text-blue-700 transition"
             >
               Crear cuenta
             </button>
           </div>
-        </div>
+        </form>
       </AuthCard>
     </div>
   );

@@ -26,6 +26,7 @@ import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
 import contactRoutes from "./routes/contactRoutes";
 import wishlistRoutes from "./routes/favorite/wishlistRoutes";
 import invoiceEcommerceRoutes from "./routes/invoice/e-commerce/invoice";
+import adminInvoiceRoutes from "./routes/invoice/admin/invoice";
 import profileRoutes from "./routes/profileRoutes/profileRoutes";
 import wompiRoutes from "./routes/wompi";
 
@@ -33,6 +34,8 @@ import wompiRoutes from "./routes/wompi";
 import { seedRouter } from "./routes/seed";
 import cookieParser from "cookie-parser";
 import { categoryRouter } from "./routes/categories/categories";
+import { brandsRouter } from "./routes/brands/brands";
+import adminRecoveryRoutes from "./routes/recoveryPassword/recoveryPassword";
 
 /**
  * CONFIGURACION DE ARRANQUE
@@ -45,7 +48,7 @@ const app = express();
  */
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
     //Permitir el envío de cookies y credenciales
     credentials: true,
   }),
@@ -67,6 +70,8 @@ app.use("/api/admin/provider", providerRoutes);
 app.use("/api/admin/customers", customerRouter);
 app.use("/api/admin/employees", employeeRouter);
 app.use("/api/admin/category", categoryRouter);
+app.use("/api/admin/brands", brandsRouter);
+app.use("/api/admin/recovery", adminRecoveryRoutes);
 app.use("/api/admin", adminRouter)
 
 // E-COMMERCE
@@ -83,6 +88,7 @@ app.use("/api/e-commerce/brands", brandsEcommerceRoutes)
 app.use("/api/e-commerce/profile", profileRoutes);
 app.use("/api/e-commerce/wishlist", wishlistRoutes);
 app.use("/api/e-commerce/invoices", invoiceEcommerceRoutes);
+app.use("/api/admin/invoices", adminInvoiceRoutes);
 app.use("/api/e-commerce/wompi", wompiRoutes);
 app.use("/api/e-commerce/contact", contactRoutes)
 

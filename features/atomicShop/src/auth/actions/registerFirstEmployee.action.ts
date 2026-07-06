@@ -11,15 +11,14 @@ export const registerFirstEmployeeAction = async (
   payload: FirstEmployeePayload,
 ) => {
   try {
-    // La ruta correcta ahora será /api/admin/first-admin
     const { data } = await AtomicShop_API.post("/admin/first-admin", payload);
-    return { success: true, data };
+    return { success: true, data, errors: [] };
   } catch (error: any) {
     console.error("Error en registerFirstEmployeeAction:", error);
-    // Mejorar el mensaje de error para depuración
-    const errorMessage =
-      error.response?.data?.message || error.message || "Error desconocido";
-    console.error("Detalle:", errorMessage);
-    return { success: false, data: null, error: errorMessage };
+    const responseData = error.response?.data;
+    const errorMessage = responseData?.message || error.message || "Error desconocido";
+    const validationErrors: { field: string; message: string }[] = responseData?.errors ?? [];
+    console.error("Detalle:", errorMessage, validationErrors);
+    return { success: false, data: null, error: errorMessage, errors: validationErrors };
   }
 };

@@ -12,6 +12,7 @@ interface Props {
 
 export const FirstUseRegisterPage = ({ onRegistered }: Props) => {
   const [isPosting, setIsPosting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     number_phone: "",
@@ -38,20 +39,26 @@ export const FirstUseRegisterPage = ({ onRegistered }: Props) => {
         : formData.number_phone;
 
     setIsPosting(true);
+    setFieldErrors({});
     const result = await registerFirstEmployeeAction({
       name: formData.name,
       email: formData.email,
       password: formData.password,
-      number_phone: formattedPhone, // usar el formateado
+      number_phone: formattedPhone,
     });
     setIsPosting(false);
     if (result.success) {
       toast.success("¡Cuenta administrador creada! Ahora inicia sesión.");
       onRegistered();
     } else {
-      toast.error("No se pudo crear la cuenta, intenta de nuevo.");
-      // Mostrar más detalles en consola para depuración
-      console.error("Error detallado:", result);
+      if (result.errors && result.errors.length > 0) {
+        const errMap: Record<string, string> = {};
+        result.errors.forEach(({ field, message }) => { errMap[field] = message; });
+        setFieldErrors(errMap);
+        toast.error("Corrige los errores del formulario.");
+      } else {
+        toast.error(result.error ?? "No se pudo crear la cuenta, intenta de nuevo.");
+      }
     }
   };
 
@@ -78,40 +85,51 @@ export const FirstUseRegisterPage = ({ onRegistered }: Props) => {
 
         <div className="space-y-4">
           {/* Nombre */}
-          <input
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Nombre completo"
-            required
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition"
-          />
+          <div>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Nombre completo"
+              required
+              className={`w-full border rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition ${fieldErrors.name ? "border-red-400" : "border-gray-300"}`}
+            />
+            {fieldErrors.name && <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>}
+          </div>
 
           {/* Teléfono */}
-          <input
-            name="number_phone"
-            value={formData.number_phone}
-            onChange={handleChange}
-            placeholder="Número de teléfono"
-            required
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition"
-          />
+          <div>
+            <input
+              name="number_phone"
+              value={formData.number_phone}
+              onChange={handleChange}
+              placeholder="Número de teléfono (ej: 7777-7777)"
+              className={`w-full border rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition ${fieldErrors.number_phone ? "border-red-400" : "border-gray-300"}`}
+            />
+            {fieldErrors.number_phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.number_phone}</p>}
+          </div>
 
-          {/* Email — reutilizamos tu componente existente */}
-          <EmailInput
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Correo electrónico"
-          />
+          {/* Email */}
+          <div>
+            <EmailInput
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Correo electrónico"
+            />
+            {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
+          </div>
 
           {/* Contraseña */}
-          <PasswordInput
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Contraseña"
-          />
+          <div>
+            <PasswordInput
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Contraseña"
+            />
+            {fieldErrors.password && <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>}
+          </div>
 
           {/* Confirmar contraseña */}
           <PasswordInput

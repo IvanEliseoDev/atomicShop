@@ -7,16 +7,10 @@ export interface CheckStatusResponse {
 export interface Data {
     _id:               string;
     name:              string;
-    dui:               string;
-    birthDay:          Date;
     number_phone:      string;
-    afp_affiliated:    string;
-    isss:              string;
-    dui_img:           string;
     direction:         string;
     position:          string;
     payroll_month:     string;
-    salary:            Salary;
     email:             string;
     isGenericPassword: boolean;
     isVerified:        boolean;
@@ -25,8 +19,4 @@ export interface Data {
     updatedAt:         Date;
     __v:               number;
     id:                string;
-}
-
-export interface Salary {
-    $numberDecimal: string;
 }

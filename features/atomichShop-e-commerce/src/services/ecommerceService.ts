@@ -176,6 +176,7 @@ export const ecommerceService = {
     };
     paymentMethod: "credito" | "debito" | "efectivo";
     wompiTransactionId?: string | null;
+    productos?: { idProduct: string; qty: number; unitPrice: number }[];
   }) =>
     fetch(`${BASE_URL}/invoices`, {
       method: "POST",
@@ -192,6 +193,19 @@ export const ecommerceService = {
   getInvoiceById: (invoiceId: string) =>
     fetch(`${BASE_URL}/invoices/${invoiceId}`, {
       credentials: "include",
+    }).then((r) => r.json()),
+
+  // Perfil
+  getProfile: (userId: string) =>
+    fetch(`${BASE_URL}/profile/${userId}`, {
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  updateProfile: (userId: string, formData: FormData) =>
+    fetch(`${BASE_URL}/profile/update/${userId}`, {
+      method: "PUT",
+      credentials: "include",
+      body: formData,
     }).then((r) => r.json()),
 
   getWompiToken: () =>

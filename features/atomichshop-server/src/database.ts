@@ -2,7 +2,11 @@
 
 // Manejamos las conexiones con nuestra base de datos
 import mongoose from "mongoose";
+import dns from "dns";
 import { config } from "./config";
+
+// Node.js may not pick up system DNS changes; force Google DNS for SRV lookups
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 // Nos conectamos a la bd
 // El signo ! le dice a TypeScript "confía en mí, este valor SÍ existe"

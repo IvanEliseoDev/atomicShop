@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, MoreVertical, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import Swal from 'sweetalert2';
+import { Search, Plus, MoreVertical, ChevronLeft, ChevronRight, SlidersHorizontal, Edit2, Trash2, Power, PowerOff } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
@@ -23,20 +26,51 @@ const ITEMS_POR_PAGINA = 10;
 // ─── Componente principal ──────────────────────────────────────────────────────
 export const ProductsPage = () => {
     const [search, setSearch] = useState('');
-    const { deleteProduct, isDeleting } = useProductMutations();
+    const { deleteProduct, isDeleting, toggleProduct, isToggling } = useProductMutations();
     const [paginaActual, setPaginaActual] = useState(1);
     const [filtroEstado, setFiltroEstado] = useState<string>('Todos');
     const [filtroCategoria, setFiltroCategoria] = useState<string>('Todas');
     const navigate = useNavigate();
 
-    const handleEliminar = async (id: string) => {
-        if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
-            try {
-                await deleteProduct(id);
-                alert("Producto eliminado exitosamente");
-            } catch (error) {
-                alert("Hubo un error al eliminar el producto");
-            }
+    const handleEliminar = async (id: string, nombre: string) => {
+        const result = await Swal.fire({
+            title: '¿Eliminar producto?',
+            html: `Esta acción eliminará <b>${nombre}</b> del inventario de forma permanente.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            focusCancel: true,
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await deleteProduct(id);
+            toast.success('Producto eliminado correctamente');
+        } catch {
+            toast.error('Hubo un error al eliminar el producto');
+        }
+    };
+
+    const handleToggleEstado = async (id: string, nombre: string, activo: boolean) => {
+        const accion = activo ? 'desactivar' : 'activar';
+        const result = await Swal.fire({
+            title: `¿${activo ? 'Desactivar' : 'Activar'} producto?`,
+            html: `Se ${accion}á <b>${nombre}</b> en la tienda.`,
+            icon: activo ? 'warning' : 'question',
+            showCancelButton: true,
+            confirmButtonColor: activo ? '#ef4444' : '#22c55e',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: `Sí, ${accion}`,
+            cancelButtonText: 'Cancelar',
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await toggleProduct(id);
+            toast.success(`Producto ${activo ? 'desactivado' : 'activado'} correctamente`);
+        } catch {
+            toast.error('No se pudo cambiar el estado del producto');
         }
     };
     
@@ -50,24 +84,23 @@ export const ProductsPage = () => {
         return ['Todas', ...Array.from(new Set(cats))];
     }, [listaProductos]);
 
-    const estados = ['Todos', 'Frecuente', 'Común', 'Restringido'];
+    const estados = ['Todos', 'Activo', 'Inactivo'];
 
     // ─── Filtrado Seguro (Memorizado para mejor rendimiento) ───────────────────
     const productosFiltrados = useMemo(() => {
         return listaProductos.filter(p => {
-            // Busqueda por texto
             const coincideBusqueda =
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.code?.toLowerCase().includes(search.toLowerCase()) ||
                 p.categoryId?.toLowerCase().includes(search.toLowerCase());
 
-            // Filtro por Categoría
-            const coincideCategoria = 
+            const coincideCategoria =
                 filtroCategoria === 'Todas' || p.categoryId === filtroCategoria;
 
-            // Filtro por Estado
-            const coincideEstado = 
-                filtroEstado === 'Todos' || p.state === filtroEstado;
+            const coincideEstado =
+                filtroEstado === 'Todos' ||
+                (filtroEstado === 'Activo' && p.state === true) ||
+                (filtroEstado === 'Inactivo' && p.state === false);
 
             return coincideBusqueda && coincideCategoria && coincideEstado;
         });
@@ -149,7 +182,7 @@ export const ProductsPage = () => {
 
                             {/* Filtros */}
                             <div className="flex items-center gap-2">
-                                <SlidersHorizontal size={15} className="text-gray-400 flex-shrink-0" />
+                                <SlidersHorizontal size={15} className="text-gray-400 shrink-0" />
                                 
                                 {/* Filtro Estado */}
                                 <select
@@ -164,7 +197,7 @@ export const ProductsPage = () => {
                                 <select
                                     value={filtroCategoria}
                                     onChange={e => { setFiltroCategoria(e.target.value); setPaginaActual(1); }}
-                                    className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 transition cursor-pointer max-w-[180px] truncate"
+                                    className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 transition cursor-pointer max-w-45 truncate"
                                 >
                                     {categorias.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
@@ -181,6 +214,7 @@ export const ProductsPage = () => {
                                         <th className="text-left font-semibold px-4 py-3">Marca</th>
                                         <th className="text-center font-semibold px-4 py-3">Cantidad</th>
                                         <th className="text-center font-semibold px-4 py-3">Precio</th>
+                                        <th className="text-center font-semibold px-4 py-3">Estado</th>
                                         <th className="text-center font-semibold px-4 py-3 rounded-tr-lg">Acciones</th>
                                     </tr>
                                 </thead>
@@ -191,14 +225,20 @@ export const ProductsPage = () => {
                                     key={`${paginaActual}-${search}-${filtroEstado}-${filtroCategoria}`}
                                 >
                                     {isLoading ? (
-                                        <tr>
-                                            <td colSpan={6} className="text-center py-12 text-gray-400">
-                                                Cargando productos...
-                                            </td>
-                                        </tr>
+                                        <>
+                                            {Array.from({ length: 8 }).map((_, i) => (
+                                                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                                                    {Array.from({ length: 7 }).map((_, j) => (
+                                                        <td key={j} className="px-4 py-3">
+                                                            <Skeleton className="h-4 w-full" />
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </>
                                     ) : productosPagina.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="text-center py-12 text-gray-400">
+                                            <td colSpan={7} className="text-center py-12 text-gray-400">
                                                 No se encontraron productos
                                             </td>
                                         </tr>
@@ -212,13 +252,13 @@ export const ProductsPage = () => {
                                                 {/* Nombre + código + avatar */}
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                                        <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
                                                             <span className="text-xs font-bold text-blue-600">
                                                                 {getInitials(product.name)}
                                                             </span>
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <p className="font-medium text-gray-800 truncate max-w-[200px]">
+                                                            <p className="font-medium text-gray-800 truncate max-w-50">
                                                                 {product.name}
                                                             </p>
                                                             <p className="text-xs text-gray-400">{product.code}</p>
@@ -227,7 +267,7 @@ export const ProductsPage = () => {
                                                 </td>
 
                                                 {/* Categoría */}
-                                                <td className="px-4 py-3 text-gray-600 max-w-[140px]">
+                                                <td className="px-4 py-3 text-gray-600 max-w-35">
                                                     <span className="truncate block">{product.categoryId}</span>
                                                 </td>
 
@@ -246,6 +286,13 @@ export const ProductsPage = () => {
                                                     ${typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                                                 </td>
 
+                                                {/* Estado */}
+                                                <td className="px-4 py-3 text-center">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.state ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                                                        {product.state ? 'Activo' : 'Inactivo'}
+                                                    </span>
+                                                </td>
+
                                                 {/* Acciones con Dropdown */}
                                                 <td className="px-4 py-3 text-center">
                                                     <DropdownMenu>
@@ -254,16 +301,30 @@ export const ProductsPage = () => {
                                                                 <MoreVertical size={16} />
                                                             </button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-36 bg-white border border-gray-100 shadow-md rounded-lg p-1">
-                                                            <DropdownMenuItem 
+                                                        <DropdownMenuContent align="end" className="w-40 bg-white border border-gray-100 shadow-md rounded-lg p-1">
+                                                            <DropdownMenuItem
                                                                 onClick={() => navigate(`/atomicAdmin/inventario/nuevo?mode=edit&id=${product._id}`)}
                                                                 className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
                                                             >
                                                                 <Edit2 size={14} className="text-gray-400" />
                                                                 Editar
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem 
-                                                                onClick={() => handleEliminar(product._id)}
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleToggleEstado(product._id, product.name, product.state)}
+                                                                disabled={isToggling}
+                                                                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors ${
+                                                                    product.state
+                                                                        ? 'text-red-600 hover:bg-red-50 focus:bg-red-50 focus:text-red-600'
+                                                                        : 'text-green-600 hover:bg-green-50 focus:bg-green-50 focus:text-green-600'
+                                                                }`}
+                                                            >
+                                                                {product.state
+                                                                    ? <><PowerOff size={14} /> Desactivar</>
+                                                                    : <><Power size={14} /> Activar</>
+                                                                }
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleEliminar(product._id, product.name)}
                                                                 disabled={isDeleting}
                                                                 className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
                                                             >

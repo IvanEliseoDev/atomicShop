@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProduct } from "../actions/put.product.action";
 import { addProductAction } from "../actions/post.product.action";
 import { deleteProduct } from "../actions/delete.product.action";
+import { toggleProductState } from "../actions/toggle.product.action";
 
 export const useProductMutations = () => {
   const queryClient = useQueryClient();
@@ -39,13 +40,23 @@ export const useProductMutations = () => {
     }
   });
 
+  // Mutación para Cambiar Estado (activar/desactivar)
+  const toggleProductMutation = useMutation({
+    mutationFn: toggleProductState,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    }
+  });
+
   return {
     createProduct: createProductMutation.mutateAsync,
     isCreating: createProductMutation.isPending,
-    updateProduct: updateProductMutation.mutateAsync, 
+    updateProduct: updateProductMutation.mutateAsync,
     mutateUpdate: updateProductMutation.mutateAsync,
     isUpdating: updateProductMutation.isPending,
     deleteProduct: deleteProductMutation.mutateAsync,
     isDeleting: deleteProductMutation.isPending,
+    toggleProduct: toggleProductMutation.mutateAsync,
+    isToggling: toggleProductMutation.isPending,
   };
 };

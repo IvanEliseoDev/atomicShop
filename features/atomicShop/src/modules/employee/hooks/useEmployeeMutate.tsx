@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addEmployeeAction } from '../actions/add.employee.action';
 import { updateEmployeeAction } from '../actions/update.employee.action';
 import { deleteEmployeeAction } from '../actions/delete.employee.action';
+import { toast } from 'sonner';
 
 // Hook para AGREGAR empleado
 export const useAddEmployee = () => {
@@ -44,11 +45,11 @@ export const useDeleteEmployee = () => {
   return useMutation({
     mutationFn: (id: string) => deleteEmployeeAction(id),
     onSuccess: () => {
-      // Invalida la lista para desaparecer al empleado eliminado inmediatamente
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success('Empleado eliminado correctamente');
     },
-    onError: (error) => {
-      console.error("Error desde el hook useDeleteEmployee:", error);
-    }
+    onError: () => {
+      toast.error('Ocurrió un error al eliminar el empleado');
+    },
   });
 };

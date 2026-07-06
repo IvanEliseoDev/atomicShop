@@ -58,16 +58,17 @@ export const productsController = {
   // INSERT ONE
   insertProducts: async (req: Request, res: Response): Promise<void> => {
     try {
-      const product = new modelProducts(req.body);
+      const { providerId, ...productData } = req.body;
+
+      const files = req.files as Express.Multer.File[];
+      const imageUrls = files ? files.map((f) => f.path) : [];
+
+      const product = new modelProducts({ ...productData, images: imageUrls });
       const result = await product.save();
-      res
-        .status(201)
-        .json({ status:201, message: "Producto creado exitosamente", data: result });
+      res.status(201).json({ status: 201, message: "Producto creado exitosamente", data: result });
     } catch (error) {
       const err = error as Error;
-      res
-        .status(500)
-        .json({ message: "Error al crear producto", error: err.message });
+      res.status(500).json({ message: "Error al crear producto", error: err.message });
     }
   },
 
@@ -75,15 +76,50 @@ export const productsController = {
   updateProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const result = await modelProducts.findByIdAndUpdate(id, req.body, {
-        new: true,
-      });
+      const { providerId, imagenesEliminadas: eliminadasRaw, ...productData } = req.body;
+
+      const files = req.files as Express.Multer.File[];
+      const newImageUrls = files ? files.map((f) => f.path) : [];
+
+      const imagenesEliminadas: string[] = eliminadasRaw
+        ? JSON.parse(eliminadasRaw)
+        : [];
+
+      const existing = await modelProducts.findById(id);
+      const existingImages: string[] = (existing?.images as string[]) ?? [];
+
+      const mergedImages = [
+        ...existingImages.filter((url) => !imagenesEliminadas.includes(url)),
+        ...newImageUrls,
+      ];
+
+      const result = await modelProducts.findByIdAndUpdate(
+        id,
+        { ...productData, images: mergedImages },
+        { new: true }
+      );
       res.status(200).json({ message: "Producto actualizado", data: result });
     } catch (error) {
       const err = error as Error;
-      res
-        .status(500)
-        .json({ message: "Error al actualizar producto", error: err.message });
+      res.status(500).json({ message: "Error al actualizar producto", error: err.message });
+    }
+  },
+
+  // TOGGLE STATE
+  toggleProductState: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const product = await modelProducts.findById(id);
+      if (!product) {
+        res.status(404).json({ message: "Producto no encontrado" });
+        return;
+      }
+      product.state = !product.state;
+      await product.save();
+      res.status(200).json({ message: "Estado actualizado", data: product });
+    } catch (error) {
+      const err = error as Error;
+      res.status(500).json({ message: "Error al cambiar estado", error: err.message });
     }
   },
 

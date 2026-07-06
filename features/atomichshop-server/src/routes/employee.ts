@@ -17,6 +17,9 @@ employeeRouter.route("/")
   .get(employeeController.getEmployees)
   .post(validateEmployee, employeeController.addEmployee)
 
+employeeRouter.route("/:id/toggle-status")
+  .patch(employeeController.toggleStatus)
+
 employeeRouter.route("/:id")
   .get(employeeController.getEmployeeByID)
   .put(employeeController.updateEmployee)

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import { useAuthStore } from "@/auth/store/auth.store";
 import { checkFirstUseAction } from "@/auth/actions/checkFirstUse.action";
 import { FirstUseRegisterPage } from "./FirstUseRegisterPage";
+import Swal from "sweetalert2";
 
 type View = "checking" | "first-use" | "login";
 
@@ -15,13 +16,27 @@ export const LoginPage = () => {
   const [view, setView] = useState<View>("checking");
   const [isPosting, setIsPosting] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login, restrictedMessage, clearRestrictedMessage } = useAuthStore();
 
   useEffect(() => {
     checkFirstUseAction().then((isFirstUse) => {
       setView(isFirstUse ? "first-use" : "login");
     });
   }, []);
+
+  // Muestra alerta si el usuario fue redirigido por cuenta restringida
+  useEffect(() => {
+    if (restrictedMessage) {
+      Swal.fire({
+        icon: "error",
+        title: "Cuenta deshabilitada",
+        text: restrictedMessage,
+        confirmButtonColor: "#3b82f6",
+        confirmButtonText: "Entendido",
+      });
+      clearRestrictedMessage();
+    }
+  }, [restrictedMessage, clearRestrictedMessage]);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +50,19 @@ export const LoginPage = () => {
       navigate("/atomicAdmin/");
       return;
     }
-    toast.error("Correo o contraseña no válidos");
+    const { restrictedMessage: msg, clearRestrictedMessage: clear } = useAuthStore.getState();
+    if (msg) {
+      Swal.fire({
+        icon: "error",
+        title: "Cuenta deshabilitada",
+        text: msg,
+        confirmButtonColor: "#3b82f6",
+        confirmButtonText: "Entendido",
+      });
+      clear();
+    } else {
+      toast.error("Correo o contraseña no válidos");
+    }
     setIsPosting(false);
   };
 
