@@ -1,3 +1,4 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -6,6 +7,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { ecommerceService } from "@/services/ecommerceService";
 import { registerSchema, type RegisterFormData } from "../schemas/registerSchema";
 import { MUNICIPIOS } from "@/constants/locationData";
+import { formatPhone, formatDUI } from "@/utils/inputFormatters";
 
 export function useRegister() {
   const navigate = useNavigate();
@@ -58,10 +60,23 @@ export function useRegister() {
       toast.success("Cuenta creada. Revisa tu correo para verificarla.");
       navigate("/verify-email");
     } else if (result.status === "400") {
-      toast.error("Este correo ya está registrado");
+      const msg = result.message ?? "";
+      if (msg.includes("employee")) {
+        toast.error("Este correo pertenece a un empleado y no puede usarse para crear una cuenta.");
+      } else {
+        toast.error("Este correo ya está registrado. Intenta con otro.");
+      }
     } else {
       toast.error("Error al registrar, intenta de nuevo");
     }
+  };
+
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue("telefono", formatPhone(e.target.value), { shouldValidate: true });
+  };
+
+  const handleDuiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue("dui", formatDUI(e.target.value), { shouldValidate: true });
   };
 
   return {
@@ -74,7 +89,10 @@ export function useRegister() {
     municipiosDisponibles,
     handleUsarMiUbicacion,
     setValue,
+    watch,
     user,
     navigate,
+    handleTelefonoChange,
+    handleDuiChange,
   };
 }

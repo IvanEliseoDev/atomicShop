@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-// Esto son como los iconos creo
+import React, { useState } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -9,59 +8,29 @@ import {
   X,
   Menu,
 } from "lucide-react";
-import { useNavigate } from "react-router"; // Para poder mandar al usuario a diferentes interfases
+import { useNavigate } from "react-router";
 import CategoriesBar from "./CategoriesBar";
-import { toast } from "sonner"; //
+import { toast } from "sonner";
 import { useCart } from "@/lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
-import { ecommerceService } from "@/services/ecommerceService";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
+import { useNavSearch } from "../hooks/useNavSearch";
 
 const Navbar = () => {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { toggleCart, totalItems, addItem } = useCart();
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(e.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-
-    if (value.trim().length >= 3) {
-      const data = await ecommerceService.searchProducts(value);
-      setSearchResults(data.slice(0, 3));
-      setShowDropdown(true);
-    } else {
-      setSearchResults([]);
-      setShowDropdown(false);
-    }
-  };
-
-  const handleClear = () => {
-    setSearchQuery("");
-    setShowDropdown(false);
-  };
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Controla el dropdown hamburguesa
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // Controla el dropdown de usuario
-
   const { user, logout } = useAuth();
+
+  const {
+    searchQuery,
+    searchResults,
+    showDropdown,
+    wrapperRef,
+    handleSearchChange,
+    handleClear,
+  } = useNavSearch();
 
   const handleLogout = async () => {
     await logout();
@@ -73,17 +42,14 @@ const Navbar = () => {
     navigate("/");
   };
 
-  // Funcion para scroll para las secciones de contactanos y nosotros en la pagina principal del proyecto
   const handleScroll = (id: string) => {
     if (window.location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: "smooth" });
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } else {
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: "smooth" });
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -100,53 +66,32 @@ const Navbar = () => {
 
         {/* Nav — solo desktop */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
-          <button
-            onClick={() => navigate("/")}
-            className="hover:text-blue-500 transition cursor-pointer"
-          >
+          <button onClick={() => navigate("/")} className="hover:text-blue-500 transition cursor-pointer">
             Inicio
           </button>
-          <button
-            onClick={() => handleScroll("nosotros")}
-            className="hover:text-blue-500 transition cursor-pointer"
-          >
+          <button onClick={() => handleScroll("nosotros")} className="hover:text-blue-500 transition cursor-pointer">
             Nosotros
           </button>
-          <button
-            onClick={() => handleScroll("contacto")}
-            className="hover:text-blue-500 transition cursor-pointer"
-          >
+          <button onClick={() => handleScroll("contacto")} className="hover:text-blue-500 transition cursor-pointer">
             Contáctanos
           </button>
-          <button
-            onClick={() => navigate("/productos")}
-            className="hover:text-blue-500 transition cursor-pointer"
-          >
+          <button onClick={() => navigate("/productos")} className="hover:text-blue-500 transition cursor-pointer">
             Productos
           </button>
         </nav>
 
         {/* Buscador — solo desktop */}
-        <div
-          ref={wrapperRef}
-          className="relative hidden md:block w-full max-w-sm"
-        >
+        <div ref={wrapperRef} className="relative hidden md:block w-full max-w-sm">
           <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <input
               type="text"
               placeholder="Buscar un producto"
               value={searchQuery}
               onChange={handleSearchChange}
-              onFocus={() => {
-                if (searchQuery.trim().length >= 3) setShowDropdown(true);
-              }}
               className="flex-1 px-4 py-2 text-sm text-gray-700 outline-none"
             />
             {searchQuery && (
-              <button
-                onClick={handleClear}
-                className="px-2 py-2 text-gray-400 hover:text-gray-600 transition cursor-pointer"
-              >
+              <button onClick={handleClear} className="px-2 py-2 text-gray-400 hover:text-gray-600 transition cursor-pointer">
                 <X size={16} />
               </button>
             )}
@@ -154,7 +99,7 @@ const Navbar = () => {
               <Search size={18} className="text-white" />
             </button>
           </div>
-          {/* Dropdown resultados */}
+
           {showDropdown && (
             <div
               className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
@@ -163,9 +108,7 @@ const Navbar = () => {
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm text-gray-600">
                   Productos para{" "}
-                  <span className="text-sky-500 font-semibold">
-                    "{searchQuery}"
-                  </span>
+                  <span className="text-sky-500 font-semibold">"{searchQuery}"</span>
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 p-4">
@@ -173,9 +116,8 @@ const Navbar = () => {
                   <div
                     key={product._id}
                     onClick={() => {
-                      navigate(`/productos/${product.id}`);
-                      setShowDropdown(false);
-                      setSearchQuery("");
+                      navigate(`/productos/${product._id}`);
+                      handleClear();
                     }}
                     className="flex flex-col gap-2 cursor-pointer group"
                   >
@@ -206,21 +148,9 @@ const Navbar = () => {
                     </p>
                     <div className="flex items-center gap-1 mt-auto">
                       <div className="flex items-center border border-gray-200 rounded-md overflow-hidden text-xs flex-1">
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="px-1.5 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer"
-                        >
-                          −
-                        </button>
-                        <span className="flex-1 text-center text-gray-700 font-medium text-[11px]">
-                          1
-                        </span>
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="px-1.5 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer"
-                        >
-                          +
-                        </button>
+                        <button onClick={(e) => e.stopPropagation()} className="px-1.5 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">−</button>
+                        <span className="flex-1 text-center text-gray-700 font-medium text-[11px]">1</span>
+                        <button onClick={(e) => e.stopPropagation()} className="px-1.5 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">+</button>
                       </div>
                       <button
                         onClick={(e) => {
@@ -245,11 +175,7 @@ const Navbar = () => {
               </div>
               <div className="border-t border-gray-100 px-4 py-2.5 text-center">
                 <button
-                  onClick={() => {
-                    navigate("/productos");
-                    setShowDropdown(false);
-                    setSearchQuery("");
-                  }}
+                  onClick={() => { navigate("/productos"); handleClear(); }}
                   className="text-xs text-gray-500 hover:text-sky-500 transition-colors cursor-pointer"
                 >
                   <span className="text-sky-500 font-semibold underline underline-offset-2">
@@ -263,7 +189,6 @@ const Navbar = () => {
 
         {/* Iconos derecha */}
         <div className="flex items-center gap-3 md:gap-6">
-          {/* Buscador móvil — solo icono */}
           <button
             className="md:hidden text-gray-600 hover:text-blue-500 transition cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -294,7 +219,6 @@ const Navbar = () => {
             <span className="text-xs mt-0.5 hidden md:block">Carrito</span>
           </button>
 
-          {/* Usuario */}
           {user ? (
             <div className="relative">
               <button
@@ -303,10 +227,7 @@ const Navbar = () => {
               >
                 <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm overflow-hidden">
                   {user?.profilePic ? (
-                    <img
-                      src={user.profilePic}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={user.profilePic} className="w-full h-full object-cover" />
                   ) : (
                     user?.name?.charAt(0).toUpperCase() || "U"
                   )}
@@ -318,18 +239,11 @@ const Navbar = () => {
               {isUserMenuOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden">
                   <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 mb-1">
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
-                      Sesión activa
-                    </p>
-                    <p className="text-sm font-bold text-gray-800 truncate">
-                      {user.name}
-                    </p>
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Sesión activa</p>
+                    <p className="text-sm font-bold text-gray-800 truncate">{user.name}</p>
                   </div>
                   <button
-                    onClick={() => {
-                      navigate("/perfil");
-                      setIsMenuOpen(false);
-                    }}
+                    onClick={() => { navigate("/perfil"); setIsMenuOpen(false); }}
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center gap-3"
                   >
                     <User size={18} />
@@ -351,13 +265,10 @@ const Navbar = () => {
               className="flex flex-col items-center text-gray-600 hover:text-blue-500 transition cursor-pointer"
             >
               <User size={22} />
-              <span className="text-xs mt-0.5 hidden md:block">
-                Iniciar sesión
-              </span>
+              <span className="text-xs mt-0.5 hidden md:block">Iniciar sesión</span>
             </button>
           )}
 
-          {/* Hamburguesa — solo móvil */}
           <button
             className="md:hidden text-gray-600 hover:text-blue-500 transition cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -371,46 +282,30 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col gap-1 shadow-md">
           <button
-            onClick={() => {
-              navigate("/atomicShop");
-              setIsMenuOpen(false);
-            }}
+            onClick={() => { navigate("/"); setIsMenuOpen(false); }}
             className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
           >
             Inicio
           </button>
           <button
-            onClick={() => {
-              handleScroll("nosotros");
-              setIsMenuOpen(false);
-            }}
+            onClick={() => { handleScroll("nosotros"); setIsMenuOpen(false); }}
             className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
           >
             Nosotros
           </button>
           <button
-            onClick={() => {
-              handleScroll("contacto");
-              setIsMenuOpen(false);
-            }}
+            onClick={() => { handleScroll("contacto"); setIsMenuOpen(false); }}
             className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
           >
             Contáctanos
           </button>
           <button
-            onClick={() => {
-              navigate("/atomicShop/productos");
-              setIsMenuOpen(false);
-            }}
+            onClick={() => { navigate("/productos"); setIsMenuOpen(false); }}
             className="text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-500 rounded-lg transition"
           >
             Productos
           </button>
-          {/* Buscador en menú móvil */}
-          <div
-            ref={wrapperRef}
-            className="mt-2 flex items-center border border-gray-300 rounded-lg overflow-hidden"
-          >
+          <div ref={wrapperRef} className="mt-2 flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <input
               type="text"
               placeholder="Buscar un producto"

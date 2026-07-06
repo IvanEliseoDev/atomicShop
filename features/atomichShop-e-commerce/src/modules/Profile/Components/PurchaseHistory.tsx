@@ -5,7 +5,6 @@ import {
   ChevronRight,
   Loader2,
   Eye,
-  Trash2,
   X,
   AlertTriangle,
 } from "lucide-react";
@@ -101,12 +100,6 @@ export const PurchaseHistory = () => {
     setActiveMenuId(null);
     setSelectedPurchase(purchase);
     setIsViewOpen(true);
-  };
-
-  const handleOpenDelete = (purchase: PurchaseItem) => {
-    setActiveMenuId(null);
-    setSelectedPurchase(purchase);
-    setIsDeleteOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -216,13 +209,6 @@ export const PurchaseHistory = () => {
                       >
                         <Eye size={14} className="text-sky-500" />
                         Ver productos
-                      </button>
-                      <button
-                        onClick={() => handleOpenDelete(item)}
-                        className="w-full px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50 cursor-pointer"
-                      >
-                        <Trash2 size={14} />
-                        Eliminar
                       </button>
                     </div>
                   )}

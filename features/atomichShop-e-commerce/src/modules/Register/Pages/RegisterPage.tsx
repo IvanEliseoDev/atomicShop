@@ -20,8 +20,11 @@ export const RegisterPage = () => {
     municipiosDisponibles,
     handleUsarMiUbicacion,
     setValue,
+    watch,
     user,
     navigate,
+    handleTelefonoChange,
+    handleDuiChange,
   } = useRegister();
 
   return (
@@ -61,8 +64,28 @@ export const RegisterPage = () => {
 
           {/* DUI y teléfono */}
           <div className="grid grid-cols-2 gap-3">
-            <TextInput {...register("dui")} placeholder="DUI (opcional)" />
-            <TextInput {...register("telefono")} placeholder="Teléfono (opcional)" />
+            <div>
+              <TextInput
+                {...register("dui")}
+                placeholder="DUI (ej: 12345678-9)"
+                onChange={handleDuiChange}
+                value={watch("dui") ?? ""}
+              />
+              {errors.dui && (
+                <p className="mt-1 text-xs text-red-500">{errors.dui.message}</p>
+              )}
+            </div>
+            <div>
+              <TextInput
+                {...register("telefono")}
+                placeholder="Teléfono (ej: 7123-4567)"
+                onChange={handleTelefonoChange}
+                value={watch("telefono") ?? ""}
+              />
+              {errors.telefono && (
+                <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>
+              )}
+            </div>
           </div>
 
           {/* Email */}

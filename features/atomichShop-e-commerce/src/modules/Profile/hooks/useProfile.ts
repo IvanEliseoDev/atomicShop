@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/AuthContext";
 import { ecommerceService } from "@/services/ecommerceService";
 import { profileSchema, type ProfileFormData } from "../schemas/profileSchema";
+import { formatPhone, formatDUI } from "@/utils/inputFormatters";
 
 export function useProfile() {
   const { user, setUser } = useAuth();
@@ -19,6 +20,7 @@ export function useProfile() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -109,6 +111,14 @@ export function useProfile() {
 
   const values = watch();
 
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue("telefono", formatPhone(e.target.value), { shouldValidate: true });
+  };
+
+  const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue("dni", formatDUI(e.target.value), { shouldValidate: true });
+  };
+
   return {
     register,
     handleSubmit,
@@ -123,5 +133,7 @@ export function useProfile() {
     fileInputRef,
     handleImageChange,
     handleCancelEdit,
+    handleTelefonoChange,
+    handleDniChange,
   };
 }

@@ -1,9 +1,10 @@
-// En este archivo lo que haremos es configurar los enpoints y las rutas con las cuales el frontEnd se podra comunicar con estos
 import express from "express";
-// Importamos cors para que nuestro fronEnd pueda utilizar nuestro enpoints
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
-// A qui importamos las rutas de los enpoints que querramos utilizar
+// Middlewares
+import { limiter, authLimiter } from "./middleware/limiter";
+import { verifyEmployeeToken } from "./middleware/auth/verifyEmployeeToken";
 
 // ADMINISTRACION
 import productsRoutes from "./routes/product/products";
@@ -14,15 +15,15 @@ import { adminRouter } from "./routes/admin";
 
 // E-COMMERCE
 import productsEcomerceRoutes from "./routes/product/e-commerce/products";
-import providersEcommerceRoutes from "./routes/provider/e-commerce/supplier"
-import bannersEcommerceRotes from "./routes/banner/e-commerce/banner"
-import cartsEcommerceRoutes from "./routes/carts/carts"
-import loginEcommerceRoutes from "./routes/login/e-commerce/login"
-import logoutEcommerceRoutes from "./routes/logout/e-commerce/logout"
-import registerCustommerEcommerceRoutes from "./routes/customer/e-commerce/registerCustomerController"
-import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerce/recoveryPassword"
-import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories"
-import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands"
+import providersEcommerceRoutes from "./routes/provider/e-commerce/supplier";
+import bannersEcommerceRotes from "./routes/banner/e-commerce/banner";
+import cartsEcommerceRoutes from "./routes/carts/carts";
+import loginEcommerceRoutes from "./routes/login/e-commerce/login";
+import logoutEcommerceRoutes from "./routes/logout/e-commerce/logout";
+import registerCustommerEcommerceRoutes from "./routes/customer/e-commerce/registerCustomerController";
+import recoveryPasswordEcommerceRoutes from "./routes/recoveryPassword/e-commerce/recoveryPassword";
+import categoriesEcommerceRoutes from "./routes/categories/e-commerce/categories";
+import brandsEcommerceRoutes from "./routes/brands/e-commerce/brands";
 import contactRoutes from "./routes/contactRoutes";
 import wishlistRoutes from "./routes/favorite/wishlistRoutes";
 import invoiceEcommerceRoutes from "./routes/invoice/e-commerce/invoice";
@@ -32,64 +33,78 @@ import wompiRoutes from "./routes/wompi";
 
 // API
 import { seedRouter } from "./routes/seed";
-import cookieParser from "cookie-parser";
 import { categoryRouter } from "./routes/categories/categories";
 import { brandsRouter } from "./routes/brands/brands";
 import adminRecoveryRoutes from "./routes/recoveryPassword/recoveryPassword";
 
-/**
- * CONFIGURACION DE ARRANQUE
- */
-// Una constante que va a ejecutar la libreria de express
-
 const app = express();
+
 /**
- * CONFIGURACION DE CORS PARA LOS ENPOINTS
+ * CORS — orígenes permitidos via variable de entorno
+ * En producción: ALLOWED_ORIGINS=https://atomicshop-admin.vercel.app,https://atomicshop.vercel.app
  */
+const allowedOrigins: string[] = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
-    //Permitir el envío de cookies y credenciales
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origen no permitido → ${origin}`));
+      }
+    },
     credentials: true,
-  }),
+  })
 );
-// Con esto permitimos solicitudes JSON a nuestros enpoints
+
 app.use(express.json());
 app.use(cookieParser());
 
-/**
- * CONFIGURACION DE ENPOINTS
- */
+// Rate limiting global
+app.use(limiter);
 
-// API
+/**
+ * RUTAS — SEED
+ */
 app.use("/api/seed", seedRouter);
 
-// ADMINISTRACION
-app.use("/api/admin/products", productsRoutes);
-app.use("/api/admin/provider", providerRoutes);
-app.use("/api/admin/customers", customerRouter);
-app.use("/api/admin/employees", employeeRouter);
-app.use("/api/admin/category", categoryRouter);
-app.use("/api/admin/brands", brandsRouter);
+/**
+ * RUTAS — ADMINISTRACIÓN
+ * Las rutas de empleados (login, logout, verifyCode) son públicas.
+ * El resto de rutas /admin/* requieren cookie de empleado autenticado.
+ */
+app.use("/api/admin/employees", authLimiter, employeeRouter);
+app.use("/api/admin", adminRouter);
 app.use("/api/admin/recovery", adminRecoveryRoutes);
-app.use("/api/admin", adminRouter)
 
-// E-COMMERCE
+// Rutas protegidas con token de empleado
+app.use("/api/admin/products", verifyEmployeeToken, productsRoutes);
+app.use("/api/admin/provider", verifyEmployeeToken, providerRoutes);
+app.use("/api/admin/customers", verifyEmployeeToken, customerRouter);
+app.use("/api/admin/category", verifyEmployeeToken, categoryRouter);
+app.use("/api/admin/brands", verifyEmployeeToken, brandsRouter);
+app.use("/api/admin/invoices", verifyEmployeeToken, adminInvoiceRoutes);
+
+/**
+ * RUTAS — E-COMMERCE (públicas salvo las que ya verifican internamente)
+ */
+app.use("/api/e-commerce/login", authLimiter, loginEcommerceRoutes);
+app.use("/api/e-commerce/register", authLimiter, registerCustommerEcommerceRoutes);
+app.use("/api/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes);
+app.use("/api/e-commerce/logout", logoutEcommerceRoutes);
 app.use("/api/e-commerce/products", productsEcomerceRoutes);
-app.use("/api/e-commerce/banners", bannersEcommerceRotes)
-app.use("/api/e-commerce/providers", providersEcommerceRoutes)
-app.use("/api/e-commerce/carts", cartsEcommerceRoutes)
-app.use("/api/e-commerce/login", loginEcommerceRoutes)
-app.use("/api/e-commerce/logout", logoutEcommerceRoutes)
-app.use("/api/e-commerce/register", registerCustommerEcommerceRoutes)
-app.use("/api/e-commerce/recoveryPassword", recoveryPasswordEcommerceRoutes)
-app.use("/api/e-commerce/categories", categoriesEcommerceRoutes)
-app.use("/api/e-commerce/brands", brandsEcommerceRoutes)
+app.use("/api/e-commerce/banners", bannersEcommerceRotes);
+app.use("/api/e-commerce/providers", providersEcommerceRoutes);
+app.use("/api/e-commerce/carts", cartsEcommerceRoutes);
+app.use("/api/e-commerce/categories", categoriesEcommerceRoutes);
+app.use("/api/e-commerce/brands", brandsEcommerceRoutes);
 app.use("/api/e-commerce/profile", profileRoutes);
 app.use("/api/e-commerce/wishlist", wishlistRoutes);
 app.use("/api/e-commerce/invoices", invoiceEcommerceRoutes);
-app.use("/api/admin/invoices", adminInvoiceRoutes);
 app.use("/api/e-commerce/wompi", wompiRoutes);
-app.use("/api/e-commerce/contact", contactRoutes)
+app.use("/api/e-commerce/contact", contactRoutes);
 
 export default app;

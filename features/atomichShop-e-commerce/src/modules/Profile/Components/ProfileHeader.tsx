@@ -16,6 +16,8 @@ export const ProfileHeader = () => {
     fileInputRef,
     handleImageChange,
     handleCancelEdit,
+    handleTelefonoChange,
+    handleDniChange,
   } = useProfile();
 
   return (
@@ -125,8 +127,10 @@ export const ProfileHeader = () => {
                 <div className="flex-1">
                   <input
                     {...register("telefono")}
+                    onChange={handleTelefonoChange}
+                    value={values.telefono ?? ""}
                     className="text-sm text-gray-700 border-b border-blue-300 outline-none w-full"
-                    placeholder="Teléfono"
+                    placeholder="Teléfono (ej: 7123-4567)"
                   />
                   {errors.telefono && (
                     <p className="text-xs text-red-500 mt-0.5">{errors.telefono.message}</p>
@@ -144,8 +148,10 @@ export const ProfileHeader = () => {
                 <div className="flex-1">
                   <input
                     {...register("dni")}
+                    onChange={handleDniChange}
+                    value={values.dni ?? ""}
                     className="text-sm text-gray-700 border-b border-blue-300 outline-none w-full"
-                    placeholder="DUI"
+                    placeholder="DUI (ej: 12345678-9)"
                   />
                   {errors.dni && (
                     <p className="text-xs text-red-500 mt-0.5">{errors.dni.message}</p>

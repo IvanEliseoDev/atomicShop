@@ -4,8 +4,14 @@ export const registerSchema = z
   .object({
     nombres: z.string().min(1, "El nombre es requerido"),
     apellidos: z.string().min(1, "Los apellidos son requeridos"),
-    dui: z.string().optional(),
-    telefono: z.string().optional(),
+    dui: z
+      .string()
+      .refine((v) => !v || /^\d{8}-\d$/.test(v), "Formato inválido (ej: 12345678-9)")
+      .optional(),
+    telefono: z
+      .string()
+      .refine((v) => !v || /^\d{4}-\d{4}$/.test(v), "Formato inválido (ej: 7123-4567)")
+      .optional(),
     email: z
       .string()
       .min(1, "El correo es requerido")

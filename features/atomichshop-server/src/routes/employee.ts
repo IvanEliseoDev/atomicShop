@@ -14,13 +14,13 @@ employeeRouter.route("/check-status").get(verifyEmployeeToken, employeeAuthCheck
 employeeRouter.route("/verifyCode").post(employeeController.verifyCode)
 
 employeeRouter.route("/")
-  .get(employeeController.getEmployees)
-  .post(validateEmployee, employeeController.addEmployee)
+  .get(verifyEmployeeToken, employeeController.getEmployees)
+  .post(verifyEmployeeToken, validateEmployee, employeeController.addEmployee)
 
 employeeRouter.route("/:id/toggle-status")
-  .patch(employeeController.toggleStatus)
+  .patch(verifyEmployeeToken, employeeController.toggleStatus)
 
 employeeRouter.route("/:id")
-  .get(employeeController.getEmployeeByID)
-  .put(employeeController.updateEmployee)
-  .delete(employeeController.deleteEmployee)
+  .get(verifyEmployeeToken, employeeController.getEmployeeByID)
+  .put(verifyEmployeeToken, employeeController.updateEmployee)
+  .delete(verifyEmployeeToken, employeeController.deleteEmployee)

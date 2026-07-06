@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { employeeModel } from "../../models/employee";
+import { customerModel } from "../../models/customer";
 
 export const firstAdminController = {
     registerFirstAdmin: async (req: Request, res: Response) => {
@@ -22,6 +23,15 @@ export const firstAdminController = {
                 return res.status(409).json({
                     status: 409,
                     message: "Ya existe un empleado con ese correo.",
+                    data: null
+                });
+            }
+
+            const existCustomer = await customerModel.findOne({ mail: email });
+            if (existCustomer) {
+                return res.status(409).json({
+                    status: 409,
+                    message: "Ese correo ya está registrado como cliente en la tienda.",
                     data: null
                 });
             }

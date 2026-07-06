@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { employeeModel } from "../../models/employee";
+import { customerModel } from "../../models/customer";
 import { generateRandomPassword } from "../../utils/generatedRandomPassword";
 import { config } from "../../config";
 import { MyTokenPayload } from "../../interface/employee.interface";
@@ -71,6 +72,14 @@ export const employeeController = {
         return res.status(409).json({
           status: 409,
           message: "Employee has alredy exist",
+          data: null,
+        });
+
+      const existCustomer = await customerModel.findOne({ mail: employeeRequest.email });
+      if (existCustomer)
+        return res.status(409).json({
+          status: 409,
+          message: "Ese correo ya está registrado como cliente en la tienda.",
           data: null,
         });
 

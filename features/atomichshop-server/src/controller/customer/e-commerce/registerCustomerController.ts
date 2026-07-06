@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { customerModel } from '../../../models/customer';
+import { employeeModel } from '../../../models/employee';
 import { config } from '../../../config';
 import { HTMLVerificationEmail } from '../../../utils/HTMLVerificationEmail';
 
@@ -15,6 +16,11 @@ export const registerCustomerEcommerceController = {
             const existCustomer = await customerModel.findOne({ mail });
             if (existCustomer) {
                 return res.status(400).json({ status: '400', message: 'Customer already exists' });
+            }
+
+            const existEmployee = await employeeModel.findOne({ email: mail });
+            if (existEmployee) {
+                return res.status(400).json({ status: '400', message: 'Email already registered as employee' });
             }
 
             const passwordHash = await bcrypt.hash(password, 10);
