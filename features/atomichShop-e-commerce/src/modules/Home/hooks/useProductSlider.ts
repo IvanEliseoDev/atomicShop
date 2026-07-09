@@ -11,6 +11,7 @@ interface Product {
   originalPrice?: number;
   isOffer: boolean;
   image: string;
+  stock: number;
 }
 
 export function useProductSlider() {
@@ -30,6 +31,7 @@ export function useProductSlider() {
           originalPrice: p.discount ? p.price / (1 - p.discount / 100) : undefined,
           isOffer: !!p.discount,
           image: p.images?.[0] ?? "",
+          stock: p.stock ?? 0,
         }))
       );
     });
@@ -65,6 +67,7 @@ export function useProductSlider() {
         price: product.price,
         originalPrice: product.originalPrice ?? product.price,
         image: product.image,
+        stock: product.stock,
       });
     }
   };

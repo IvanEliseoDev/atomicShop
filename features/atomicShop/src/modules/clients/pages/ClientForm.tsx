@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { motion } from "framer-motion"
 import { useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useGetCustomerByID } from "../hooks/useGetCustomerByID"
@@ -63,7 +62,6 @@ export const ClientForm = () => {
     const {
         register,
         handleSubmit,
-        control,
         reset,
         setValue,
         formState: { errors },
@@ -182,29 +180,6 @@ export const ClientForm = () => {
                                             className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
                                         />
                                         <FieldError message={errors.telephone?.message} />
-                                    </div>
-
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-1 block">
-                                            Estado <span className="text-red-500">*</span>
-                                        </label>
-                                        <Controller
-                                            control={control}
-                                            name="state"
-                                            render={({ field }) => (
-                                                <Select value={field.value} onValueChange={field.onChange}>
-                                                    <SelectTrigger className="border-2 border-gray-300 rounded-lg focus:border-blue-500">
-                                                        <SelectValue placeholder="Seleccionar estado" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="comun">Común</SelectItem>
-                                                        <SelectItem value="frecuente">Frecuente</SelectItem>
-                                                        <SelectItem value="restringido">Restringido</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
-                                        <FieldError message={errors.state?.message} />
                                     </div>
                                 </div>
 

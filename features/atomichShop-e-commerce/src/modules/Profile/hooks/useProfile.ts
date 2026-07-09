@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { ecommerceService } from "@/services/ecommerceService";
 import { profileSchema, type ProfileFormData } from "../schemas/profileSchema";
 import { formatPhone, formatDUI } from "@/utils/inputFormatters";
+import { MUNICIPIOS } from "@/constants/locationData";
 
 export function useProfile() {
   const { user, setUser } = useAuth();
@@ -24,27 +25,42 @@ export function useProfile() {
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { nombres: "", telefono: "", dni: "", direccion: "" },
+    defaultValues: {
+      nombres: "",
+      telefono: "",
+      dni: "",
+      direccion: "",
+      departamento: "",
+      municipio: "",
+    },
   });
+
+  const departamento = watch("departamento");
+  const municipiosDisponibles = departamento ? (MUNICIPIOS[departamento] ?? []) : [];
+
+  const loadProfile = (id: string) =>
+    ecommerceService.getProfile(id).then((res) => {
+      const customer = res.data;
+      if (customer) {
+        reset({
+          nombres: customer.name || "",
+          telefono: customer.telephone || "",
+          dni: customer.dui || "",
+          direccion: customer.direction || "",
+          departamento: customer.deparmet || "",
+          municipio: customer.municipality || "",
+        });
+        setProfilePic(customer.image || "");
+        setCorreo(customer.mail || "");
+      }
+    });
 
   useEffect(() => {
     if (!user?.id) return;
-    ecommerceService.getProfile(user.id)
-      .then((res) => {
-        const customer = res.data;
-        if (customer) {
-          reset({
-            nombres: customer.name || "",
-            telefono: customer.telephone || "",
-            dni: customer.dui || "",
-            direccion: customer.direction || "",
-          });
-          setProfilePic(customer.image || "");
-          setCorreo(customer.mail || "");
-        }
-      })
-      .catch(() => toast.error("No se pudieron cargar los datos del perfil"));
-  }, [user?.id, reset]);
+    loadProfile(user.id).catch(() =>
+      toast.error("No se pudieron cargar los datos del perfil")
+    );
+  }, [user?.id]);
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user?.id) {
@@ -57,9 +73,11 @@ export function useProfile() {
     formData.append("telephone", data.telefono || "");
     formData.append("direction", data.direccion || "");
     formData.append("dui", data.dni || "");
+    formData.append("deparmet", data.departamento || "");
+    formData.append("municipality", data.municipio || "");
     if (selectedFile) formData.append("image", selectedFile);
 
-    await toast.promise(
+    toast.promise(
       ecommerceService.updateProfile(user.id, formData).then((res) => {
         const updated = res.data;
         if (!updated) throw new Error("Sin datos en la respuesta");
@@ -68,9 +86,17 @@ export function useProfile() {
           telefono: updated.telephone || "",
           dni: updated.dui || "",
           direccion: updated.direction || "",
+          departamento: updated.deparmet || "",
+          municipio: updated.municipality || "",
         });
         setProfilePic(updated.image || "");
-        setUser({ ...user, name: updated.name, profilePic: updated.image });
+        setUser({
+          ...user,
+          name: updated.name,
+          profilePic: updated.image,
+          deparmet: updated.deparmet,
+          municipality: updated.municipality,
+        });
         setIsEditing(false);
         setSelectedFile(null);
       }),
@@ -94,18 +120,7 @@ export function useProfile() {
     setIsEditing(false);
     setSelectedFile(null);
     if (user?.id) {
-      ecommerceService.getProfile(user.id).then((res) => {
-        const customer = res.data;
-        if (customer) {
-          reset({
-            nombres: customer.name || "",
-            telefono: customer.telephone || "",
-            dni: customer.dui || "",
-            direccion: customer.direction || "",
-          });
-          setProfilePic(customer.image || "");
-        }
-      });
+      loadProfile(user.id).catch(() => {});
     }
   };
 
@@ -117,6 +132,11 @@ export function useProfile() {
 
   const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue("dni", formatDUI(e.target.value), { shouldValidate: true });
+  };
+
+  const handleDepartamentoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue("departamento", e.target.value, { shouldValidate: true });
+    setValue("municipio", "", { shouldValidate: false });
   };
 
   return {
@@ -135,5 +155,8 @@ export function useProfile() {
     handleCancelEdit,
     handleTelefonoChange,
     handleDniChange,
+    handleDepartamentoChange,
+    departamento,
+    municipiosDisponibles,
   };
 }

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export interface CartItem {
   id: string;
@@ -11,6 +11,7 @@ export interface CartItem {
   originalPrice: number;
   image: string;
   quantity: number;
+  stock: number;
 }
 
 interface CartContextType {
@@ -44,6 +45,7 @@ function mapCartFromBackend(cart: any): CartItem[] {
       originalPrice,
       image: product?.images?.[0] ?? "",
       quantity: p.amount,
+      stock: product?.stock ?? 999,
     };
   });
 }
@@ -66,6 +68,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = async (product: Omit<CartItem, "quantity">) => {
     if (!user?.id) { setIsOpen(true); return; }
+    const existing = items.find((i) => i.id === product.id);
+    const currentQty = existing?.quantity ?? 0;
+    if (currentQty >= product.stock) {
+      setIsOpen(true);
+      return;
+    }
     const updatedCart = await fetch(`${BASE_URL}/carts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,7 +97,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (quantity < 1) { removeItem(id); return; }
     if (!user?.id) return;
     const current = items.find((i) => i.id === id);
-    const delta = quantity - (current?.quantity ?? 0);
+    const cappedQty = Math.min(quantity, current?.stock ?? 999);
+    const delta = cappedQty - (current?.quantity ?? 0);
     if (delta !== 0) {
       const updatedCart = await fetch(`${BASE_URL}/carts`, {
         method: "POST",

@@ -12,6 +12,8 @@ export const RecoverPasswordPage = () => {
   const {
     step,
     setStep,
+    recoveryToken,
+    setRecoveryToken,
     handleVerifyUser,
     handleBack,
     handleUpdatePassword,
@@ -36,7 +38,11 @@ export const RecoverPasswordPage = () => {
 
       {step === 2 && (
         <RecoverVerificationCode
-          onNext={() => setStep(3)}
+          recoveryToken={recoveryToken}
+          onNext={(updatedToken) => {
+            setRecoveryToken(updatedToken);
+            setStep(3);
+          }}
         />
       )}
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -163,6 +163,7 @@ const Navbar = () => {
                               ? product.price / (1 - product.discount / 100)
                               : product.price,
                             image: product.images?.[0] ?? "",
+                            stock: product.stock ?? 0,
                           });
                         }}
                         className="w-7 h-7 bg-sky-500 hover:bg-sky-600 rounded-md flex items-center justify-center transition-colors cursor-pointer shrink-0"

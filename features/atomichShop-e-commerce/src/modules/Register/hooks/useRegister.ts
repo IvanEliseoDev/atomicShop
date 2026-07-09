@@ -57,6 +57,7 @@ export function useRegister() {
     });
 
     if (result.status === "201") {
+      sessionStorage.setItem("pendingVerificationEmail", data.email);
       toast.success("Cuenta creada. Revisa tu correo para verificarla.");
       navigate("/verify-email");
     } else if (result.status === "400") {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   MoreVertical,
   ChevronLeft,
@@ -62,7 +62,7 @@ export const PurchaseHistory = () => {
       }
 
       const response = await fetch(
-        `http://localhost:4000/api/e-commerce/invoices/customer/${customerId}`,
+        `${import.meta.env.VITE_API_URL}/e-commerce/invoices/customer/${customerId}`,
         {
           credentials: "include",
         },
@@ -108,7 +108,7 @@ export const PurchaseHistory = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/e-commerce/invoices/${selectedPurchase.id}`,
+        `${import.meta.env.VITE_API_URL}/e-commerce/invoices/${selectedPurchase.id}`,
         {
           method: "DELETE",
           headers: {
@@ -276,7 +276,7 @@ export const PurchaseHistory = () => {
                 </span>
                 <span>
                   Descuento aplicado:{" "}
-                  <b className="text-green-600">{selectedPurchase.discount}</b>
+                  <b className="text-green-600">{selectedPurchase.discountTotal}</b>
                 </span>
               </div>
 

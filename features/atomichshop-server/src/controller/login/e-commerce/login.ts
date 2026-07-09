@@ -30,6 +30,13 @@ export const loginEcommerceController = {
           .json({ status: "403", message: "Email not verified" });
       }
 
+      // Verificar que la cuenta no esté restringida por un administrador
+      if (userFound.state === "restringido") {
+        return res
+          .status(403)
+          .json({ status: "403", message: "Account restricted" });
+      }
+
       const isMatch = await bcrypt.compare(
         password,
         userFound.password as string,
@@ -64,11 +71,12 @@ export const loginEcommerceController = {
         { expiresIn: "30d" },
       );
 
+      const isProd = process.env.NODE_ENV === "production";
       res.cookie("authCookie", token, {
         httpOnly: true,
-        sameSite: "lax", // ← permite que se envíe en el mismo origen
-        secure: false, // ← false en desarrollo (sin HTTPS)
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días en ms
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
       return res
@@ -95,12 +103,17 @@ export const loginEcommerceController = {
 
       const user = await customerModel
         .findById(decoded.id)
-        .select("_id name mail image direction deparmet municipality");
+        .select("_id name mail image direction deparmet municipality state");
 
       if (!user) {
         return res
           .status(404)
           .json({ status: "404", message: "User not found" });
+      }
+
+      if (user.state === "restringido") {
+        res.clearCookie("authCookie", { path: "/", httpOnly: true, secure: true, sameSite: "none" });
+        return res.status(403).json({ status: "403", message: "Account restricted" });
       }
 
       return res.status(200).json({

@@ -65,6 +65,10 @@ function ProductSlider() {
 
             <p className="text-gray-600 text-sm leading-snug mb-2">{product.name}</p>
 
+            <p className={`text-xs mb-2 font-medium ${product.stock === 0 ? 'text-red-500' : 'text-gray-400'}`}>
+              {product.stock === 0 ? 'Sin stock' : `Stock: ${product.stock}`}
+            </p>
+
             <div className="flex items-center gap-4 mt-auto">
               <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
                 <button
@@ -74,11 +78,15 @@ function ProductSlider() {
                   -
                 </button>
                 <span className="px-2 py-1 text-gray-700 min-w-8 text-center">
-                  {(quantities[product.id] ?? 1).toFixed(2)}
+                  {(quantities[product.id] ?? 1)}
                 </span>
                 <button
-                  onClick={(e) => { e.stopPropagation(); updateQuantity(product.id, 1); }}
-                  className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if ((quantities[product.id] ?? 1) < product.stock) updateQuantity(product.id, 1);
+                  }}
+                  className="px-4 py-2 hover:bg-gray-100 transition text-gray-900 cursor-pointer disabled:opacity-40"
+                  disabled={(quantities[product.id] ?? 1) >= product.stock}
                 >
                   +
                 </button>

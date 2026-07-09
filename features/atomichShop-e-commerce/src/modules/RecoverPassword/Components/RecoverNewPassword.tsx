@@ -3,14 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthCard } from "../../Login/Components/AuthCard";
 import { PasswordInput } from "../../Login/Components/PasswordInput";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
-import { useRecoverNewPassword } from "../hooks/useRecoverNewPassword";
 import {
   recoverNewPasswordSchema,
   type RecoverNewPasswordFormData,
 } from "../schemas/recoverPasswordSchema";
 
 interface Props {
-  onConfirm: (pass: string) => void;
+  onConfirm: (pass: string) => void | Promise<void>;
 }
 
 export const RecoverNewPassword = ({ onConfirm }: Props) => {
@@ -23,11 +22,8 @@ export const RecoverNewPassword = ({ onConfirm }: Props) => {
     defaultValues: { password: "", confirmPassword: "" },
   });
 
-  const { updatePassword } = useRecoverNewPassword(() => {});
-
   const onSubmit = async (data: RecoverNewPasswordFormData) => {
-    await updatePassword(data.password);
-    onConfirm(data.password);
+    await onConfirm(data.password);
   };
 
   return (

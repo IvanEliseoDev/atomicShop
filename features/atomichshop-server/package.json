@@ -12,7 +12,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -34,9 +33,7 @@
     "nodemon": "^3.1.14",
     "pdfkit": "^0.18.0",
     "tsx": "^4.21.0",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
+    "zod": "^4.4.3",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
@@ -49,5 +46,6 @@
     "@types/pdfkit": "^0.17.6",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2"
-  }
+  },
+  "devDependencies": {}
 }

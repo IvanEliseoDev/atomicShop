@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import { transporter } from "../../utils/mailer";
 import { employeeModel } from "../../models/employee";
 import { customerModel } from "../../models/customer";
 import { generateRandomPassword } from "../../utils/generatedRandomPassword";
@@ -99,27 +99,12 @@ export const employeeController = {
 
       const { name, email } = employeeRequest;
 
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: config.email.user,
-          pass: config.email.password,
-        },
-        tls: { rejectUnauthorized: false },
-      });
-
-      const mailOptions = {
-        from: config.email.user,
+      transporter.sendMail({
+        from: config.email.from,
         to: email,
         subject: "Bienvenido a AtomicShop — Tus credenciales de acceso",
         html: HTMLVerifyEmail(name, email, genericPassword),
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error, info);
-        }
-      });
+      }).catch((error) => console.error("Error sending employee email:", error));
 
       await newEmployee.save();
       return res.status(201).json({ message: "Employee Create Succesful", data: null });

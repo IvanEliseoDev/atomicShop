@@ -3,7 +3,18 @@ import { LogoYonJob } from "@/components/ui/LogoYonJob";
 import { useVerifyEmail } from "../hooks/useVerifyEmail";
 
 export const VerifyEmailPage = () => {
-  const { code, inputRefs, handleChange, handlePaste, handleKeyDown, handleVerify } = useVerifyEmail();
+  const {
+    code,
+    inputRefs,
+    handleChange,
+    handlePaste,
+    handleKeyDown,
+    handleVerify,
+    handleResend,
+    cooldown,
+    isResending,
+    pendingEmail,
+  } = useVerifyEmail();
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -14,8 +25,11 @@ export const VerifyEmailPage = () => {
             Verifica tu correo
           </h2>
           <p className="text-sm text-gray-500 leading-relaxed">
-            Te enviamos un código de verificación. Ingrésalo aquí para activar
-            tu cuenta.
+            Te enviamos un código de verificación
+            {pendingEmail && (
+              <> a <span className="font-medium text-gray-700">{pendingEmail}</span></>
+            )}
+            . Ingrésalo aquí para activar tu cuenta.
           </p>
         </div>
 
@@ -37,10 +51,29 @@ export const VerifyEmailPage = () => {
 
         <button
           onClick={handleVerify}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition mb-4"
         >
           Verificar cuenta
         </button>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-500 mb-1">¿No recibiste el código?</p>
+          <button
+            onClick={handleResend}
+            disabled={cooldown > 0 || isResending}
+            className={`text-sm font-semibold transition ${
+              cooldown > 0 || isResending
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-blue-500 hover:text-blue-700 cursor-pointer"
+            }`}
+          >
+            {isResending
+              ? "Enviando..."
+              : cooldown > 0
+              ? `Reenviar código (${cooldown}s)`
+              : "Reenviar código"}
+          </button>
+        </div>
       </AuthCard>
     </div>
   );

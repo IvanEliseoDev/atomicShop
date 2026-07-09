@@ -4,11 +4,16 @@ export interface ProductResponse {
     data:    ProductI[];
 }
 
+export interface PopulatedRef {
+    _id:  string;
+    name: string;
+}
+
 export interface ProductI {
     _id:         string;
     code:        string;
-    brandId:     string;
-    categoryId:  string;
+    brandId:     string | PopulatedRef;
+    categoryId:  string | PopulatedRef;
     providerId:  string;
     name:        string;
     description: string;
@@ -17,6 +22,8 @@ export interface ProductI {
     price:       number;
     discount:    number;
     state:       boolean;
+    minStock?:   number;
+    costPrice?:  number;
     createdAt:   Date;
     updatedAt:   Date;
     __v:         number;

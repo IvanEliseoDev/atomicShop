@@ -39,7 +39,7 @@ export const profileCustomerController = {
     updateProfileData: async (req: Request, res: Response): Promise<any> => {
         try {
             const { id } = req.params;
-            const { telephone, direction, dui, name } = req.body;
+            const { telephone, direction, dui, name, deparmet, municipality } = req.body;
 
             if (!id) {
                 return res.status(400).json({ status: 400, message: "Customer ID is required" });
@@ -51,9 +51,11 @@ export const profileCustomerController = {
             }
 
             if (name) customer.name = name;
-            if (telephone) customer.telephone = telephone;
-            if (direction) customer.direction = direction;
-            if (dui) customer.dui = dui;
+            if (telephone !== undefined) customer.telephone = telephone;
+            if (direction !== undefined) customer.direction = direction;
+            if (dui !== undefined) customer.dui = dui;
+            if (deparmet !== undefined) customer.deparmet = deparmet;
+            if (municipality !== undefined) customer.municipality = municipality;
 
             if (req.file) {
                 if (customer.public_id) {
@@ -75,6 +77,8 @@ export const profileCustomerController = {
                     telephone: updatedCustomer.telephone,
                     direction: updatedCustomer.direction,
                     dui: updatedCustomer.dui,
+                    deparmet: updatedCustomer.deparmet,
+                    municipality: updatedCustomer.municipality,
                     image: updatedCustomer.image
                 }
             });

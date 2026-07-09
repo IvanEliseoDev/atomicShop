@@ -54,7 +54,7 @@ export default function CreatePasswordPage() {
 
             <div className="text-center mb-8">
                 <div className="flex justify-center mb-6">
-                    <img src="../public/logoatomicshop.png" alt="logo AtomicShop" className="object-contain w-30 h-28" />
+                    <img src="/logoatomicshop.png" alt="logo AtomicShop" className="object-contain w-30 h-28" />
                 </div>
                 <h2 className="font-semibold text-gray-800 text-xl mb-2">Nueva contraseña</h2>
                 <p className="text-gray-400 text-xs">

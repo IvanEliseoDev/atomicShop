@@ -21,6 +21,9 @@ import {
 const getInitials = (nombre: string) =>
     nombre ? nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase() : '';
 
+const getName = (ref: any): string =>
+    ref && typeof ref === 'object' ? ref.name ?? '' : ref ?? '';
+
 const ITEMS_POR_PAGINA = 10;
 
 // ─── Componente principal ──────────────────────────────────────────────────────
@@ -48,8 +51,13 @@ export const ProductsPage = () => {
         try {
             await deleteProduct(id);
             toast.success('Producto eliminado correctamente');
-        } catch {
-            toast.error('Hubo un error al eliminar el producto');
+        } catch (error: any) {
+            const msg = error?.response?.data?.message;
+            if (msg) {
+                Swal.fire({ icon: 'error', title: 'No se puede eliminar', text: msg });
+            } else {
+                toast.error('Hubo un error al eliminar el producto');
+            }
         }
     };
 
@@ -78,9 +86,9 @@ export const ProductsPage = () => {
     const { data: products, isLoading } = useGetProducts();
     const listaProductos = products?.data || [];
 
-    // Categorías únicas basadas en los productos REALES de la API
+    // Categorías únicas (usando nombre del objeto populado)
     const categorias = useMemo(() => {
-        const cats = listaProductos.map(p => p.categoryId).filter(Boolean);
+        const cats = listaProductos.map(p => getName(p.categoryId)).filter(Boolean);
         return ['Todas', ...Array.from(new Set(cats))];
     }, [listaProductos]);
 
@@ -89,13 +97,17 @@ export const ProductsPage = () => {
     // ─── Filtrado Seguro (Memorizado para mejor rendimiento) ───────────────────
     const productosFiltrados = useMemo(() => {
         return listaProductos.filter(p => {
+            const catName = getName(p.categoryId);
+            const brandName = getName(p.brandId);
+            const q = search.toLowerCase();
             const coincideBusqueda =
-                p.name?.toLowerCase().includes(search.toLowerCase()) ||
-                p.code?.toLowerCase().includes(search.toLowerCase()) ||
-                p.categoryId?.toLowerCase().includes(search.toLowerCase());
+                p.name?.toLowerCase().includes(q) ||
+                p.code?.toLowerCase().includes(q) ||
+                catName.toLowerCase().includes(q) ||
+                brandName.toLowerCase().includes(q);
 
             const coincideCategoria =
-                filtroCategoria === 'Todas' || p.categoryId === filtroCategoria;
+                filtroCategoria === 'Todas' || catName === filtroCategoria;
 
             const coincideEstado =
                 filtroEstado === 'Todos' ||
@@ -268,11 +280,11 @@ export const ProductsPage = () => {
 
                                                 {/* Categoría */}
                                                 <td className="px-4 py-3 text-gray-600 max-w-35">
-                                                    <span className="truncate block">{product.categoryId}</span>
+                                                    <span className="truncate block">{getName(product.categoryId) || '—'}</span>
                                                 </td>
 
                                                 {/* Marca */}
-                                                <td className="px-4 py-3 text-gray-600">{product.brandId || 'N/A'}</td>
+                                                <td className="px-4 py-3 text-gray-600">{getName(product.brandId) || 'N/A'}</td>
 
                                                 {/* Cantidad / Stock */}
                                                 <td className="px-4 py-3 text-center">

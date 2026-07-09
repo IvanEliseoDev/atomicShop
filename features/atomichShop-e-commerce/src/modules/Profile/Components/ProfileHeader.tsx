@@ -1,5 +1,6 @@
-import { Mail, MapPin, Phone, CreditCard, Pencil, Check, X, Camera } from "lucide-react";
+import { Mail, MapPin, Phone, CreditCard, Pencil, Check, X, Camera, Building2 } from "lucide-react";
 import { useProfile } from "../hooks/useProfile";
+import { DEPARTAMENTOS } from "@/constants/locationData";
 
 export const ProfileHeader = () => {
   const {
@@ -18,6 +19,9 @@ export const ProfileHeader = () => {
     handleCancelEdit,
     handleTelefonoChange,
     handleDniChange,
+    handleDepartamentoChange,
+    departamento,
+    municipiosDisponibles,
   } = useProfile();
 
   return (
@@ -161,6 +165,55 @@ export const ProfileHeader = () => {
                 <span className="text-gray-600 text-sm">{values.dni || "Sin definir"}</span>
               )}
             </div>
+
+            {/* Departamento */}
+            <div className="flex items-center gap-3">
+              <Building2 size={18} className="text-gray-400 shrink-0" />
+              {isEditing ? (
+                <div className="flex-1">
+                  <select
+                    {...register("departamento")}
+                    onChange={handleDepartamentoChange}
+                    className="text-sm text-gray-700 border-b border-blue-300 outline-none w-full bg-transparent cursor-pointer"
+                  >
+                    <option value="">Seleccionar departamento...</option>
+                    {DEPARTAMENTOS.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                  {errors.departamento && (
+                    <p className="text-xs text-red-500 mt-0.5">{errors.departamento.message}</p>
+                  )}
+                </div>
+              ) : (
+                <span className="text-gray-600 text-sm">{values.departamento || "Sin definir"}</span>
+              )}
+            </div>
+
+            {/* Municipio */}
+            <div className="flex items-center gap-3">
+              <MapPin size={18} className="text-gray-400 shrink-0" />
+              {isEditing ? (
+                <div className="flex-1">
+                  <select
+                    {...register("municipio")}
+                    disabled={!departamento}
+                    className="text-sm text-gray-700 border-b border-blue-300 outline-none w-full bg-transparent cursor-pointer disabled:text-gray-400"
+                  >
+                    <option value="">Seleccionar municipio...</option>
+                    {municipiosDisponibles.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  {errors.municipio && (
+                    <p className="text-xs text-red-500 mt-0.5">{errors.municipio.message}</p>
+                  )}
+                </div>
+              ) : (
+                <span className="text-gray-600 text-sm">{values.municipio || "Sin definir"}</span>
+              )}
+            </div>
+
           </div>
 
           {isEditing && (

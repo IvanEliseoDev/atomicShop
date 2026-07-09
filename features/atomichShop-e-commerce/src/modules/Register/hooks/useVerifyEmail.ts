@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { ecommerceService } from "@/services/ecommerceService";
@@ -8,17 +8,42 @@ export function useVerifyEmail() {
   const [code, setCode] = useState(new Array(6).fill(""));
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
+  const [cooldown, setCooldown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const pendingEmail = sessionStorage.getItem("pendingVerificationEmail") ?? "";
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startCooldown = useCallback(() => {
+    setCooldown(60);
+    timerRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
   const handleChange = (value: string, index: number) => {
-    if (isNaN(Number(value))) return;
+    const char = value.replace(/[^a-zA-Z0-9]/g, "").slice(-1);
     const newCode = [...code];
-    newCode[index] = value.slice(-1);
+    newCode[index] = char;
     setCode(newCode);
-    if (value && index < 5) inputRefs.current[index + 1]?.focus();
+    if (char && index < 5) inputRefs.current[index + 1]?.focus();
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData.getData("text").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6);
     if (!pasted) return;
     const newCode = new Array(6).fill("");
     pasted.split("").forEach((char, i) => { newCode[i] = char; });
@@ -41,6 +66,7 @@ export function useVerifyEmail() {
     }
     const result = await ecommerceService.verifyRegisterCode(fullCode);
     if (result.status === "200") {
+      sessionStorage.removeItem("pendingVerificationEmail");
       toast.success("Correo verificado correctamente");
       navigate("/login");
     } else {
@@ -50,5 +76,40 @@ export function useVerifyEmail() {
     }
   };
 
-  return { code, inputRefs, handleChange, handlePaste, handleKeyDown, handleVerify };
+  const handleResend = async () => {
+    if (cooldown > 0 || isResending) return;
+    if (!pendingEmail) {
+      toast.error("No se encontró el correo. Vuelve a registrarte.");
+      return;
+    }
+    setIsResending(true);
+    try {
+      const result = await ecommerceService.resendVerificationCode(pendingEmail);
+      if (result.status === "200") {
+        toast.success("Código reenviado. Revisa tu bandeja (o spam).");
+        setCode(new Array(6).fill(""));
+        inputRefs.current[0]?.focus();
+        startCooldown();
+      } else {
+        toast.error(result.message ?? "No se pudo reenviar el código");
+      }
+    } catch {
+      toast.error("Error de conexión al reenviar el código");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  return {
+    code,
+    inputRefs,
+    handleChange,
+    handlePaste,
+    handleKeyDown,
+    handleVerify,
+    handleResend,
+    cooldown,
+    isResending,
+    pendingEmail,
+  };
 }

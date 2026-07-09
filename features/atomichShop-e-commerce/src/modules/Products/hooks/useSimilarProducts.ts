@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ProductShop } from "./useProductsShop";
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export function useSimilarProducts(categoryId: string | undefined, currentId: string | undefined) {
   const [products, setProducts] = useState<ProductShop[]>([]);
@@ -21,6 +21,7 @@ export function useSimilarProducts(categoryId: string | undefined, currentId: st
             price: p.price,
             originalPrice: p.discount ? p.price / (1 - p.discount / 100) : p.price,
             image: p.images?.[0] ?? "",
+            stock: p.stock ?? 0,
             onSale: !!p.discount,
           }))
         );

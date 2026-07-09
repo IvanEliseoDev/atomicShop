@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import type { CustomerEntity } from '../entity/customer.entity'
 import { getCustomers } from '../actions/getCustomers.action'
 import type { CustomerResponse } from '../responses/getCustomerResponse'
 

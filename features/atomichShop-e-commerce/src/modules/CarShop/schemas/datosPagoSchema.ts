@@ -3,10 +3,10 @@ import { z } from "zod";
 export const datosPagoSchema = z
   .object({
     metodo: z.enum(["credito", "debito", "efectivo"]),
-    numeroTarjeta: z.string().default(""),
-    nombreTitular: z.string().default(""),
-    vigencia: z.string().default(""),
-    cvv: z.string().default(""),
+    numeroTarjeta: z.string(),
+    nombreTitular: z.string(),
+    vigencia: z.string(),
+    cvv: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.metodo === "efectivo") return;

@@ -6,8 +6,10 @@ import { useRecoverVerificationCode }
 
 export const RecoverVerificationCode = ({
   onNext,
+  recoveryToken,
 }: {
-  onNext: () => void;
+  onNext: (updatedToken: string) => void;
+  recoveryToken: string;
 }) => {
 
   const {
@@ -17,7 +19,7 @@ export const RecoverVerificationCode = ({
     handleKeyDown,
     handleVerify,
     handlePaste,
-  } = useRecoverVerificationCode(onNext);
+  } = useRecoverVerificationCode(onNext, recoveryToken);
 
   return (
     <AuthCard className="max-w-md">

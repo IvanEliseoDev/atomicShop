@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export const ecommerceService = {
   // Pagina de inicio
@@ -66,6 +66,14 @@ export const ecommerceService = {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ verificationCodeRequest }),
+    }).then((r) => r.json()),
+
+  resendVerificationCode: (mail: string) =>
+    fetch(`${BASE_URL}/register/resendCode`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mail }),
     }).then((r) => r.json()),
 
   // Recuperar contraseña

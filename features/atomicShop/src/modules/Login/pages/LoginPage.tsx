@@ -88,7 +88,7 @@ export const LoginPage = () => {
       <form onSubmit={handleLogin}>
         <div className="flex items-center gap-4 mb-8">
           <img
-            src="../public/logoatomicshop.png"
+            src="/logoatomicshop.png"
             alt=""
             className="object-contain w-52 h-24"
           />

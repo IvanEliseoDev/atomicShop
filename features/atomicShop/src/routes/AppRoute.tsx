@@ -9,7 +9,7 @@ import { ForgotPasswordPage } from "@/modules/Login/pages/ForgetPassword"
 import { LoginPage } from "@/modules/Login/pages/LoginPage"
 import SuccessPage from "@/modules/Login/pages/SuccesPage"
 import { VerifyCodePage } from "@/modules/Login/pages/VerifyCodePage"
-import { createBrowserRouter } from "react-router"
+import { createBrowserRouter, Navigate } from "react-router"
 import { EmployeePage } from "@/modules/employee/Pages/EmployeePage"
 import { EmployeeForm } from "@/modules/employee/Pages/EmployeeForm"
 import { ClientPage } from "@/modules/clients/pages/ClientPage"
@@ -24,6 +24,10 @@ export const appRouter = createBrowserRouter([
         path: "/",
         element: <AuthLayout />,
         children: [
+            {
+                index: true,
+                element: <Navigate to="/login" replace />
+            },
             {
                 path: "login",
                 element: <NotAuthenticatedRoute><LoginPage /></NotAuthenticatedRoute>

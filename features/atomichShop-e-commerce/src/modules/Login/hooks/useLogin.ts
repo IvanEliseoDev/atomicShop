@@ -10,6 +10,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "Incorrect password": "Contraseña incorrecta",
   "Account blocked": "Cuenta bloqueada, intenta en 15 minutos",
   "Email not verified": "Debes verificar tu correo antes de ingresar",
+  "Account restricted": "Tu cuenta ha sido restringida. Contacta al administrador.",
 };
 
 export function useLogin() {

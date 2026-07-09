@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import { transporter } from '../../utils/mailer';
 import { employeeModel } from '../../models/employee';
 import { config } from '../../config';
 import { HTMLRecoveryEmail } from '../../utils/HTMLRecoveryEmail';
@@ -29,29 +29,18 @@ export const recoveryPasswordAdminController = {
 
             res.cookie('recoveryEmployeeCookie', token, { httpOnly: true, maxAge: 15 * 60 * 1000 });
 
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: config.email.user,
-                    pass: config.email.password,
-                },
-                tls: { rejectUnauthorized: false },
-            });
-
-            const mailOptions = {
-                from: config.email.user,
-                to: email,
-                subject: 'AtomicShop — Recuperación de contraseña',
-                html: HTMLRecoveryEmail(code),
-            };
-
-            transporter.sendMail(mailOptions, (error) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(500).json({ status: 500, message: 'Error al enviar el correo' });
-                }
+            try {
+                await transporter.sendMail({
+                    from: config.email.from,
+                    to: email,
+                    subject: 'AtomicShop — Recuperación de contraseña',
+                    html: HTMLRecoveryEmail(code),
+                });
                 return res.status(200).json({ status: 200, message: 'Código enviado exitosamente' });
-            });
+            } catch (mailError) {
+                console.error('Error sending admin recovery email:', mailError);
+                return res.status(500).json({ status: 500, message: 'Error al enviar el correo' });
+            }
         } catch (error) {
             console.log(error);
             return res.status(500).json({ status: 500, message: 'Internal Server Error - Check Server Logs' });

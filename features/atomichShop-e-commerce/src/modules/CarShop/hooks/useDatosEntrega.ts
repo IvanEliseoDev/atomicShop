@@ -36,7 +36,10 @@ export function useDatosEntrega() {
     if (!user) return;
     setValue("direccion", user.direction || "", { shouldValidate: true });
     setValue("departamento", user.deparmet || "", { shouldValidate: true });
-    setValue("municipio", user.municipality || "", { shouldValidate: true });
+    // Set municipio after the next render so the select options are populated
+    setTimeout(() => {
+      setValue("municipio", user.municipality || "", { shouldValidate: true });
+    }, 0);
   };
 
   const onSubmit = (data: DatosEntregaFormData) => {

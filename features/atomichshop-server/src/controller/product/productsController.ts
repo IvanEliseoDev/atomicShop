@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { modelProducts } from "../../models/product";
+import { invoiceModel } from "../../models/invoice";
+import { modelCarts } from "../../models/cart";
 
 // Creo un array de products y alparecer no se pueda hacer como hantes, si no que en el array que creamos, adentro se ponen los metodos
 export const productsController = {
@@ -31,7 +33,9 @@ export const productsController = {
   // GET ALL
   getProducts: async (req: Request, res: Response): Promise<void> => {
     try {
-      const products = await modelProducts.find();
+      const products = await modelProducts.find()
+        .populate('brandId', 'name')
+        .populate('categoryId', 'name');
       if (!products) res.status(404).json({status: 404, message:"Productos no encontrados", data: null})
       res.status(200).json({status:200, message:"Productos encontrados exitosamente", data:products});
     } catch (error) {
@@ -44,7 +48,9 @@ export const productsController = {
 
   getProductById: async(req:Request, res:Response) => {
     try {
-      const product = await modelProducts.findById(req.params.id);
+      const product = await modelProducts.findById(req.params.id)
+        .populate('brandId', 'name')
+        .populate('categoryId', 'name');
       if (!product) res.status(404).json({status: 404, message:"Producto no encontrados", data: null})
       res.status(200).json({status:200, message:"Producto encontrado exitosamente", data:product});
     } catch (error) {
@@ -127,6 +133,19 @@ export const productsController = {
   deleteProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
+
+      const usedInInvoice = await invoiceModel.findOne({ "products.productId": id });
+      if (usedInInvoice) {
+        res.status(409).json({ message: "No se puede eliminar: el producto ya está registrado en una o más facturas." });
+        return;
+      }
+
+      const usedInCart = await modelCarts.findOne({ "products.idProduct": id });
+      if (usedInCart) {
+        res.status(409).json({ message: "No se puede eliminar: el producto está en el carrito de un cliente." });
+        return;
+      }
+
       await modelProducts.findByIdAndDelete(id);
       res.status(200).json({ message: "Producto eliminado exitosamente" });
     } catch (error) {

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Phone, Mail, Building2, User, CalendarDays, BadgeCheck } from 'lucide-react';
+import { Phone, Mail, User } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -91,12 +91,6 @@ export const ProfilePage = () => {
                         <p className="text-blue-100 text-sm mt-1">
                             {positionLabel} &bull; Panel Administrativo
                         </p>
-                        <div className="flex items-center gap-1 mt-2">
-                            <BadgeCheck size={14} className={employee?.isVerified ? 'text-green-300' : 'text-gray-300'} />
-                            <span className="text-xs text-blue-100">
-                                {employee?.isVerified ? 'Cuenta verificada' : 'Cuenta pendiente de verificación'}
-                            </span>
-                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -139,50 +133,6 @@ export const ProfilePage = () => {
                                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Correo Electrónico</p>
                                         <p className="text-sm font-medium text-gray-800 break-all">{email ?? '—'}</p>
                                     </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Dirección e información adicional */}
-                <motion.div variants={itemVariants} className="md:col-span-2">
-                    <Card>
-                        <CardContent className="pt-5">
-                            <SectionHeader icon={Building2} title="Información Adicional" />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                                <DataField label="Dirección" value={employee?.direction} />
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                                        Estado de cuenta
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-2 h-2 rounded-full ${employee?.isVerified ? 'bg-green-500' : 'bg-gray-400'}`} />
-                                        <span className="text-sm font-medium text-gray-800">
-                                            {employee?.isVerified ? 'Activo' : 'Inactivo'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Fecha de ingreso destacada */}
-                <motion.div variants={itemVariants} className="md:col-span-2">
-                    <Card className="bg-blue-50 border-blue-100">
-                        <CardContent className="pt-5">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <CalendarDays size={18} className="text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-blue-500 font-semibold uppercase tracking-wider">
-                                        Miembro desde
-                                    </p>
-                                    <p className="text-sm font-semibold text-blue-800">
-                                        {employee?.payroll_month ?? '—'}
-                                    </p>
                                 </div>
                             </div>
                         </CardContent>

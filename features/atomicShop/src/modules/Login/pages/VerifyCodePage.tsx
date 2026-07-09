@@ -69,7 +69,7 @@ export const VerifyCodePage = () => {
             </div>
 
             <div className="flex justify-center mb-6">
-                <img src="../public/logoatomicshop.png" alt="logo AtomicShop" className="object-contain w-42 h-30" />
+                <img src="/logoatomicshop.png" alt="logo AtomicShop" className="object-contain w-42 h-30" />
             </div>
 
             <div className="text-center mb-4">

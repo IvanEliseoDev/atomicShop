@@ -11,6 +11,8 @@ export const profileSchema = z.object({
     .refine((v) => !v || /^\d{8}-\d$/.test(v), "Formato inválido (ej: 12345678-9)")
     .optional(),
   direccion: z.string().optional(),
+  departamento: z.string().optional(),
+  municipio: z.string().optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;

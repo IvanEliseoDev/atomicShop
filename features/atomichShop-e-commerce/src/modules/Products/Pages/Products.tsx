@@ -15,7 +15,7 @@ interface Category {
   name: string;
 }
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevancia" },
@@ -81,6 +81,7 @@ function Products() {
         price: product.price,
         originalPrice: product.originalPrice,
         image: product.image,
+        stock: product.stock ?? 0,
       });
     }
   };

@@ -86,15 +86,17 @@ export const ProductRegisterForm = ({ onSuccessSubmit }: ProductFormProps) => {
   useEffect(() => {
     if (isEditMode && fetchedProduct?.data) {
       const product = fetchedProduct.data;
+      const brandId = typeof product.brandId === 'object' ? (product.brandId as any)?._id : product.brandId;
+      const categoryId = typeof product.categoryId === 'object' ? (product.categoryId as any)?._id : product.categoryId;
       setFormData({
         nombre: product.name || "",
         codigo: product.code || "",
-        marca: product.brandId || "",
-        categoria: product.categoryId || "",
+        marca: brandId || "",
+        categoria: categoryId || "",
         stock: product.stock || 0,
-        stockMinimo: 0,
+        stockMinimo: (product as any).minStock ?? 0,
         precioVenta: product.price ?? "",
-        precioCoste: "",
+        precioCoste: (product as any).costPrice ?? "",
         discount: product.discount ?? "",
         descripcion: product.description || "",
         imagenes: [],
@@ -255,11 +257,13 @@ export const ProductRegisterForm = ({ onSuccessSubmit }: ProductFormProps) => {
       categoryId: formData.categoria,
       description: formData.descripcion,
       stock: formData.stock,
+      minStock: formData.stockMinimo,
       price: parseFloat(formData.precioVenta.toString()) || 0,
+      costPrice: parseFloat(formData.precioCoste.toString()) || 0,
       discount: parseFloat(formData.discount.toString()) || 0,
       images: formData.imagenes,
       state: true,
-      imagenesEliminadas: imagenesEliminadas, // Para que el backend sepa cuáles eliminar
+      imagenesEliminadas: imagenesEliminadas,
     };
 
     try {
@@ -363,6 +367,7 @@ export const ProductRegisterForm = ({ onSuccessSubmit }: ProductFormProps) => {
                         type="text"
                         placeholder="Código único"
                         value={formData.codigo}
+                        maxLength={10}
                         onChange={(e) =>
                           handleInputChange("codigo", e.target.value)
                         }

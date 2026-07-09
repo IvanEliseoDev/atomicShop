@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  SlidersHorizontal, MoreVertical, Pencil, Lock, Unlock, Trash2,
+  SlidersHorizontal, MoreVertical, Pencil, Lock, Unlock,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useGetEmployees } from '../hooks/useGetEmployees';
 import { useFilterEmployee } from '../hooks/useFilterEmployee';
-import { useDeleteEmployee } from '../hooks/useEmployeeMutate';
 import { useRestrictEmployee } from '../hooks/useRestrictEmployee';
 import { HeaderAdmin } from '@/components/custom/header/HeaderAdmin';
 import { CustomPaginationPage } from '@/components/custom/pagination/CustomPaginationPage';
@@ -42,7 +41,6 @@ export const EmployeePage = () => {
   const navigate = useNavigate();
 
   const { data: employeesResponse, isLoading } = useGetEmployees();
-  const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployee();
   const { mutateAsync: restrictEmployee, isPending: isRestricting } = useRestrictEmployee();
 
   const employees = employeesResponse?.data ?? [];
@@ -66,28 +64,6 @@ export const EmployeePage = () => {
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  const handleDelete = async (id: string, name: string) => {
-    const result = await Swal.fire({
-      title: '¿Eliminar empleado?',
-      html: `Esta acción eliminará a <b>${name}</b> de forma permanente.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      focusCancel: true,
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      await deleteEmployee(id);
-    } catch {
-      // toast already shown in hook
-    }
-  };
 
   const handleToggleStatus = async (id: string, name: string, isActive: boolean) => {
     const result = await Swal.fire({
@@ -334,17 +310,6 @@ export const EmployeePage = () => {
                                       Habilitar cuenta
                                     </DropdownMenuItem>
                                   )}
-
-                                  <DropdownMenuSeparator />
-
-                                  <DropdownMenuItem
-                                    disabled={isDeleting}
-                                    onClick={() => handleDelete(employee._id, employee.name)}
-                                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Eliminar empleado
-                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </td>

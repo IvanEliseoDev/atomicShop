@@ -1,3 +1,5 @@
+import type { PopulatedRef } from "./product.response";
+
 export interface Product {
     status:  number;
     message: string;
@@ -7,8 +9,8 @@ export interface Product {
 export interface Data {
     _id:         string;
     code:        string;
-    brandId:     string;
-    categoryId:  string;
+    brandId:     string | PopulatedRef;
+    categoryId:  string | PopulatedRef;
     providerId:  string;
     name:        string;
     description: string;
@@ -17,6 +19,8 @@ export interface Data {
     price:       number;
     discount:    number;
     state:       boolean;
+    minStock?:   number;
+    costPrice?:  number;
     __v:         number;
     createdAt:   Date;
     updatedAt:   Date;

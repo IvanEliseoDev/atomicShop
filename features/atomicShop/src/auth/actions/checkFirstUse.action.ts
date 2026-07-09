@@ -9,6 +9,6 @@ export const checkFirstUseAction = async (): Promise<boolean> => {
     return employees.length === 0;
   } catch (error) {
     console.error("Error en checkFirstUseAction:", error);
-    return true;
+    return false;
   }
 };

@@ -68,7 +68,7 @@ export const FirstUseRegisterPage = ({ onRegistered }: Props) => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <img
-            src="../public/logoatomicshop.png"
+            src="/logoatomicshop.png"
             alt="AtomicShop"
             className="object-contain w-52 h-24"
           />

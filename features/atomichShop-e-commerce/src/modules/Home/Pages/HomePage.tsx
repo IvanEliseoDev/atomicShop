@@ -45,7 +45,7 @@ function HomePage() {
     setIsSending(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/e-commerce/contact/", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/e-commerce/contact/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contactForm),
@@ -100,7 +100,7 @@ function HomePage() {
           {/* Targeta */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4  gap-3 relative flex justify-center">
             <img
-              src="../../../../public/logoatomicshop.png"
+              src="/logoatomicshop.png"
               alt=""
               className="w-full h-42 object-contain rounded-lg mt-4"
             />

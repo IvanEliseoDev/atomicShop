@@ -1,8 +1,11 @@
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import {BASE_URL} from "../../../config/api" 
+import {BASE_URL} from "../../../config/api"
 
-export function useRecoverVerificationCode(onNext: () => void) {
+export function useRecoverVerificationCode(
+  onNext: (updatedToken: string) => void,
+  recoveryToken: string
+) {
   const [code, setCode] = useState(new Array(6).fill(""));
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -35,13 +38,13 @@ export function useRecoverVerificationCode(onNext: () => void) {
       const response = await fetch(`${BASE_URL}/recoveryPassword/verifyCode`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codeRequest: fullCode }),
+        body: JSON.stringify({ codeRequest: fullCode, recoveryToken }),
         credentials: "include"
       });
       const result = await response.json();
 
       if (result.status === "200") {
-        onNext();
+        onNext(result.recoveryToken ?? "");
       } else {
         toast.error("Código incorrecto o expirado");
         setCode(new Array(6).fill(""));

@@ -89,7 +89,7 @@ export const HTMLVerifyEmail = (name: string, mail: string, password: string) =>
           <!-- Botón -->
           <tr>
             <td align="center" style="padding:0 40px 36px;">
-              <a href="http://localhost:5173/login"
+              <a href="https://atomic-shop-public-91s1.vercel.app/login"
                  style="display:inline-block;background-color:#2196f3;color:#ffffff;padding:14px 48px;
                         text-decoration:none;border-radius:6px;font-weight:700;font-size:15px;">
                 Ir al sistema

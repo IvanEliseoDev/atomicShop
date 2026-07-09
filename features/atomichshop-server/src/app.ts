@@ -39,13 +39,17 @@ import adminRecoveryRoutes from "./routes/recoveryPassword/recoveryPassword";
 
 const app = express();
 
+// Render (y cualquier reverse proxy) envía X-Forwarded-For;
+// sin esto express-rate-limit lanza ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set("trust proxy", 1);
+
 /**
  * CORS — orígenes permitidos via variable de entorno
  * En producción: ALLOWED_ORIGINS=https://atomicshop-admin.vercel.app,https://atomicshop.vercel.app
  */
 const allowedOrigins: string[] = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-  : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
+  : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://atomic-shop-public.vercel.app", "https://atomic-shop-private.vercel.app"];
 
 app.use(
   cors({
