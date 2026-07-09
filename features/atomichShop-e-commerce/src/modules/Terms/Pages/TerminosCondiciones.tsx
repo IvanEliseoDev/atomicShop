@@ -1,5 +1,3 @@
-import React from "react";
-
 const TerminosCondiciones = () => {
   return (
     <div className="max-w-6xl mx-auto p-8 md:p-16 font-sans text-gray-700">

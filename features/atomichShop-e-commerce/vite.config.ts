@@ -10,5 +10,15 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  }
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://api-atomicshop.onrender.com",
+        changeOrigin: true,
+        secure: true,
+        cookieDomainRewrite: "localhost",
+      },
+    },
+  },
 })

@@ -14,6 +14,7 @@ export interface Product {
   originalPrice?: number;
   isOffer?: boolean; // era: isOffer: boolean
   image: string;
+  stock?: number;
   description?: string;
   characteristics?: string[];
   shippingInfo?: {

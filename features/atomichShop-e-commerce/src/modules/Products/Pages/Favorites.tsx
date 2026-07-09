@@ -47,12 +47,12 @@ function Favorites() {
 
   const addSelectedToCart = () => {
     favorites.filter((p) => p.selected).forEach((p) => {
-      addItem({ id: p._id, name: p.name, price: p.price, originalPrice: p.price, image: p.images?.[0] ?? "" });
+      addItem({ id: p._id, name: p.name, price: p.price, originalPrice: p.price, image: p.images?.[0] ?? "", stock: p.stock ?? 0 });
     });
   };
 
   const addSingleToCart = (product: typeof favorites[0]) => {
-    addItem({ id: product._id, name: product.name, price: product.price, originalPrice: product.price, image: product.images?.[0] ?? "" });
+    addItem({ id: product._id, name: product.name, price: product.price, originalPrice: product.price, image: product.images?.[0] ?? "", stock: product.stock ?? 0 });
     setOpenMenuId(null);
   };
 

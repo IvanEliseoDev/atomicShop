@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import jsonwebtoken from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 import { customerModel } from '../../../models/customer';
 import { config } from '../../../config';
+import { transporter } from '../../../utils/mailer';
 import { HTMLRecoveryEmail } from '../../../utils/HTMLRecoveryEmail';
 
 export const recoveryPasswordEcommerceController = {
@@ -25,30 +24,28 @@ export const recoveryPasswordEcommerceController = {
                 { expiresIn: '15m' }
             );
 
-            res.cookie('recoveryCookie', token, { httpOnly: true, maxAge: 15 * 60 * 1000 });
-
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: config.email.user,
-                    pass: config.email.password
-                }
+            const isProd = process.env.NODE_ENV === "production";
+            res.cookie('recoveryCookie', token, {
+                httpOnly: true,
+                sameSite: isProd ? "none" : "lax",
+                secure: isProd,
+                maxAge: 15 * 60 * 1000,
             });
 
             const mailOptions = {
-                from: config.email.user,
+                from: config.email.from,
                 to: mail,
                 subject: 'Correo de recuperacion de contrasena',
                 html: HTMLRecoveryEmail(code)
             };
 
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(500).json({ status: '500', message: 'Error sending email' });
-                }
-                return res.status(200).json({ status: '200', message: 'Email sent successfully' });
-            });
+            try {
+                await transporter.sendMail(mailOptions);
+                return res.status(200).json({ status: '200', message: 'Email sent successfully', recoveryToken: token });
+            } catch (mailError) {
+                console.error('Error sending recovery email:', mailError);
+                return res.status(500).json({ status: '500', message: 'Error sending email' });
+            }
         } catch (error) {
             console.log(error);
             return res.status(500).json({ status: '500', message: 'Internal Server Error - Check Server Logs' });
@@ -57,9 +54,10 @@ export const recoveryPasswordEcommerceController = {
 
     verifyCode: async (req: Request, res: Response): Promise<any> => {
         try {
-            const { codeRequest } = req.body;
+            const { codeRequest, recoveryToken: tokenFromBody } = req.body;
 
-            const token = req.cookies.recoveryCookie;
+            // Accept token from request body (cross-domain) or cookie (same-domain fallback)
+            const token = tokenFromBody || req.cookies.recoveryCookie;
             if (!token) {
                 return res.status(400).json({ status: '400', message: 'Recovery token not found' });
             }
@@ -76,9 +74,15 @@ export const recoveryPasswordEcommerceController = {
                 { expiresIn: '15m' }
             );
 
-            res.cookie('recoveryCookie', newToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
+            const isProd = process.env.NODE_ENV === "production";
+            res.cookie('recoveryCookie', newToken, {
+                httpOnly: true,
+                sameSite: isProd ? "none" : "lax",
+                secure: isProd,
+                maxAge: 15 * 60 * 1000,
+            });
 
-            return res.status(200).json({ status: '200', message: 'Code verified successfully' });
+            return res.status(200).json({ status: '200', message: 'Code verified successfully', recoveryToken: newToken });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ status: '500', message: 'Internal Server Error - Check Server Logs' });
@@ -87,13 +91,14 @@ export const recoveryPasswordEcommerceController = {
 
     newPassword: async (req: Request, res: Response): Promise<any> => {
         try {
-            const { newPassword, confirmNewPassword } = req.body;
+            const { newPassword, confirmNewPassword, recoveryToken: tokenFromBody } = req.body;
 
             if (newPassword !== confirmNewPassword) {
                 return res.status(400).json({ status: '400', message: 'Passwords do not match' });
             }
 
-            const token = req.cookies.recoveryCookie;
+            // Accept token from request body (cross-domain) or cookie (same-domain fallback)
+            const token = tokenFromBody || req.cookies.recoveryCookie;
             if (!token) {
                 return res.status(400).json({ status: '400', message: 'Recovery token not found' });
             }
@@ -116,7 +121,12 @@ export const recoveryPasswordEcommerceController = {
                 return res.status(404).json({ status: '404', message: 'Customer not found' });
             }
 
-            res.clearCookie('recoveryCookie');
+            const isProdClear = process.env.NODE_ENV === "production";
+            res.clearCookie('recoveryCookie', {
+                httpOnly: true,
+                sameSite: isProdClear ? "none" : "lax",
+                secure: isProdClear,
+            });
 
             return res.status(200).json({ status: '200', message: 'Password updated successfully' });
         } catch (error) {

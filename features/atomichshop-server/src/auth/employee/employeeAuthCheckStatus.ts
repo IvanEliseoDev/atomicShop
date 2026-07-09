@@ -13,6 +13,11 @@ export const employeeAuthCheckStatus = {
           .status(404)
           .json({ status: 404, message: "Empleado no encontrado", data: null });
       }
+      if (!employee.isVerified) {
+        return res
+          .status(403)
+          .json({ status: 403, message: "Tu cuenta ha sido deshabilitada. Contacta al administrador.", data: null });
+      }
       return res
         .status(200)
         .json({ status: 200, message: "Sesión activa", data: employee });

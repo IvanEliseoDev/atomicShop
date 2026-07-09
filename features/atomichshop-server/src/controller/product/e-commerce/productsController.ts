@@ -16,10 +16,34 @@ export const productsEcommerceController = {
   },
 
   // Buscador dinamico (Regex) para barra de busqueda y resultados
+  // DESPUÉS
   searchProducts: async (req: Request, res: Response): Promise<void> => {
     try {
       const { q } = req.query;
-      const searchRegex = new RegExp(String(q), "i"); // "i" para que no importe mayusculas/minusculas
+
+      // Normaliza el texto quitando tildes para búsqueda flexible
+      const normalized = String(q)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      // Convierte cada carácter con tilde en una clase regex opcional
+      // Ej: "bascula" también encuentra "báscula"
+      const flexible = normalized
+        .split("")
+        .map((char) => {
+          const accents: Record<string, string> = {
+            a: "[aáàäâ]",
+            e: "[eéèëê]",
+            i: "[iíìïî]",
+            o: "[oóòöô]",
+            u: "[uúùüû]",
+            n: "[nñ]",
+          };
+          return accents[char.toLowerCase()] ?? char;
+        })
+        .join("");
+
+      const searchRegex = new RegExp(flexible, "i");
 
       const products = await modelProducts
         .find({

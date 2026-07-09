@@ -1,13 +1,17 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 interface AuthUser {
-  id: string;
-  name: string;
-  mail: string;
-  profilePic?: string;
+    id: string;
+    name: string;
+    mail: string;
+    profilePic?: string;
+    direction?: string;
+    deparmet?: string;
+    municipality?: string;
 }
 
 interface AuthContextType {
@@ -20,17 +24,59 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const checkSession = async (isInitial = false) => {
+    try {
+      const r = await fetch(`${BASE_URL}/login/me`, { credentials: "include" });
+      if (r.status === 403) {
+        if (user || isInitial) {
+          setUser(null);
+          if (!isInitial) {
+            toast.error("Tu cuenta ha sido restringida. Sesión cerrada.");
+          }
+        }
+        return;
+      }
+      if (!r.ok) {
+        if (isInitial) setUser(null);
+        return;
+      }
+      const data = await r.json();
+      if (data.user) setUser(data.user);
+      else if (isInitial) setUser(null);
+    } catch {
+      if (isInitial) setUser(null);
+    } finally {
+      if (isInitial) setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch(`${BASE_URL}/login/me`, { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => { if (data.user) setUser(data.user); })
-      .catch(() => { })
-      .finally(() => setLoading(false));
+    checkSession(true);
   }, []);
+
+  // Verificación periódica de sesión (detecta restricción mientras está logueado)
+  useEffect(() => {
+    if (!user) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    intervalRef.current = setInterval(() => checkSession(false), CHECK_INTERVAL_MS);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [user?.id]);
+
+  // Verificar también cuando la ventana recupera el foco
+  useEffect(() => {
+    const onFocus = () => { if (user) checkSession(false); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [user?.id]);
 
   const login = async (mail: string, password: string) => {
     const data = await fetch(`${BASE_URL}/login`, {

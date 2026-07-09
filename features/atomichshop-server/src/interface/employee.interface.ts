@@ -1,37 +1,28 @@
 import { Types } from "mongoose";
+
 export interface IEmployee {
     _id?: Types.ObjectId;
     name: string;
-    dui: string;
-    birthDay: Date;
     number_phone?: string;
-    afp_affiliated?: string;
-    isss?: string;
-    dui_img?: string;
     direction?: string;
     position: string;
     payroll_month: string;
-    salary: Types.Decimal128; 
     email: string;
     password?: string;
-
-    isGenericPassword: boolean; 
-
+    isGenericPassword: boolean;
     isVerified: boolean;
     loginAttemps?: number;
-
-    
-    timeOut?: number; 
-
+    timeOut?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
+
 export type CreateEmployeeInput = Omit<
-    IEmployee, 
-    "_id" | "password" | "isGenericPassword" | "isVerified" | "loginAttemps" | "timeOut" | "createdAt" | "updatedAt"
+    IEmployee,
+    "_id" | "password" | "isGenericPassword" | "isVerified" | "loginAttemps" | "timeOut" | "payroll_month" | "createdAt" | "updatedAt"
 >;
 
-export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
+export type UpdateEmployeeInput = Partial<Omit<CreateEmployeeInput, "payroll_month">>;
 
 export interface MyTokenPayload {
     email: string;

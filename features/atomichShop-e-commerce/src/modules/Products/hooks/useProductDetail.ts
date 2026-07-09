@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export interface ProductDetail {
   _id: string;
@@ -12,6 +12,7 @@ export interface ProductDetail {
   features?: string;
   brandId?: { _id: string; name: string };
   categoryId?: { _id: string; name: string };
+  stock: number;
   state: boolean;
 }
 

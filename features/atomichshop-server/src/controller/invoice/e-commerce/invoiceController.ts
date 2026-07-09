@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
 import { invoiceModel } from "../../../models/invoice";
-import { modelProducts } from "../../../models/product";
 import { modelCarts } from "../../../models/cart";
 import { customerModel } from "../../../models/customer";
+import { modelProducts } from "../../../models/product";
 import { config } from "../../../config";
+import { transporter } from "../../../utils/mailer";
 import { generateInvoicePDF } from "../../../utils/generateInvoicePDF";
 import { HTMLInvoiceEmail } from "../../../utils/HTMLInvoiceEmail";
 
@@ -96,6 +96,14 @@ export const invoiceEcommerceController = {
 
       await newInvoice.save();
 
+      // Descontar stock de cada producto comprado
+      for (const item of invoiceProducts) {
+        await modelProducts.findByIdAndUpdate(
+          item.productId,
+          { $inc: { stock: -item.quantity } }
+        );
+      }
+
       const invoicePopulated = await invoiceModel
         .findById(newInvoice._id)
         .populate("products.productId", "name");
@@ -108,16 +116,8 @@ export const invoiceEcommerceController = {
       });
 
       // 7. Enviar el correo con la factura adjunta al cliente
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: config.email.user,
-          pass: config.email.password,
-        },
-      });
-
       const mailOptions = {
-        from: config.email.user,
+        from: config.email.from,
         to: customer.mail,
         subject: `AtomicShop - Factura de tu compra ${invoiceNumber}`,
         html: HTMLInvoiceEmail(customer.name, invoiceNumber, total),
@@ -130,7 +130,12 @@ export const invoiceEcommerceController = {
         ],
       };
 
-      await transporter.sendMail(mailOptions);
+      console.log(`[EMAIL] Intentando enviar factura ${invoiceNumber} a ${customer.mail}`);
+      transporter.sendMail(mailOptions).then(() => {
+        console.log(`[EMAIL] Factura ${invoiceNumber} enviada exitosamente a ${customer.mail}`);
+      }).catch((mailError: any) => {
+        console.error(`[EMAIL] Error al enviar factura ${invoiceNumber} a ${customer.mail}:`, mailError?.message || mailError);
+      });
 
       // 8. Vaciar el carrito del cliente en la BD
       await modelCarts.findOneAndUpdate(

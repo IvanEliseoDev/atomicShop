@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export interface ProductShop {
   id: string;
@@ -10,6 +10,7 @@ export interface ProductShop {
   brandId?: { _id: string; name: string };
   categoryId?: { _id: string; name: string };
   image: string;
+  stock: number;
   onSale: boolean;
 }
 
@@ -52,6 +53,7 @@ export function useProductsShop(filters: Filters) {
             brandId: p.brandId,
             categoryId: p.categoryId,
             image: p.images?.[0] ?? "",
+            stock: p.stock ?? 0,
             onSale: !!p.discount,
           }))
         );

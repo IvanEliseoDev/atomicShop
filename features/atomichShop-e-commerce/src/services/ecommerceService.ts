@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 export const ecommerceService = {
   // Pagina de inicio
@@ -47,6 +47,8 @@ export const ecommerceService = {
     telephone: string;
     direction: string;
     dui: string;
+    deparmet?: string;
+    municipality?: string;
   }) =>
     fetch(`${BASE_URL}/register`, {
       method: "POST",
@@ -64,6 +66,14 @@ export const ecommerceService = {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ verificationCodeRequest }),
+    }).then((r) => r.json()),
+
+  resendVerificationCode: (mail: string) =>
+    fetch(`${BASE_URL}/register/resendCode`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mail }),
     }).then((r) => r.json()),
 
   // Recuperar contraseña
@@ -174,6 +184,7 @@ export const ecommerceService = {
     };
     paymentMethod: "credito" | "debito" | "efectivo";
     wompiTransactionId?: string | null;
+    productos?: { idProduct: string; qty: number; unitPrice: number }[];
   }) =>
     fetch(`${BASE_URL}/invoices`, {
       method: "POST",
@@ -190,6 +201,19 @@ export const ecommerceService = {
   getInvoiceById: (invoiceId: string) =>
     fetch(`${BASE_URL}/invoices/${invoiceId}`, {
       credentials: "include",
+    }).then((r) => r.json()),
+
+  // Perfil
+  getProfile: (userId: string) =>
+    fetch(`${BASE_URL}/profile/${userId}`, {
+      credentials: "include",
+    }).then((r) => r.json()),
+
+  updateProfile: (userId: string, formData: FormData) =>
+    fetch(`${BASE_URL}/profile/update/${userId}`, {
+      method: "PUT",
+      credentials: "include",
+      body: formData,
     }).then((r) => r.json()),
 
   getWompiToken: () =>

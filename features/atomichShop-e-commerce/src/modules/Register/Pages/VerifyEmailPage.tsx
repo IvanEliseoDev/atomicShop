@@ -1,66 +1,20 @@
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
 import { AuthCard } from "@/modules/Login/Components/AuthCard";
-import { ecommerceService } from "@/services/ecommerceService";
 import { LogoYonJob } from "@/components/ui/LogoYonJob";
+import { useVerifyEmail } from "../hooks/useVerifyEmail";
 
 export const VerifyEmailPage = () => {
-  const navigate = useNavigate();
-  const [code, setCode] = useState(new Array(6).fill(""));
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-  const handleChange = (value: string, index: number) => {
-    if (isNaN(Number(value))) return;
-    const newCode = [...code];
-    newCode[index] = value.slice(-1);
-    setCode(newCode);
-    if (value && index < 5) inputRefs.current[index + 1]?.focus();
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    if (!pasted) return;
-
-    const newCode = new Array(6).fill("");
-    pasted.split("").forEach((char, i) => {
-      newCode[i] = char;
-    });
-    setCode(newCode);
-
-    // Mover el foco al ultimo campo llenado
-    const lastIndex = Math.min(pasted.length - 1, 5);
-    inputRefs.current[lastIndex]?.focus();
-  };
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
-  ) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-    if (e.key === "Enter") handleVerify();
-  };
-
-  const handleVerify = async () => {
-    const fullCode = code.join("");
-    if (fullCode.length < 6) return;
-
-    const result = await ecommerceService.verifyRegisterCode(fullCode);
-    if (result.status === "200") {
-      toast.success("Correo verificado correctamente");
-      navigate("/login");
-    } else {
-      toast.error("Código incorrecto o expirado");
-      setCode(new Array(6).fill(""));
-      inputRefs.current[0]?.focus();
-    }
-  };
+  const {
+    code,
+    inputRefs,
+    handleChange,
+    handlePaste,
+    handleKeyDown,
+    handleVerify,
+    handleResend,
+    cooldown,
+    isResending,
+    pendingEmail,
+  } = useVerifyEmail();
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -71,8 +25,11 @@ export const VerifyEmailPage = () => {
             Verifica tu correo
           </h2>
           <p className="text-sm text-gray-500 leading-relaxed">
-            Te enviamos un código de verificación. Ingrésalo aquí para activar
-            tu cuenta.
+            Te enviamos un código de verificación
+            {pendingEmail && (
+              <> a <span className="font-medium text-gray-700">{pendingEmail}</span></>
+            )}
+            . Ingrésalo aquí para activar tu cuenta.
           </p>
         </div>
 
@@ -83,9 +40,7 @@ export const VerifyEmailPage = () => {
               type="text"
               maxLength={1}
               value={data}
-              ref={(el) => {
-                if (el) inputRefs.current[i] = el;
-              }}
+              ref={(el) => { if (el) inputRefs.current[i] = el; }}
               onChange={(e) => handleChange(e.target.value, i)}
               onKeyDown={(e) => handleKeyDown(e, i)}
               onPaste={handlePaste}
@@ -96,10 +51,29 @@ export const VerifyEmailPage = () => {
 
         <button
           onClick={handleVerify}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition mb-4"
         >
           Verificar cuenta
         </button>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-500 mb-1">¿No recibiste el código?</p>
+          <button
+            onClick={handleResend}
+            disabled={cooldown > 0 || isResending}
+            className={`text-sm font-semibold transition ${
+              cooldown > 0 || isResending
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-blue-500 hover:text-blue-700 cursor-pointer"
+            }`}
+          >
+            {isResending
+              ? "Enviando..."
+              : cooldown > 0
+              ? `Reenviar código (${cooldown}s)`
+              : "Reenviar código"}
+          </button>
+        </div>
       </AuthCard>
     </div>
   );

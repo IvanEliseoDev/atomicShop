@@ -8,6 +8,7 @@ export function useRecoverPasswordPage() {
 
   const [step, setStep] = useState(1);
   const [emailToRecover, setEmailToRecover] = useState("");
+  const [recoveryToken, setRecoveryToken] = useState("");
 
   const handleVerifyUser = async (email: string) => {
     try {
@@ -24,6 +25,7 @@ export function useRecoverPasswordPage() {
 
       if (result.status === "200") {
         setEmailToRecover(email);
+        setRecoveryToken(result.recoveryToken ?? "");
         setStep(2);
       } else {
         toast.error("Este correo no está registrado.");
@@ -44,6 +46,7 @@ export function useRecoverPasswordPage() {
         body: JSON.stringify({
           newPassword,
           confirmNewPassword: newPassword,
+          recoveryToken,
         }),
       });
 
@@ -71,6 +74,8 @@ export function useRecoverPasswordPage() {
     step,
     setStep,
     emailToRecover,
+    recoveryToken,
+    setRecoveryToken,
     handleVerifyUser,
     handleUpdatePassword,
     handleBack,

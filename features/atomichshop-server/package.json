@@ -12,7 +12,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -22,6 +21,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.2.0",
@@ -32,9 +32,8 @@
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",
     "pdfkit": "^0.18.0",
-    "tsx": "^4.21.0"
-  },
-  "devDependencies": {
+    "tsx": "^4.21.0",
+    "zod": "^4.4.3",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
@@ -47,5 +46,6 @@
     "@types/pdfkit": "^0.17.6",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2"
-  }
+  },
+  "devDependencies": {}
 }

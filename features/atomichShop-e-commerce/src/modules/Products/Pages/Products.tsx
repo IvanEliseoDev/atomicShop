@@ -15,7 +15,7 @@ interface Category {
   name: string;
 }
 
-const BASE_URL = "http://localhost:4000/api/e-commerce";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/e-commerce`;
 
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevancia" },
@@ -81,6 +81,7 @@ function Products() {
         price: product.price,
         originalPrice: product.originalPrice,
         image: product.image,
+        stock: product.stock ?? 0,
       });
     }
   };
@@ -97,7 +98,7 @@ function Products() {
               <span className="text-gray-400">$</span>
               <input type="number" value={minPrice} min={0}
                 onChange={(e) => setMinPrice(Number(e.target.value))}
-                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="w-16 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
             </div>
             <span className="text-gray-400">—</span>
@@ -105,7 +106,7 @@ function Products() {
               <span className="text-gray-400">$</span>
               <input type="number" value={maxPrice} min={0}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="w-16 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
             </div>
           </div>

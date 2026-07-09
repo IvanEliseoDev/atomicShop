@@ -14,6 +14,12 @@ export const employeeAuthLogin = {
           .status(404)
           .json({ status: 404, message: "Usuario no encontrado" });
       }
+      // Cuenta deshabilitada por un administrador
+      if (!employee.isVerified) {
+        return res
+          .status(403)
+          .json({ status: 403, message: "Cuenta deshabilitada. Contacta al administrador." });
+      }
       //Verificamos si la cuenta está bloqueada
       if (employee.timeOut && employee.timeOut > Date.now()) {
         return res
@@ -53,8 +59,15 @@ export const employeeAuthLogin = {
         //#3- cuando expira
         { expiresIn: "30d" },
       );
-      res.cookie("authCookieEmployee", token);
+      res.cookie("authCookieEmployee", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
       const dataReturn = {
+        _id: employee._id,
+        name: employee.name,
         email: employee.email,
         position: employee.position,
       };

@@ -28,11 +28,12 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     for (let i = 0; i < qty; i++) {
       addItem({
-        id: product.id,
+        id: String(product.id),
         name: product.name,
         price: product.price,
         originalPrice: product.originalPrice ?? product.price,
         image: product.image,
+        stock: product.stock ?? 0,
       });
     }
     setAdded(true);

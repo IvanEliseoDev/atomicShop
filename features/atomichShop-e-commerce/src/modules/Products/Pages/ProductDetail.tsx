@@ -1,3 +1,4 @@
+// DESPUÉS — reemplaza el archivo completo con esto
 import { useParams, useNavigate } from "react-router";
 import { useCart } from "../../../lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
@@ -64,6 +65,7 @@ function ProductDetail() {
   const hasDiscount = !!product.discount && product.discount > 0;
 
   const handleAddToCart = () => {
+    if (product.stock === 0) return;
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product._id,
@@ -71,13 +73,13 @@ function ProductDetail() {
         price: discountedPrice,
         originalPrice: product.price,
         image,
+        stock: product.stock,
       });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-
       {/* ─── HERO ─── */}
       <div className="bg-sky-400 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-10 py-12 flex flex-col md:flex-row items-center gap-8">
@@ -90,7 +92,9 @@ function ProductDetail() {
 
           {/* Info */}
           <div className="flex flex-col gap-3 flex-1 text-white">
-            <h1 className="text-2xl md:text-3xl font-bold leading-tight">{product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold leading-tight">
+              {product.name}
+            </h1>
 
             {/* Meta: marca y categoría desde el backend */}
             <p className="text-sky-100 text-sm">
@@ -114,6 +118,11 @@ function ProductDetail() {
               )}
             </div>
 
+            {/* Stock disponible */}
+            <p className={`text-sm font-medium ${product.stock === 0 ? 'text-red-200' : 'text-sky-100'}`}>
+              {product.stock === 0 ? 'Sin stock disponible' : `Disponibles: ${product.stock} unidades`}
+            </p>
+
             {/* Controles */}
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               {/* Cantidad */}
@@ -121,8 +130,10 @@ function ProductDetail() {
                 <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer">−</button>
                 <span className="px-4 py-2 text-sm font-semibold text-white min-w-[3rem] text-center">{quantity}</span>
-                <button onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer">+</button>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(q + 1, product.stock))}
+                  disabled={quantity >= product.stock}
+                  className="px-3 py-2 text-white hover:bg-white/20 transition-colors text-lg leading-none cursor-pointer disabled:opacity-40">+</button>
               </div>
 
               {/* Agregar al carrito */}
@@ -155,9 +166,10 @@ function ProductDetail() {
           </p>
         </div>
 
-        {/* Pago y envío */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h2 className="text-base font-bold text-gray-800 mb-4">Pago y envío</h2>
+          <h2 className="text-base font-bold text-gray-800 mb-4">
+            Pago y envío
+          </h2>
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
               <Store size={20} className="text-sky-400 mt-0.5 shrink-0" />
@@ -171,7 +183,9 @@ function ProductDetail() {
             </div>
             <div className="flex items-start gap-3">
               <Clock size={20} className="text-sky-400 mt-0.5 shrink-0" />
-              <p className="text-sm text-gray-600">Envío a domicilio (estimado 3-5 días hábiles)</p>
+              <p className="text-sm text-gray-600">
+                Envío a domicilio (estimado 3-5 días hábiles)
+              </p>
             </div>
           </div>
         </div>
@@ -234,7 +248,7 @@ function ProductDetail() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      addItem({ id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice, image: p.image });
+                      addItem({ id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice, image: p.image, stock: p.stock ?? 0 });
                     }}
                     className="w-full flex items-center justify-center gap-1 bg-sky-500 hover:bg-sky-600 rounded-lg py-1.5 text-xs text-white font-semibold transition-colors cursor-pointer">
                     <ShoppingCart size={13} />

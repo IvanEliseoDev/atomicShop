@@ -21,6 +21,12 @@ const customerSchema = new Schema<ICustomer>(
         direction: {
             type: String,
         },
+        deparmet: {
+            type: String,
+        },
+        municipality: {
+            type: String
+        },
         typeCustomer: {
             type: String,
         },
@@ -55,6 +61,24 @@ const customerSchema = new Schema<ICustomer>(
         wishlist: {
             type: [String],
             default: []
+        },
+        purchases: {
+            type: [
+                {
+                    id: { type: String, required: true },
+                    date: { type: String, required: true },
+                    discount: { type: String, default: "0%" },
+                    total: { type: Number, required: true },
+                    productos: [
+                        {
+                            idProduct: { type: String, required: true },
+                            qty: { type: Number, required: true },
+                            unitPrice: { type: Number }
+                        }
+                    ]
+                }
+            ],
+            default: [] // Empieza como un array vacío para cada cliente nuevo
         }
     },
     {

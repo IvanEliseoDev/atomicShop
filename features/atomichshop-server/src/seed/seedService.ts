@@ -4,7 +4,6 @@ import { categoryModel  } from "../models/categories";
 import providerModel from "../models/providers";
 import { modelProducts } from "../models/product";
 import { modelBanner } from "../models/banner";
-import { customerSeed } from "./customer/customer.seed";
 
 export const seedService = {
   seedExecute: async (req: Request, res: Response) => {
@@ -113,9 +112,6 @@ export const seedService = {
         { title: "Calidad Garantizada", subtitle: "Instrumentos certificados por los mejores fabricantes del mundo", image: "https://www.shutterstock.com/image-photo/panorama-background-health-care-researchers-260nw-1974611666.jpg", public_id: "banners/002", state: true },
         { title: "Soporte Técnico", subtitle: "Nuestro equipo está disponible para ayudarte en todo momento", image: "https://www.shutterstock.com/image-photo/flask-test-tune-science-research-600nw-2524509389.jpg", public_id: "banners/003", state: true }
       ]);
-
-      // 6. Clientes (Recuerda poner timeOut: null en customer.seed.ts antes de correr esto)
-      await customerSeed();
 
       return res.status(201).json({ status: 201, message: "Seed completado con data de diseño" });
     } catch (error: any) {

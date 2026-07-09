@@ -1,6 +1,5 @@
 import { Facebook, Youtube, Instagram } from "lucide-react";
-import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useNavigate, useLocation } from "react-router";
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -9,17 +8,21 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-// ✅ Interface explícita para los social links — esto soluciona el error de TSX
 interface SocialLink {
   icon: React.ReactNode;
   label: string;
   href: string;
 }
 
-const navLinks = [
-  { label: "Inicio", path: "/" },
-  { label: "Nosotros", path: "/nosotros" },
-  { label: "Contáctanos", path: "/contactanos" },
+interface NavLink {
+  label: string;
+  sectionId: string | null;
+}
+
+const navLinks: NavLink[] = [
+  { label: "Inicio", sectionId: null },
+  { label: "Nosotros", sectionId: "nosotros" },
+  { label: "Contáctanos", sectionId: "contacto" },
 ];
 
 const socialLinks: SocialLink[] = [
@@ -30,10 +33,29 @@ const socialLinks: SocialLink[] = [
 ];
 
 function Footer() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = (sectionId: string | null) => {
+    if (!sectionId) {
+      navigate("/");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const scrollToSection = () => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    if (location.pathname === "/") {
+      scrollToSection();
+    } else {
+      navigate("/");
+      // Wait for navigation + render before scrolling
+      setTimeout(scrollToSection, 300);
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-gray-300 pt-10 pb-4">
@@ -51,7 +73,6 @@ function Footer() {
             </p>
 
             {/* Redes sociales */}
-            {/* ✅ .map con parámetro tipado explícitamente */}
             <div className="flex items-center gap-4 mt-2">
               {socialLinks.map((social: SocialLink) => (
                 <a
@@ -76,7 +97,7 @@ function Footer() {
             {navLinks.map((link) => (
               <button
                 key={link.label}
-                onClick={() => navigate(link.path)}
+                onClick={() => handleNavClick(link.sectionId)}
                 className="text-sm text-gray-400 hover:text-white transition text-left"
               >
                 {link.label}
@@ -109,44 +130,13 @@ function Footer() {
                   className="h-11 w-auto"
                 >
                   <rect width="135" height="40" rx="5" fill="#000000" />
-                  <text
-                    x="44"
-                    y="13"
-                    fill="white"
-                    fontSize="7"
-                    fontFamily="Arial, sans-serif"
-                  >
-                    GET IT ON
-                  </text>
-                  <text
-                    x="44"
-                    y="28"
-                    fill="white"
-                    fontSize="13"
-                    fontWeight="bold"
-                    fontFamily="Arial, sans-serif"
-                  >
-                    Google Play
-                  </text>
-                  {/* Ícono Play Store */}
+                  <text x="44" y="13" fill="white" fontSize="7" fontFamily="Arial, sans-serif">GET IT ON</text>
+                  <text x="44" y="28" fill="white" fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">Google Play</text>
                   <g transform="translate(10, 8)">
-                    {/* Triángulo izquierdo verde */}
                     <path d="M1.5 1.5 L1.5 22.5 L13.5 12 Z" fill="#00C853" />
-                    {/* Triángulo superior azul */}
-                    <path
-                      d="M1.5 1.5 L13.5 12 L17.5 8 L4.5 0.5 Z"
-                      fill="#00B0FF"
-                    />
-                    {/* Triángulo inferior rojo */}
-                    <path
-                      d="M1.5 22.5 L13.5 12 L17.5 16 L4.5 23.5 Z"
-                      fill="#FF3D00"
-                    />
-                    {/* Triángulo derecho amarillo */}
-                    <path
-                      d="M13.5 12 L17.5 8 L20.5 12 L17.5 16 Z"
-                      fill="#FFD600"
-                    />
+                    <path d="M1.5 1.5 L13.5 12 L17.5 8 L4.5 0.5 Z" fill="#00B0FF" />
+                    <path d="M1.5 22.5 L13.5 12 L17.5 16 L4.5 23.5 Z" fill="#FF3D00" />
+                    <path d="M13.5 12 L17.5 8 L20.5 12 L17.5 16 Z" fill="#FFD600" />
                   </g>
                 </svg>
               </a>
@@ -158,26 +148,8 @@ function Footer() {
                   className="h-11 w-auto"
                 >
                   <rect width="135" height="40" rx="5" fill="#000000" />
-                  <text
-                    x="44"
-                    y="13"
-                    fill="white"
-                    fontSize="7"
-                    fontFamily="Arial, sans-serif"
-                  >
-                    Download on the
-                  </text>
-                  <text
-                    x="44"
-                    y="28"
-                    fill="white"
-                    fontSize="13"
-                    fontWeight="bold"
-                    fontFamily="Arial, sans-serif"
-                  >
-                    App Store
-                  </text>
-                  {/* Ícono Apple */}
+                  <text x="44" y="13" fill="white" fontSize="7" fontFamily="Arial, sans-serif">Download on the</text>
+                  <text x="44" y="28" fill="white" fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">App Store</text>
                   <g transform="translate(12, 6)" fill="white">
                     <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.39.07 2.35.77 3.17.8 1.21-.24 2.37-.97 3.67-.84 1.57.17 2.75.8 3.52 2.02-3.23 1.93-2.46 5.96.52 7.15-.61 1.64-1.42 3.25-2.88 4.75zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                   </g>
@@ -190,16 +162,12 @@ function Footer() {
         {/* Copyright */}
         <div className="pt-4 text-center text-xs text-gray-500">
           © {new Date().getFullYear()} AtomicShop.{" "}
-          <p
-          className="cursor-pointer text-gray-400 p-4 rounded-lg"
-            onClick={() => {
-              navigate("/atomicShop/terminos y condiciones");
-              setShowDropdown(false);
-              setSearchQuery("");
-            }}
+          <button
+            className="cursor-pointer text-gray-400 hover:text-white transition"
+            onClick={() => navigate("/terminos y condiciones")}
           >
             Términos y condiciones
-          </p>
+          </button>
         </div>
       </div>
     </footer>

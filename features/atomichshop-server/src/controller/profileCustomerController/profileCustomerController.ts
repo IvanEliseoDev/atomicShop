@@ -24,7 +24,11 @@ export const profileCustomerController = {
                 return res.status(404).json({ status: "404", message: "Customer Not Found" });
             }
 
-            return res.status(200).json({ status: '200', message: "Profile data fetched successfully", data: customer });
+            return res.status(200).json({ 
+                status: '200', 
+                message: "Profile data fetched successfully", 
+                data: customer 
+            });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ status: "500", message: "Internal Server Error - Check Server Logs" });
@@ -35,33 +39,31 @@ export const profileCustomerController = {
     updateProfileData: async (req: Request, res: Response): Promise<any> => {
         try {
             const { id } = req.params;
-            const { telephone, direction, dui, name } = req.body;
+            const { telephone, direction, dui, name, deparmet, municipality } = req.body;
 
             if (!id) {
                 return res.status(400).json({ status: 400, message: "Customer ID is required" });
             }
 
-            // Buscamos al cliente actual
             const customer = await customerModel.findById(id);
             if (!customer) {
                 return res.status(404).json({ status: "404", message: "Customer Not Found" });
             }
 
-            // Actualizamos solo los campos que se permite editar en "Administrar Perfil"
             if (name) customer.name = name;
-            if (telephone) customer.telephone = telephone;
-            if (direction) customer.direction = direction;
-            if (dui) customer.dui = dui;
+            if (telephone !== undefined) customer.telephone = telephone;
+            if (direction !== undefined) customer.direction = direction;
+            if (dui !== undefined) customer.dui = dui;
+            if (deparmet !== undefined) customer.deparmet = deparmet;
+            if (municipality !== undefined) customer.municipality = municipality;
 
-            // Manejo de la Imagen de Perfil
             if (req.file) {
-                // Borrar imagen anterior si existe
                 if (customer.public_id) {
                     await cloudinary.uploader.destroy(customer.public_id);
                 }
                 const file = req.file as any;
-                customer.image = file.path;       // URL de Cloudinary
-                customer.public_id = file.filename; // public_id de Cloudinary
+                customer.image = file.path;      
+                customer.public_id = file.filename; 
             }
 
             const updatedCustomer = await customer.save();
@@ -75,6 +77,8 @@ export const profileCustomerController = {
                     telephone: updatedCustomer.telephone,
                     direction: updatedCustomer.direction,
                     dui: updatedCustomer.dui,
+                    deparmet: updatedCustomer.deparmet,
+                    municipality: updatedCustomer.municipality,
                     image: updatedCustomer.image
                 }
             });
@@ -82,6 +86,80 @@ export const profileCustomerController = {
         } catch (error) {
             console.log(error);
             return res.status(500).json({ status: "500", message: "Internal Server Error - Check Server Logs" });
+        }
+    },
+
+    // 3. Registrar una nueva compra en el historial del cliente
+    addPurchase: async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { id } = req.params; 
+            const { total, descuento, productos } = req.body;
+
+            if (!id) {
+                return res.status(400).json({ status: 400, message: "Customer ID is required" });
+            }
+
+            const customer = await customerModel.findById(id);
+            if (!customer) {
+                return res.status(404).json({ status: "404", message: "Customer Not Found" });
+            }
+
+            const nuevaCompra = {
+                id: `FAC-${Math.floor(100000 + Math.random() * 900000)}`, 
+                date: new Date().toLocaleDateString('es-ES'), 
+                discount: descuento || "0%",
+                total: total,
+                productos: productos 
+            };
+
+            if (!customer.purchases) {
+                customer.purchases = [];
+            }
+            
+            customer.purchases.unshift(nuevaCompra);
+            await customer.save();
+
+            return res.status(201).json({
+                status: 201,
+                message: "Purchase registered successfully",
+                data: nuevaCompra
+            });
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ status: "500", message: "Error saving purchase to database" });
+        }
+    },
+
+    // 4. Eliminar una compra del historial de MongoDB
+    deletePurchase: async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { id, purchaseId } = req.params; // id = cliente, purchaseId = código factura (FAC-XXXXXX)
+
+            if (!id || !purchaseId) {
+                return res.status(400).json({ status: 400, message: "Customer ID and Purchase ID are required" });
+            }
+
+            // Buscamos al cliente y removemos del array de purchases el objeto cuyo id coincida con purchaseId
+            const customer = await customerModel.findByIdAndUpdate(
+                id,
+                { $pull: { purchases: { id: purchaseId } } },
+                { new: true } // Nos devuelve el documento actualizado
+            );
+
+            if (!customer) {
+                return res.status(404).json({ status: 404, message: "Customer Not Found" });
+            }
+
+            return res.status(200).json({
+                status: 200,
+                message: "Purchase deleted successfully from database",
+                data: customer.purchases
+            });
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ status: "500", message: "Error deleting purchase from database" });
         }
     }
 };

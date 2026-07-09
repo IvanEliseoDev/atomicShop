@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.route('/').post(registerCustomerEcommerceController.register);
 router.route('/verifyCodeEmail').post(registerCustomerEcommerceController.verifyCode);
+router.route('/resendCode').post(registerCustomerEcommerceController.resendCode);
 
 export default router;

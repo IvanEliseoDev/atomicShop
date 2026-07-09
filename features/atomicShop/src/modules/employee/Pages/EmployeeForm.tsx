@@ -2,373 +2,269 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select"
-import { motion} from "framer-motion"
-import { Upload, X } from "lucide-react"
-import { useState } from "react"
+import { motion } from "framer-motion"
+import { useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router"
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useAddEmployee, useUpdateEmployee } from "../hooks/useEmployeeMutate"
+import { useGetEmployeeByID } from "../hooks/useGetEmployeeByID"
+import { toast } from "sonner"
+import { formatPhoneNumber } from "@/utils/format/numberPhone.format"
+
+const employeeSchema = z.object({
+    nombre: z
+        .string()
+        .min(3, "El nombre debe tener al menos 3 caracteres")
+        .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/, "El nombre solo debe contener letras"),
+    numeroTelefonico: z
+        .string()
+        .optional()
+        .refine((val) => !val || /^[267]\d{3}-\d{4}$/.test(val), {
+            message: "Formato de teléfono inválido (ej: 7777-7777)",
+        }),
+    correoElectronico: z
+        .string()
+        .min(1, "El correo es obligatorio")
+        .email("Debe ser un correo electrónico válido"),
+    direccion: z
+        .string()
+        .optional()
+        .refine((val) => !val || val.length >= 5, {
+            message: "La dirección debe tener al menos 5 caracteres",
+        }),
+    cargo: z
+        .string()
+        .min(1, "El cargo es obligatorio")
+        .refine((val) => ["Admin", "Empleado"].includes(val), {
+            message: "Selecciona un cargo válido",
+        }),
+})
+
+type EmployeeFormValues = z.infer<typeof employeeSchema>
 
 const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: 'easeOut' },
+        transition: { duration: 0.4, ease: "easeOut" },
     },
-} as const;
+} as const
 
-
-interface RegistrationFormState {
-    nombre: string;
-    numeroTelefonico: string;
-    correoElectronico: string;
-    fechaNacimiento: string;
-    documentoIdentificacion: string;
-    afpAfiliado: string;
-    isss: string;
-    direccion: string;
-    fechaIngreso: string;
-    salarioActual: string;
-    cargo: string;
-    duiImages: File[];
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    },
 }
 
-
 export const EmployeeForm = () => {
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const mode = searchParams.get("mode")
+    const employeeId = searchParams.get("id") || ""
+    const isEditMode = mode === "edit" && Boolean(employeeId)
 
-    // Form state
-    const [formData, setFormData] = useState<RegistrationFormState>({
-        nombre: '',
-        numeroTelefonico: '',
-        correoElectronico: '',
-        fechaNacimiento: '',
-        documentoIdentificacion: '',
-        afpAfiliado: '',
-        isss: '',
-        direccion: '',
-        fechaIngreso: '',
-        salarioActual: '$0.00',
-        cargo: '',
-        duiImages: [],
-    });
+    const { mutateAsync: createEmployee, isPending: isCreating } = useAddEmployee()
+    const { mutateAsync: updateEmployee, isPending: isUpdating } = useUpdateEmployee()
+    const { data: employeeResponse } = useGetEmployeeByID(employeeId)
 
-    // Handlers
-    const handleFormInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSelectChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, cargo: value }));
-    };
-
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const files = Array.from(e.dataTransfer.files);
-        setFormData((prev) => ({ ...prev, duiImages: [...prev.duiImages, ...files] }));
-    };
-
-    const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const files = Array.from(e.target.files);
-            setFormData((prev) => ({ ...prev, duiImages: [...prev.duiImages, ...files] }));
-        }
-    };
-
-    const removeImage = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            duiImages: prev.duiImages.filter((_, i) => i !== index),
-        }));
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-            },
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        setValue,
+        formState: { errors },
+    } = useForm<EmployeeFormValues>({
+        resolver: zodResolver(employeeSchema),
+        defaultValues: {
+            nombre: "",
+            numeroTelefonico: "",
+            correoElectronico: "",
+            direccion: "",
+            cargo: "",
         },
-    };
+    })
 
+    useEffect(() => {
+        if (!isEditMode || !employeeResponse?.data) return
+        const employee = employeeResponse.data
+        reset({
+            nombre: employee.name || "",
+            numeroTelefonico: employee.number_phone || "",
+            correoElectronico: employee.email || "",
+            direccion: employee.direction || "",
+            cargo: employee.position || "",
+        })
+    }, [isEditMode, employeeResponse, reset])
+
+    const onSubmitForm = async (data: EmployeeFormValues) => {
+        const payload = {
+            name: data.nombre,
+            number_phone: data.numeroTelefonico || undefined,
+            direction: data.direccion || undefined,
+            position: data.cargo,
+            email: data.correoElectronico,
+        }
+
+        try {
+            if (isEditMode && employeeId) {
+                await updateEmployee({ id: employeeId, dataUpd: payload })
+                toast.success("Empleado actualizado correctamente")
+            } else {
+                await createEmployee(payload)
+                toast.success("Empleado registrado. Se enviará un correo con sus credenciales de acceso.")
+            }
+            navigate("/atomicAdmin/empleados")
+        } catch {
+            toast.error("Ocurrió un error al procesar el empleado. Inténtalo de nuevo.")
+        }
+    }
+
+    const loading = isCreating || isUpdating
+
+    const FieldError = ({ message }: { message?: string }) =>
+        message ? <p className="text-red-500 text-xs mt-1">{message}</p> : null
 
     return (
         <motion.main
-            className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-4 md:p-6 lg:p-8"
+            className="w-full min-h-screen bg-linear-to-br from-blue-50 to-slate-50 p-4 md:p-6 lg:p-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-            <div className="max-w-7xl mx-auto space-y-8">
-                {/* Section A: Registration Form */}
-                <motion.div variants={{ itemVariants }}>
+            <div className="max-w-3xl mx-auto space-y-8">
+                <motion.div variants={itemVariants}>
                     <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
-                        Registro de empleado
+                        {isEditMode ? "Editar empleado" : "Registro de empleado"}
                     </h1>
 
                     <Card className="shadow-lg border-0 bg-white">
                         <CardContent className="p-8">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                {/* Left: Personal Data Section */}
-                                <div className="space-y-6">
-                                    <div className="pb-6 border-b border-gray-200">
-                                        <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide">
-                                            Datos Personales
-                                        </h2>
-                                    </div>
+                            <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-6">
 
+                                <div className="pb-4 border-b border-gray-200">
+                                    <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide">
+                                        Datos del empleado
+                                    </h2>
+                                </div>
+
+                                {/* Nombre */}
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                        Nombre completo <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        {...register("nombre")}
+                                        placeholder="Nombre completo"
+                                        className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                                    />
+                                    <FieldError message={errors.nombre?.message} />
+                                </div>
+
+                                {/* Teléfono y Correo */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                            Nombre
+                                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                            Número Telefónico
                                         </label>
                                         <Input
-                                            name="nombre"
-                                            value={formData.nombre}
-                                            onChange={handleFormInputChange}
-                                            placeholder="Nombre completo"
+                                            {...register("numeroTelefonico")}
+                                            placeholder="7777-7777"
+                                            maxLength={9}
+                                            onChange={(e) =>
+                                                setValue("numeroTelefonico", formatPhoneNumber(e.target.value))
+                                            }
                                             className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
                                         />
+                                        <FieldError message={errors.numeroTelefonico?.message} />
                                     </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Número Telefónico
-                                            </label>
-                                            <Input
-                                                name="numeroTelefonico"
-                                                value={formData.numeroTelefonico}
-                                                onChange={handleFormInputChange}
-                                                placeholder="+503"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Correo Electrónico
-                                            </label>
-                                            <Input
-                                                name="correoElectronico"
-                                                type="email"
-                                                value={formData.correoElectronico}
-                                                onChange={handleFormInputChange}
-                                                placeholder="correo@ejemplo.com"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Fecha de nacimiento
-                                            </label>
-                                            <Input
-                                                name="fechaNacimiento"
-                                                type="date"
-                                                value={formData.fechaNacimiento}
-                                                onChange={handleFormInputChange}
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Documento de identificación
-                                            </label>
-                                            <Input
-                                                name="documentoIdentificacion"
-                                                value={formData.documentoIdentificacion}
-                                                onChange={handleFormInputChange}
-                                                placeholder="DUI"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                AFP Afiliado
-                                            </label>
-                                            <Input
-                                                name="afpAfiliado"
-                                                value={formData.afpAfiliado}
-                                                onChange={handleFormInputChange}
-                                                placeholder="AFP"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                ISSS
-                                            </label>
-                                            <Input
-                                                name="isss"
-                                                value={formData.isss}
-                                                onChange={handleFormInputChange}
-                                                placeholder="ISSS"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                    </div>
-
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                            Dirección
+                                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                            Correo Electrónico <span className="text-red-500">*</span>
                                         </label>
                                         <Input
-                                            name="direccion"
-                                            value={formData.direccion}
-                                            onChange={handleFormInputChange}
-                                            placeholder="Dirección completa"
-                                            className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                                            {...register("correoElectronico")}
+                                            type="email"
+                                            placeholder="correo@ejemplo.com"
+                                            disabled={isEditMode}
+                                            className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                         />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Fecha de ingreso
-                                            </label>
-                                            <Input
-                                                name="fechaIngreso"
-                                                type="date"
-                                                value={formData.fechaIngreso}
-                                                onChange={handleFormInputChange}
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                                Salario actual
-                                            </label>
-                                            <Input
-                                                name="salarioActual"
-                                                value={formData.salarioActual}
-                                                onChange={handleFormInputChange}
-                                                placeholder="$0.00"
-                                                className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                            Cargo
-                                        </label>
-                                        <Select value={formData.cargo} onValueChange={handleSelectChange}>
-                                            <SelectTrigger className="border-2 border-gray-300 rounded-lg focus:border-blue-500">
-                                                <SelectValue placeholder="Seleccionar cargo" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="ventas">Ventas</SelectItem>
-                                                <SelectItem value="desarrollo">Desarrollo</SelectItem>
-                                                <SelectItem value="limpieza">Limpieza</SelectItem>
-                                                <SelectItem value="administracion">Administración</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <FieldError message={errors.correoElectronico?.message} />
                                     </div>
                                 </div>
 
-                                {/* Right: DUI Images Section */}
-                                <div className="space-y-6">
-                                    <div className="pb-6 border-b border-gray-200">
-                                        <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wide">
-                                            Imágenes del DUI
-                                        </h2>
-                                    </div>
-
-                                    {/* Drag & Drop Area */}
-                                    <div
-                                        onDragOver={handleDragOver}
-                                        onDrop={handleDrop}
-                                        className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
-                                    >
-                                        <div className="flex flex-col items-center space-y-4">
-                                            <Upload className="w-12 h-12 text-blue-400" />
-                                            <p className="text-gray-600 text-sm">
-                                                Arrastra la imagen del documento aquí o{' '}
-                                                <label className="text-blue-500 font-medium cursor-pointer hover:underline">
-                                                    click para buscar
-                                                    <input
-                                                        type="file"
-                                                        multiple
-                                                        onChange={handleFileInput}
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                    />
-                                                </label>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Images Preview */}
-                                    {formData.duiImages.length > 0 && (
-                                        <div className="space-y-4">
-                                            <h3 className="text-sm font-semibold text-gray-700 uppercase">
-                                                Imágenes Actuales
-                                            </h3>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                {formData.duiImages.map((file, index) => (
-                                                    <motion.div
-                                                        key={index}
-                                                        initial={{ opacity: 0, scale: 0.9 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        className="flex items-center justify-between border-2 border-gray-200 rounded-lg p-4 bg-gray-50"
-                                                    >
-                                                        <div className="flex items-center space-x-3">
-                                                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                                <Upload className="w-6 h-6 text-gray-400" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                                    {file.name}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {(file.size / 1024).toFixed(2)} KB
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => removeImage(index)}
-                                                            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
-                                                        >
-                                                            <X className="w-5 h-5 text-red-500" />
-                                                        </button>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {formData.duiImages.length === 0 && (
-                                        <div className="border-2 border-gray-200 rounded-lg p-6 bg-gray-50 text-center">
-                                            <div className="w-20 h-20 mx-auto mb-4 bg-gray-300 rounded-lg flex items-center justify-center">
-                                                <span className="text-gray-400 text-2xl">📄</span>
-                                            </div>
-                                            <p className="text-sm text-gray-500">No hay imágenes cargadas</p>
-                                        </div>
-                                    )}
+                                {/* Dirección */}
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                        Dirección
+                                    </label>
+                                    <Input
+                                        {...register("direccion")}
+                                        placeholder="Dirección completa"
+                                        className="border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                                    />
+                                    <FieldError message={errors.direccion?.message} />
                                 </div>
-                            </div>
 
-                            {/* Submit Button */}
-                            <div className="mt-8 flex justify-start">
-                                <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-base">
-                                        Registrar
-                                    </Button>
-                                </motion.div>
-                            </div>
+                                {/* Cargo */}
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                        Cargo <span className="text-red-500">*</span>
+                                    </label>
+                                    <Controller
+                                        control={control}
+                                        name="cargo"
+                                        render={({ field }) => (
+                                            <Select value={field.value} onValueChange={field.onChange}>
+                                                <SelectTrigger className="border-2 border-gray-300 rounded-lg focus:border-blue-500">
+                                                    <SelectValue placeholder="Seleccionar cargo" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Admin">Administrador</SelectItem>
+                                                    <SelectItem value="Empleado">Empleado</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    <FieldError message={errors.cargo?.message} />
+                                </div>
+
+                                {/* Fecha de ingreso (solo lectura en modo edición) */}
+                                {isEditMode && employeeResponse?.data?.payroll_month && (
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-1 block">
+                                            Fecha de ingreso
+                                        </label>
+                                        <Input
+                                            value={employeeResponse.data.payroll_month}
+                                            readOnly
+                                            disabled
+                                            className="border-2 border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            La fecha de ingreso se asigna automáticamente y no puede modificarse.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Botón */}
+                                <div className="pt-4 flex justify-start">
+                                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                        <Button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-base"
+                                        >
+                                            {loading ? "Guardando..." : isEditMode ? "Actualizar" : "Registrar"}
+                                        </Button>
+                                    </motion.div>
+                                </div>
+                            </form>
                         </CardContent>
                     </Card>
                 </motion.div>

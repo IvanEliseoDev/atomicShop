@@ -12,8 +12,8 @@ export const sendContactEmail = async (req: Request, res: Response): Promise<voi
 
   try {
     await transporter.sendMail({
-      from: `"AtomicShop Web" <${config.email.user}>`,
-      to: config.email.user, // llega al mismo correo del negocio
+      from: `"AtomicShop Web" <${config.email.from}>`,
+      to: config.email.from,
       replyTo: correo,       // al responder, va al cliente
       subject: `Nuevo mensaje de contacto de ${nombre}`,
       html: `
