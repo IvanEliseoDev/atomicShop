@@ -1,0 +1,16 @@
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomeScreen from "../screens/HomeScreen";
+import ProductDetailScreen from "../screens/ProductDetailScreen";
+import SearchResultsScreen from "../screens/SearchResultsScreen";
+
+const Stack = createNativeStackNavigator();
+
+export default function HomeStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeMain"       component={HomeScreen} />
+      <Stack.Screen name="ProductDetail"  component={ProductDetailScreen} />
+      <Stack.Screen name="SearchResults"  component={SearchResultsScreen} />
+    </Stack.Navigator>
+  );
+}
