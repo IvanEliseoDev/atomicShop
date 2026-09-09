@@ -11,11 +11,13 @@ export function getBaseUrl() {
 
 export async function apiFetch(path, options = {}) {
   const url = `${getBaseUrl()}${path}`;
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+
   return fetch(url, {
     credentials: "include",
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers ?? {}),
     },
   });

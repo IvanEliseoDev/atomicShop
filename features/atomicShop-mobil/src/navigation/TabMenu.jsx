@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import HomeStack from "./HomeStack";
 import CartStack from "./CartStack";
 import PlaceholderScreen from "../screens/PlaceholderScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 import { useCart } from "../hooks/useCart";
 
 const Tab = createBottomTabNavigator();
@@ -62,7 +63,7 @@ export default function TabMenu() {
       <Tab.Screen name="Favoritos"  component={PlaceholderScreen} options={{ title: "Favoritos" }} />
       <Tab.Screen name="Carrito"    component={CartStack}       options={{ title: "Carrito" }} />
       <Tab.Screen name="Categorias" component={PlaceholderScreen} options={{ title: "Categorías" }} />
-      <Tab.Screen name="Perfil"     component={PlaceholderScreen} options={{ title: "Perfil" }} />
+      <Tab.Screen name="Perfil"     component={ProfileScreen}   options={{ title: "Perfil" }} />
     </Tab.Navigator>
   );
 }
