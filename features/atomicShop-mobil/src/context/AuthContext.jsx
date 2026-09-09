@@ -36,9 +36,9 @@ export function AuthProvider({ children }) {
       const msg = loginData?.message ?? "Credenciales incorrectas";
       throw new Error(msg === "Email not found" ? "Correo no registrado" :
         msg === "Account blocked" ? "Cuenta bloqueada temporalmente. Intenta en 15 min." :
-        msg === "Email not verified" ? "Debes verificar tu correo antes de iniciar sesión" :
-        msg === "Account restricted" ? "Cuenta restringida. Contacta soporte." :
-        "Credenciales incorrectas");
+          msg === "Email not verified" ? "Debes verificar tu correo antes de iniciar sesión" :
+            msg === "Account restricted" ? "Cuenta restringida. Contacta soporte." :
+              "Credenciales incorrectas");
     }
 
     // Fetch profile to obtain _id (needed for cart API)
@@ -47,9 +47,9 @@ export function AuthProvider({ children }) {
       const meRes = await apiFetch("/api/e-commerce/login/me");
       if (meRes.ok) {
         const meData = await meRes.json();
-        const customer = meData?.customer ?? meData;
+        const customer = meData?.user ?? meData;
         sessionUser = {
-          _id: customer?._id ?? null,
+          _id: customer?.id ?? customer?._id ?? null,
           name: customer?.name ?? "Cliente",
           mail: normalizedMail,
         };
@@ -73,7 +73,7 @@ export function AuthProvider({ children }) {
       const msg = data?.message ?? "";
       throw new Error(msg === "Customer already exists" ? "Este correo ya está registrado" :
         msg === "Email already registered as employee" ? "Este correo pertenece a un empleado" :
-        "No se pudo completar el registro");
+          "No se pudo completar el registro");
     }
     return data;
   }, []);
@@ -96,7 +96,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try { await apiFetch("/api/e-commerce/logout", { method: "POST" }); } catch (_) {}
+    try { await apiFetch("/api/e-commerce/logout", { method: "POST" }); } catch (_) { }
     setUser(null);
     await clearSession();
   }, [clearSession]);
