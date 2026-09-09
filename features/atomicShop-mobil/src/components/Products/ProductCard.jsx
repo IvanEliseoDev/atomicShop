@@ -3,7 +3,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function ProductCard({ product, onPress, onAddToCart }) {
   const { name, price, discount, images } = product;
-  const hasDiscount = discount && discount > 0;
+  const hasDiscount = discount > 0;
   const finalPrice = hasDiscount ? price - (price * discount) / 100 : price;
   const imageUri = Array.isArray(images) && images[0] ? images[0] : null;
 

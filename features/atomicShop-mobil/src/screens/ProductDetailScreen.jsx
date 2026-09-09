@@ -99,7 +99,7 @@ export default function ProductDetailScreen({ navigation, route }) {
 
   const images = Array.isArray(product.images) && product.images.length > 0
     ? product.images : [null];
-  const hasDiscount = product.discount && product.discount > 0;
+  const hasDiscount = product.discount > 0;
   const finalPrice = hasDiscount
     ? product.price - (product.price * product.discount) / 100
     : product.price;

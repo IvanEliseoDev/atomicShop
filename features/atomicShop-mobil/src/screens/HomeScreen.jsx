@@ -10,17 +10,27 @@ import ProductCard from "../components/Products/ProductCard";
 import { useCart } from "../hooks/useCart";
 import { apiFetch } from "../config/api";
 
-const CATEGORIES = [
-  { label: "Básculas",             icon: "scale-outline" },
-  { label: "Equipamiento",         icon: "construct-outline" },
-  { label: "Seguridad",            icon: "shield-checkmark-outline" },
-  { label: "Reactivos",            icon: "flask-outline" },
+// Ícono aproximado según palabras clave en el nombre de la categoría (las categorías
+// en sí vienen de la API — no hay un campo de ícono en el modelo del backend)
+const ICON_KEYWORDS = [
+  { keywords: ["báscul", "bascul", "peso", "pesa"], icon: "scale-outline" },
+  { keywords: ["equip"],                            icon: "construct-outline" },
+  { keywords: ["seguridad", "protec"],               icon: "shield-checkmark-outline" },
+  { keywords: ["reactivo", "químic", "quimic"],      icon: "flask-outline" },
+  { keywords: ["vidrio", "cristal"],                 icon: "wine-outline" },
 ];
+
+function iconForCategory(name = "") {
+  const lower = name.toLowerCase();
+  const match = ICON_KEYWORDS.find((k) => k.keywords.some((kw) => lower.includes(kw)));
+  return match?.icon ?? "cube-outline";
+}
 
 export default function HomeScreen({ navigation }) {
   const { addToCart } = useCart();
   const [banners, setBanners]   = useState([]);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingBanners, setLoadingBanners] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [query, setQuery] = useState("");
@@ -45,15 +55,33 @@ export default function HomeScreen({ navigation }) {
     finally { setLoadingProducts(false); }
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await apiFetch("/api/e-commerce/categories");
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(Array.isArray(data) ? data.slice(0, 4) : []);
+      }
+    } catch (_) {}
+  }, []);
+
   useEffect(() => {
     fetchBanners();
     fetchProducts();
-  }, [fetchBanners, fetchProducts]);
+    fetchCategories();
+  }, [fetchBanners, fetchProducts, fetchCategories]);
 
   async function onRefresh() {
     setRefreshing(true);
-    await Promise.all([fetchBanners(), fetchProducts()]);
+    await Promise.all([fetchBanners(), fetchProducts(), fetchCategories()]);
     setRefreshing(false);
+  }
+
+  function goToCategory(cat) {
+    navigation.getParent()?.navigate("Categorias", {
+      screen: "CategoriesMain",
+      params: { categoryId: cat._id },
+    });
   }
 
   function handleSearch() {
@@ -147,19 +175,26 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* Categorías */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Categorías</Text>
-        <View style={styles.categoriesRow}>
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity key={cat.label} style={styles.catItem} activeOpacity={0.8}>
-              <View style={styles.catIcon}>
-                <Ionicons name={cat.icon} size={26} color="#0f5fa6" />
-              </View>
-              <Text style={styles.catLabel} numberOfLines={2}>{cat.label}</Text>
-            </TouchableOpacity>
-          ))}
+      {categories.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Categorías</Text>
+          <View style={styles.categoriesRow}>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat._id}
+                style={styles.catItem}
+                activeOpacity={0.8}
+                onPress={() => goToCategory(cat)}
+              >
+                <View style={styles.catIcon}>
+                  <Ionicons name={iconForCategory(cat.name)} size={26} color="#0f5fa6" />
+                </View>
+                <Text style={styles.catLabel} numberOfLines={2}>{cat.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Lo más buscado */}
       <View style={styles.section}>

@@ -26,6 +26,12 @@ export default function RegisterScreen({ onBack, onNeedsVerification }) {
 
   const set = (field) => (val) => setForm((f) => ({ ...f, [field]: val }));
 
+  function setDui(val) {
+    const digits = val.replace(/\D/g, "").slice(0, 9);
+    const formatted = digits.length > 8 ? `${digits.slice(0, 8)}-${digits.slice(8)}` : digits;
+    setForm((f) => ({ ...f, dui: formatted }));
+  }
+
   function validate() {
     const e = {};
     if (!form.firstName.trim()) e.firstName = "Los nombres son requeridos";
@@ -106,7 +112,7 @@ export default function RegisterScreen({ onBack, onNeedsVerification }) {
             <InputText
               placeholder="DUI (########-#)"
               value={form.dui}
-              onChangeText={set("dui")}
+              onChangeText={setDui}
               error={errors.dui}
               keyboardType="numeric"
               maxLength={10}

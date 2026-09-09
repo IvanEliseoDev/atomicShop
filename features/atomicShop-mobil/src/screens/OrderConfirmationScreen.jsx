@@ -8,6 +8,9 @@ export default function OrderConfirmationScreen() {
   const navigation = useNavigation();
 
   function goHome() {
+    // Reiniciar el stack del carrito a su pantalla principal para que la próxima
+    // vez que se abra el tab "Carrito" muestre el carrito vacío, no esta confirmación
+    navigation.reset({ index: 0, routes: [{ name: "CartMain" }] });
     // Navegar al tab Inicio desde dentro del CartStack
     navigation.getParent()?.navigate("Inicio");
   }

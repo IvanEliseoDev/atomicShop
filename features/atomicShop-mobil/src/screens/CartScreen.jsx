@@ -10,7 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 function CartItem({ item, onIncrease, onDecrease, onRemove }) {
   const product = item.idProduct ?? {};
   const { name, price, discount, images } = product;
-  const hasDiscount = discount && discount > 0;
+  const hasDiscount = discount > 0;
   const unitPrice = hasDiscount ? price - (price * discount) / 100 : price;
   const imageUri = Array.isArray(images) && images[0] ? images[0] : null;
 

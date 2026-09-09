@@ -49,7 +49,7 @@ app.set("trust proxy", 1);
  */
 const allowedOrigins: string[] = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-  : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://atomic-shop-public.vercel.app", "https://atomic-shop-private.vercel.app"];
+  : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:8081", "http://localhost:19006", "https://atomic-shop-public.vercel.app", "https://atomic-shop-private.vercel.app"];
 
 app.use(
   cors({
