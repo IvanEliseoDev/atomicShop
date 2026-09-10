@@ -6,6 +6,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
+import { useFavorites } from "../hooks/useFavorites";
 import { useSplashTimer } from "../hooks/useSplashTimer";
 
 import SplashScreen from "../screens/SplashScreen";
@@ -22,6 +23,7 @@ import TabMenu from "./TabMenu";
 export default function AppContent() {
   const { isAuthenticated, isBooting, user } = useAuth();
   const { initCart } = useCart();
+  const { initFavorites } = useFavorites();
   const showSplash = useSplashTimer(isBooting);
 
   // Segunda pantalla de carga (criterio rúbrica #7 / #14)
@@ -41,12 +43,13 @@ export default function AppContent() {
     }
   }, [showSplash]);
 
-  // Inicializar carrito cuando el usuario se autentica y tiene _id
+  // Inicializar carrito y favoritos cuando el usuario se autentica y tiene _id
   useEffect(() => {
     if (isAuthenticated && user?._id) {
       initCart(user._id);
+      initFavorites(user._id);
     }
-  }, [isAuthenticated, user, initCart]);
+  }, [isAuthenticated, user, initCart, initFavorites]);
 
   if (showSplash) return <SplashScreen />;
   if (showLoader) return <LoadingScreen />;

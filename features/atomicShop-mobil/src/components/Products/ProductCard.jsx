@@ -1,17 +1,28 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFavorites } from "../../hooks/useFavorites";
 
 export default function ProductCard({ product, onPress, onAddToCart }) {
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { name, price, discount, images } = product;
   const hasDiscount = discount > 0;
   const finalPrice = hasDiscount ? price - (price * discount) / 100 : price;
   const imageUri = Array.isArray(images) && images[0] ? images[0] : null;
+  const favorited = isFavorite(product?._id);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
-      {/* Favorito (UI only — pantalla de favoritos es de otro integrante) */}
-      <TouchableOpacity style={styles.heartBtn} activeOpacity={0.7}>
-        <Ionicons name="heart-outline" size={18} color="#38b6ff" />
+      <TouchableOpacity
+        style={styles.heartBtn}
+        activeOpacity={0.7}
+        onPress={() => toggleFavorite(product)}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Ionicons
+          name={favorited ? "heart" : "heart-outline"}
+          size={18}
+          color="#38b6ff"
+        />
       </TouchableOpacity>
 
       {hasDiscount && (

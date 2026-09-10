@@ -7,6 +7,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductCard from "../components/Products/ProductCard";
 import CustomButton from "../components/Buttons/CustomButton";
 import { useCart } from "../hooks/useCart";
+import { useFavorites } from "../hooks/useFavorites";
 import { apiFetch } from "../config/api";
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -39,6 +40,7 @@ const colStyles = StyleSheet.create({
 export default function ProductDetailScreen({ navigation, route }) {
   const { productId } = route.params ?? {};
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const [product, setProduct]   = useState(null);
   const [similar, setSimilar]   = useState([]);
@@ -111,8 +113,16 @@ export default function ProductDetailScreen({ navigation, route }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color="#0f5fa6" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.heartBtn}>
-          <Ionicons name="heart-outline" size={22} color="#38b6ff" />
+        <TouchableOpacity
+          style={styles.heartBtn}
+          onPress={() => toggleFavorite(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name={isFavorite(product._id) ? "heart" : "heart-outline"}
+            size={22}
+            color="#38b6ff"
+          />
         </TouchableOpacity>
       </View>
 

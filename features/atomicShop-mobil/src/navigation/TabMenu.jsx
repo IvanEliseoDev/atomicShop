@@ -5,9 +5,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import HomeStack from "./HomeStack";
 import CartStack from "./CartStack";
 import CategoriesStack from "./CategoriesStack";
-import PlaceholderScreen from "../screens/PlaceholderScreen";
+import FavoritesStack from "./FavoritesStack";
 import ProfileScreen from "../screens/ProfileScreen";
 import { useCart } from "../hooks/useCart";
+import { useFavorites } from "../hooks/useFavorites";
 
 const Tab = createBottomTabNavigator();
 const ACTIVE = "#0f5fa6";
@@ -24,6 +25,7 @@ function CartBadge({ count }) {
 
 export default function TabMenu() {
   const { itemCount } = useCart();
+  const { count: favCount } = useFavorites();
 
   return (
     <Tab.Navigator
@@ -56,12 +58,20 @@ export default function TabMenu() {
               </View>
             );
           }
+          if (route.name === "Favoritos") {
+            return (
+              <View>
+                <Ionicons name={iconName} color={color} size={size} />
+                <CartBadge count={favCount} />
+              </View>
+            );
+          }
           return <Ionicons name={iconName} color={color} size={size} />;
         },
       })}
     >
       <Tab.Screen name="Inicio"     component={HomeStack}       options={{ title: "Inicio" }} />
-      <Tab.Screen name="Favoritos"  component={PlaceholderScreen} options={{ title: "Favoritos" }} />
+      <Tab.Screen name="Favoritos"  component={FavoritesStack}  options={{ title: "Favoritos" }} />
       <Tab.Screen name="Carrito"    component={CartStack}       options={{ title: "Carrito" }} />
       <Tab.Screen name="Categorias" component={CategoriesStack} options={{ title: "Categorías" }} />
       <Tab.Screen name="Perfil"     component={ProfileScreen}   options={{ title: "Perfil" }} />
